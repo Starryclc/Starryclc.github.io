@@ -7,7 +7,7 @@ baseurl: "" # 假如你的博客是建在某个目录下的，请在这里加上
 
 title: "语の秘密花园"
 url: http://Starryclc.github.io
-author: Liuxy
+author: L-xy
 
 head: # 删改前确定知道自己在做什么
 - tag: meta # Enable responsiveness on mobile devices
@@ -289,7 +289,7 @@ post:
 
 valine:
   enable: true
-  autoloader: C:\Users\DELL\Documents\GitHub\Starryclc.github.io/public/js/valine.js
+  autoloade:/public/js/valine.js
   src: //cdn.jsdelivr.net/npm/valine
   appId: 9hABRddSuEkTgqLrt1VSK5B1-gzGzoHsz
   appKey: NJ7RwmgrxsF7KDzlqU7YewlL
