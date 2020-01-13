@@ -1,0 +1,3 @@
+I"�<h1 id="broken-watch"><a href="https://vjudge.net/problem/Gym-101964B">Broken Watch</a></h1>
+<p>假如三根指针等长，答案是$C_n^3-3*C_{\lfloor\frac{n-1}{2}\rfloor}$。</p>
+:ET

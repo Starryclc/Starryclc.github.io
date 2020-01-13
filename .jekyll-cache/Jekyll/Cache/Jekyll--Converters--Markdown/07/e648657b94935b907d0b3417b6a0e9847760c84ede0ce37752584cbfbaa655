@@ -1,0 +1,17 @@
+I"<h1 id="an-olympian-math-problem"><a href="https://nanti.jisuanke.com/t/30990">An Olympian Math Problem</a></h1>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;stdio.h&gt;
+</span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">long</span> <span class="kt">long</span> <span class="n">t</span><span class="p">,</span><span class="n">n</span><span class="p">;</span>
+	<span class="k">for</span><span class="p">(</span><span class="n">scanf</span><span class="p">(</span><span class="s">"%lld"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">t</span><span class="p">);</span> <span class="n">t</span><span class="o">--</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"%lld</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%lld"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h1 id="ac-challenge"><a href="https://nanti.jisuanke.com/t/30994">AC Challenge</a></h1>
+<p>```cpp
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+using namespace std;</queue></algorithm></cstring></cstdio></p>
+:ET
