@@ -242,7 +242,7 @@ sidebar:
     alert: <i class="fas fa-user-edit fa-fw"></i>
   run_time:
     enable: true
-    src:/starryclc.github.io /public/js/run_time.js
+    src:/starryclc.github.io/public/js/run_time.js
     start_time: '10/04/2017 11:03:56' # 这是我第一篇CSDN博客的时间
     alert: <i class="fas fa-cog fa-spin fa-fw"></i>
     day: 天
