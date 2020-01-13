@@ -1,0 +1,283 @@
+I"�<h2 id="project-04-01-multiple-uses-two-dimensional-fast-fourier-transform">PROJECT 04-01 [Multiple Uses] Two-Dimensional Fast Fourier Transform</h2>
+
+<p>The purpose of this project is to develop a 2-D FFT program “package” that will be used in several other projects that follow.  Your implementation must have the capabilities to:</p>
+
+<ol>
+  <li>Multiply the input image by $(-1)^{x+y}$ to center the transform for filtering.</li>
+  <li>Multiply the resulting (complex) array by a real function (in the sense that the the real coefficients multiply both the real and imaginary parts of the transforms).  Recall that multiplication of two images is done on pairs of corresponding elements.</li>
+  <li>Compute the inverse Fourier transform.</li>
+  <li>Multiply the result by $(-1)^{x+y}$ and take the real part.</li>
+  <li>Compute the spectrum.</li>
+</ol>
+
+<p>Basically, this project implements Fig. 4.5.  If you are using MATLAB, then your Fourier transform program will not be limited to images whose size are integer powers of 2.  If you are implementing the program yourself, then the FFT routine you are using may be limited to integer powers of 2.  In this case, you may need to zoom or shrink an image to the proper size by using the program you developed in Project 02-04.</p>
+
+<p>An approximation:  To simplify this and the following projects (with the exception of Project 04-05), you may ignore image padding (Section 4.6.3).  Although your results will not be strictly correct, significant simplifications will be gained not only in image sizes, but also in the need for cropping the final result. The principles will not be affected by this approximation.</p>
+
+<h3 id="原理">原理</h3>
+
+<ol>
+  <li>因为$\Im[f(x,y)(-1)^{x+y}]=F(u-M/2,v-N/2)$，因此频率域的中心平移可以由原图乘上$(-1)^{x+y}$实现。</li>
+  <li>直接在得到的复数数组上乘上实函数即可。</li>
+  <li>可以调用matlab的ifft2</li>
+  <li>同（1），获取实部可以用<code class="highlighter-rouge">real</code>函数</li>
+  <li>复数的模可以用<code class="highlighter-rouge">abs</code>函数</li>
+</ol>
+
+<h3 id="代码">代码</h3>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">f</span><span class="o">=</span><span class="nb">imread</span><span class="p">(</span><span class="s1">'Fig0418(a).tif'</span><span class="p">);</span><span class="c1">%输入图片</span>
+<span class="n">H</span><span class="o">=</span><span class="nb">imread</span><span class="p">(</span><span class="s1">'Fig0418(a).tif'</span><span class="p">);</span><span class="c1">%实函数</span>
+
+<span class="p">[</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="p">]</span><span class="o">=</span><span class="nb">size</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+<span class="n">P</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">M</span><span class="p">;</span><span class="n">Q</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="p">;</span>
+
+<span class="n">fp</span><span class="o">=</span><span class="nb">zeros</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="n">Q</span><span class="p">);</span>
+<span class="n">fp</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="p">)</span><span class="o">=</span><span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="p">);</span><span class="c1">%图像填充</span>
+
+<span class="p">[</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">]</span><span class="o">=</span><span class="nb">meshgrid</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">Q</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">P</span><span class="p">);</span>
+<span class="nb">ones</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.^</span><span class="p">(</span><span class="n">X</span><span class="o">+</span><span class="n">Y</span><span class="p">);</span>
+
+<span class="n">F</span><span class="o">=</span><span class="nb">fft2</span><span class="p">(</span><span class="nb">ones</span><span class="o">.*</span><span class="n">fp</span><span class="p">);</span><span class="c1">%用（-1）^(x+y)乘以输入图像,来实现中心化变换</span>
+<span class="c1">%(-1)^(x+y)*f(x,y)的傅里叶变换等于fftshift(fft2(f,P,Q));</span>
+<span class="c1">% 因此上面可用一句F=fftshift(fft2(f,P,Q)); 代替</span>
+
+<span class="n">G</span><span class="o">=</span><span class="n">H</span><span class="o">.*</span><span class="n">F</span><span class="p">;</span><span class="c1">%频率域相乘，这里H是实函数</span>
+
+<span class="n">g</span><span class="o">=</span><span class="nb">real</span><span class="p">(</span><span class="nb">ifft2</span><span class="p">(</span><span class="n">G</span><span class="p">));</span><span class="c1">%反变换并取结果的实部</span>
+<span class="n">g</span><span class="o">=</span><span class="nb">ones</span><span class="o">.*</span><span class="n">g</span><span class="p">;</span>
+<span class="n">g</span><span class="o">=</span><span class="n">g</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="p">);</span><span class="c1">%在g（x,y）提取M*N左上象限</span>
+
+<span class="n">I</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="n">F</span><span class="p">);</span><span class="c1">% 取频谱，即模长，直接调用abs即可</span>
+</code></pre></div></div>
+
+<h2 id="project-04-02-fourier-spectrum-and-average-value">PROJECT 04-02 Fourier Spectrum and Average Value</h2>
+
+<ol>
+  <li>Download Fig. 4.18(a) and compute its (centered) Fourier spectrum.</li>
+  <li>Display the spectrum.</li>
+  <li>Use your result in (a) to compute the average value of the image.</li>
+</ol>
+
+<h3 id="原理-1">原理</h3>
+
+<p>直流分量$F(0,0)=\frac{1}{MN}\sum_{x=0}^M\sum_{y=0}^N$为图像像素的均值。</p>
+
+<h3 id="代码-1">代码</h3>
+
+<p>为了能够更加清楚显示频谱图的情况，输出频谱图的时候做了一次对数变换。</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">close</span> <span class="nb">all</span><span class="p">;</span><span class="nb">clear</span> <span class="nb">all</span><span class="p">;</span><span class="nb">clc</span><span class="p">;</span>
+<span class="n">I</span> <span class="o">=</span> <span class="nb">imread</span><span class="p">(</span><span class="s1">'Fig0418(a).tif'</span><span class="p">);</span>
+<span class="n">I</span> <span class="o">=</span> <span class="nb">double</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+<span class="p">[</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="nb">size</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+<span class="n">s</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">I</span><span class="p">));</span>
+<span class="n">avg</span> <span class="o">=</span> <span class="n">s</span> <span class="p">/</span> <span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="n">n</span><span class="p">);</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="nb">uint8</span><span class="p">(</span><span class="n">I</span><span class="p">)),</span><span class="nb">title</span><span class="p">(</span><span class="n">avg</span><span class="p">);</span>
+<span class="n">sp</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">fftshift</span><span class="p">(</span><span class="nb">fft2</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">)));</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="nb">uint8</span><span class="p">(</span><span class="nb">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">sp</span><span class="p">)),[]);</span>
+</code></pre></div></div>
+
+<h3 id="结果">结果</h3>
+
+<p>如图，计算出的平均值为207.315。</p>
+
+<p><img src="/public/image/2019-09-26-1.jpg" alt="4.2" /></p>
+
+<h2 id="project-04-03-lowpass-filtering">PROJECT 04-03 Lowpass Filtering</h2>
+
+<ol>
+  <li>Implement the Gaussian lowpass filter in Eq. (4.3-7).  You must be able to specify the size, M x N, of the resulting 2D function.  In addition, you must be able to specify where the 2D location of the center of the Gaussian function.</li>
+  <li>Download Fig. 4.11(a) [this image is the same as Fig. 4.18(a)] and lowpass filter it to obtain Fig. 4.18(c).</li>
+</ol>
+
+<h3 id="原理-2">原理</h3>
+
+<p>二维高斯滤波器的方程为：$H(u,v)=e^{-D^2(u,v)/2\sigma^2}$，其中$D(u,v)$为距傅里叶变换原点的距离，$\sigma$为高斯曲线扩展的程度。</p>
+
+<h3 id="代码-2">代码</h3>
+
+<p>这里大部分内容可以复用第一问的的代码。</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">close</span> <span class="nb">all</span><span class="p">;</span><span class="nb">clear</span> <span class="nb">all</span><span class="p">;</span><span class="nb">clc</span><span class="p">;</span>
+<span class="n">f</span> <span class="o">=</span> <span class="nb">imread</span><span class="p">(</span><span class="s1">'Fig0418(a).tif'</span><span class="p">);</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">mat2gray</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+<span class="p">[</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="p">]</span> <span class="o">=</span> <span class="nb">size</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+<span class="n">P</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">M</span><span class="p">;</span> <span class="n">Q</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="p">;</span>
+
+<span class="c1">%生成实的对称的滤波函数H，中心在（M,N）</span>
+<span class="n">alf</span><span class="o">=</span><span class="mi">100</span><span class="p">;</span>
+<span class="k">for</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">P</span>
+    <span class="k">for</span> <span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">Q</span>
+        <span class="n">H</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span><span class="nb">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">i</span><span class="o">-</span><span class="n">P</span><span class="p">/</span><span class="mi">2</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="n">Q</span><span class="p">/</span><span class="mi">2</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)/(</span><span class="mi">2</span><span class="o">*</span><span class="n">alf</span><span class="o">^</span><span class="mi">2</span><span class="p">));</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+
+<span class="n">fp</span><span class="o">=</span><span class="nb">zeros</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="n">Q</span><span class="p">);</span>
+<span class="n">fp</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="p">)</span><span class="o">=</span><span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="p">);</span><span class="c1">%图像填充</span>
+
+<span class="p">[</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">]</span><span class="o">=</span><span class="nb">meshgrid</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">Q</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">P</span><span class="p">);</span>
+<span class="nb">ones</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.^</span><span class="p">(</span><span class="n">X</span><span class="o">+</span><span class="n">Y</span><span class="p">);</span>
+
+<span class="n">F</span><span class="o">=</span><span class="nb">fft2</span><span class="p">(</span><span class="nb">ones</span><span class="o">.*</span><span class="n">fp</span><span class="p">);</span><span class="c1">%用（-1）^(x+y)乘以输入图像,来实现中心化变换</span>
+<span class="c1">%(-1)^(x+y)*f(x,y)的傅里叶变换等于fftshift(fft2(f,P,Q));</span>
+<span class="c1">% 因此上面可用一句F=fftshift(fft2(f,P,Q)); 代替</span>
+
+<span class="n">G</span><span class="o">=</span><span class="n">H</span><span class="o">.*</span><span class="n">F</span><span class="p">;</span><span class="c1">%频率域相乘，这里H是实函数</span>
+
+<span class="n">g</span><span class="o">=</span><span class="nb">real</span><span class="p">(</span><span class="nb">ifft2</span><span class="p">(</span><span class="n">G</span><span class="p">));</span><span class="c1">%反变换并取结果的实部</span>
+<span class="n">g</span><span class="o">=</span><span class="nb">ones</span><span class="o">.*</span><span class="n">g</span><span class="p">;</span>
+<span class="n">g</span><span class="o">=</span><span class="n">g</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="p">);</span><span class="c1">%在g（x,y）提取M*N左上象限</span>
+
+
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="n">f</span><span class="p">),</span><span class="nb">title</span><span class="p">(</span><span class="s1">'原图'</span><span class="p">);</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="n">H</span><span class="p">),</span><span class="nb">title</span><span class="p">(</span><span class="s1">'滤波函数'</span><span class="p">);</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="n">g</span><span class="p">),</span><span class="nb">title</span><span class="p">(</span><span class="s1">'高斯低通滤波后的图像'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h3 id="结果-1">结果</h3>
+
+<p><img src="/public/image/2019-09-26-2.jpg" alt="4.3" /></p>
+
+<h2 id="project-04-04-highpass-filtering-using-a-lowpass-image">PROJECT 04-04 Highpass Filtering Using a Lowpass Image</h2>
+
+<ol>
+  <li>Subtract your image in Project 04-03(b) from the original to obtain a sharpened image, as in Eq. (4.4-14).  You will note that the resulting image does not resemble the Gaussian highpass results in Fig. 4.26.  Explain why this is so.</li>
+  <li>Adjust the variance of your Gaussian lowpass filter until the result obtained by image subtraction looks similar to Fig. 4.26(c).  Explain your result.</li>
+</ol>
+
+<h3 id="原理-3">原理</h3>
+
+<p>利用下式可以得到高通滤波的图像</p>
+
+<p>$f_{hp}(x,y)=f(x,y)-f_{lp}(x,y)$</p>
+
+<p>其中$f_{lp}$即为PROJECT 04-03，即上一个通过高斯滤波后的图像。</p>
+
+<h3 id="代码-3">代码</h3>
+
+<p>在上一问的基础上继续做即可，用原图图像减去高斯低通滤波处理的图像。</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">close</span> <span class="nb">all</span><span class="p">;</span><span class="nb">clear</span> <span class="nb">all</span><span class="p">;</span><span class="nb">clc</span><span class="p">;</span>
+<span class="n">f</span> <span class="o">=</span> <span class="nb">imread</span><span class="p">(</span><span class="s1">'Fig0418(a).tif'</span><span class="p">);</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">mat2gray</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+<span class="p">[</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="p">]</span> <span class="o">=</span> <span class="nb">size</span><span class="p">(</span><span class="n">f</span><span class="p">);</span>
+<span class="n">P</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">M</span><span class="p">;</span> <span class="n">Q</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="p">;</span>
+
+<span class="c1">%生成实的对称的滤波函数，中心在（M,N）</span>
+<span class="n">alf</span><span class="o">=</span><span class="mi">100</span><span class="p">;</span><span class="c1">%第二问把这里改成200</span>
+<span class="k">for</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">P</span>
+    <span class="k">for</span> <span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">Q</span>
+        <span class="n">H</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span><span class="nb">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">i</span><span class="o">-</span><span class="n">P</span><span class="p">/</span><span class="mi">2</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">j</span><span class="o">-</span><span class="n">Q</span><span class="p">/</span><span class="mi">2</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)/(</span><span class="mi">2</span><span class="o">*</span><span class="n">alf</span><span class="o">^</span><span class="mi">2</span><span class="p">));</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">fp</span><span class="o">=</span><span class="nb">zeros</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="n">Q</span><span class="p">);</span>
+<span class="n">fp</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="p">)</span><span class="o">=</span><span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="p">);</span><span class="c1">%图像填充</span>
+
+<span class="p">[</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">]</span><span class="o">=</span><span class="nb">meshgrid</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">Q</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">P</span><span class="p">);</span>
+<span class="nb">ones</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.^</span><span class="p">(</span><span class="n">X</span><span class="o">+</span><span class="n">Y</span><span class="p">);</span>
+
+<span class="n">F</span><span class="o">=</span><span class="nb">fft2</span><span class="p">(</span><span class="nb">ones</span><span class="o">.*</span><span class="n">fp</span><span class="p">);</span><span class="c1">%用（-1）^(x+y)乘以输入图像,来实现中心化变换</span>
+<span class="c1">%(-1)^(x+y)*f(x,y)的傅里叶变换等于fftshift(fft2(f,P,Q));</span>
+<span class="c1">% 因此上面可用一句F=fftshift(fft2(f,P,Q)); 代替</span>
+
+<span class="n">G</span><span class="o">=</span><span class="n">H</span><span class="o">.*</span><span class="n">F</span><span class="p">;</span><span class="c1">%频率域相乘，这里H是实函数</span>
+
+<span class="n">g</span><span class="o">=</span><span class="nb">real</span><span class="p">(</span><span class="nb">ifft2</span><span class="p">(</span><span class="n">G</span><span class="p">));</span><span class="c1">%反变换并取结果的实部</span>
+<span class="n">g</span><span class="o">=</span><span class="nb">ones</span><span class="o">.*</span><span class="n">g</span><span class="p">;</span>
+<span class="n">g</span><span class="o">=</span><span class="n">g</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">N</span><span class="p">);</span><span class="c1">%在g（x,y）提取M*N左上象限</span>
+
+
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="n">f</span><span class="p">),</span><span class="nb">title</span><span class="p">(</span><span class="s1">'原图'</span><span class="p">);</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="n">H</span><span class="p">),</span><span class="nb">title</span><span class="p">(</span><span class="s1">'滤波函数'</span><span class="p">);</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="n">g</span><span class="p">),</span><span class="nb">title</span><span class="p">(</span><span class="s1">'高斯低通滤波后的图像'</span><span class="p">);</span>
+
+<span class="n">g</span><span class="o">=</span><span class="nb">im2double</span><span class="p">(</span><span class="n">g</span><span class="p">);</span><span class="n">f</span><span class="o">=</span><span class="nb">im2double</span><span class="p">(</span><span class="n">f</span><span class="p">);</span><span class="n">gmask</span><span class="o">=</span><span class="n">f</span><span class="o">-</span><span class="n">g</span><span class="p">;</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="n">gmask</span><span class="p">);</span><span class="nb">title</span><span class="p">(</span><span class="s1">'钝化模板'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h3 id="结果-2">结果</h3>
+
+<p>用原图减去高斯低通滤波处理后的图像后确实变模糊了。和课本上的图片对比，我这里生成的图片边缘更加清楚一些（主观上感觉）。如果排除印刷的问题，考虑到公式上与直接做高斯高通滤波是等价的，可能是因为不同的计算方式导致了不同的浮点数误差造成的。</p>
+
+<p><img src="/public/image/2019-09-26-3.jpg" alt="4.4" /></p>
+
+<p>调整第8行为<code class="highlighter-rouge">alf=200</code>，可以看到模板变得更模糊了，更加接近课本。</p>
+
+<p><img src="/public/image/2019-09-26-3.jpg" alt="4.4" /></p>
+
+<h2 id="project-04-05-correlation-in-the-frequency-domain">PROJECT 04-05 Correlation in the Frequency Domain</h2>
+
+<p>Download Figs. 4.41(a) and (b) and duplicate Example 4.11 to obtain Fig. 4.41(e).  Give the (x,y) coordinates of the location of the maximum value in the 2D correlation function.  There is no need to plot the profile in Fig. 4.41(f).</p>
+
+<h3 id="代码-4">代码</h3>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">close</span> <span class="nb">all</span><span class="p">;</span><span class="nb">clc</span><span class="p">;</span><span class="nb">clear</span> <span class="nb">all</span><span class="p">;</span>
+<span class="n">f1</span> <span class="o">=</span> <span class="nb">imread</span><span class="p">(</span><span class="s1">'Fig4.41(a).jpg'</span><span class="p">);</span>
+<span class="n">f2</span> <span class="o">=</span> <span class="nb">imread</span><span class="p">(</span><span class="s1">'Fig4.41(b).jpg'</span><span class="p">);</span>
+<span class="p">[</span><span class="n">M1</span><span class="p">,</span> <span class="n">N1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">size</span><span class="p">(</span><span class="n">f1</span><span class="p">);</span>
+<span class="p">[</span><span class="n">M2</span><span class="p">,</span> <span class="n">N2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">size</span><span class="p">(</span><span class="n">f2</span><span class="p">);</span>
+<span class="n">P</span> <span class="o">=</span> <span class="mi">298</span><span class="p">;</span>
+<span class="n">Q</span> <span class="o">=</span> <span class="mi">298</span><span class="p">;</span>
+<span class="p">[</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">]</span><span class="o">=</span><span class="nb">meshgrid</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">Q</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">P</span><span class="p">);</span>
+<span class="nb">ones</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.^</span><span class="p">(</span><span class="n">X</span><span class="o">+</span><span class="n">Y</span><span class="p">);</span>
+<span class="n">fp1</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">);</span>
+<span class="n">fp2</span> <span class="o">=</span> <span class="nb">zeros</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">Q</span><span class="p">);</span>
+<span class="n">fp1</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="n">N1</span><span class="p">)</span> <span class="o">=</span> <span class="n">f1</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M1</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="n">N1</span><span class="p">);</span>
+<span class="n">fp2</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M2</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="n">N2</span><span class="p">)</span> <span class="o">=</span> <span class="n">f2</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">M2</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="n">N2</span><span class="p">);</span>
+<span class="n">Fp1</span> <span class="o">=</span> <span class="nb">fft2</span><span class="p">(</span><span class="nb">ones</span><span class="o">.*</span><span class="n">fp1</span><span class="p">);</span>
+<span class="n">Fp2</span> <span class="o">=</span> <span class="nb">fft2</span><span class="p">(</span><span class="nb">ones</span><span class="o">.*</span><span class="n">fp2</span><span class="p">);</span>
+<span class="n">Fp</span> <span class="o">=</span> <span class="n">Fp2</span> <span class="o">.*</span> <span class="nb">conj</span><span class="p">(</span><span class="n">Fp1</span><span class="p">);</span><span class="c1">% 求共轭</span>
+<span class="n">fp</span> <span class="o">=</span> <span class="nb">ifft2</span><span class="p">(</span><span class="n">Fp</span><span class="p">);</span>
+<span class="n">fp</span> <span class="o">=</span> <span class="nb">real</span><span class="p">(</span> <span class="nb">ones</span><span class="o">.*</span> <span class="n">fp</span><span class="p">);</span>
+<span class="n">fp</span> <span class="o">=</span> <span class="n">mat2gray</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+<span class="n">max_value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">fp</span><span class="p">));</span>
+<span class="p">[</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="nb">find</span><span class="p">(</span><span class="n">fp</span> <span class="o">==</span> <span class="n">max_value</span><span class="p">);</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="n">f1</span><span class="p">),</span><span class="nb">title</span><span class="p">([</span><span class="s1">'max value is : '</span><span class="p">,</span> <span class="nb">num2str</span><span class="p">(</span><span class="n">max_value</span><span class="p">)]);</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="n">f2</span><span class="p">),</span><span class="nb">title</span><span class="p">([</span><span class="s1">'('</span><span class="p">,</span> <span class="nb">num2str</span><span class="p">(</span><span class="n">row</span><span class="p">),</span> <span class="s1">','</span><span class="p">,</span> <span class="nb">num2str</span><span class="p">(</span><span class="n">col</span><span class="p">),</span><span class="s1">')'</span><span class="p">]);</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h3 id="结果-3">结果</h3>
+
+<p>如图，从左到右分别为原图、掩膜/需要查找的图像、共轭生成的相关图（其实并没有要求输出）。</p>
+
+<p><img src="/public/image/2019-09-26-4.jpg" alt="4.6" /></p>
+
+<p>最大值出现在(191,193)的位置，符合预期。</p>
+
+<h2 id="以figure44为例检验谱平面随着图像旋转而旋转的性质">以figure4.4为例检验谱平面随着图像旋转而旋转的性质</h2>
+
+<h3 id="原理-4">原理</h3>
+
+<p>引入极坐标$x=r\cos\theta,y=r\sin\theta,u=\omega\cos\phi,v=\omega\sin\phi$，计算可得$f(r,\theta+\theta_0)\iff F(\omega,\phi+\theta_0)$</p>
+
+<h3 id="代码-5">代码</h3>
+
+<p>在PROJECT 04-02的代码上略作修改即可。</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">close</span> <span class="nb">all</span><span class="p">;</span><span class="nb">clear</span> <span class="nb">all</span><span class="p">;</span><span class="nb">clc</span><span class="p">;</span>
+<span class="n">I</span> <span class="o">=</span> <span class="nb">imread</span><span class="p">(</span><span class="s1">'Fig4.04(a).jpg'</span><span class="p">);</span>
+<span class="n">I</span> <span class="o">=</span> <span class="nb">double</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+<span class="p">[</span><span class="n">m</span><span class="p">,</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="nb">size</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+<span class="n">s</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">I</span><span class="p">));</span>
+<span class="n">avg</span> <span class="o">=</span> <span class="n">s</span> <span class="p">/</span> <span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="n">n</span><span class="p">);</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="nb">uint8</span><span class="p">(</span><span class="n">I</span><span class="p">)),</span><span class="nb">title</span><span class="p">(</span><span class="s1">'原图'</span><span class="p">);</span>
+<span class="n">sp</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">fftshift</span><span class="p">(</span><span class="nb">fft2</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">)));</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="nb">uint8</span><span class="p">(</span><span class="nb">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">sp</span><span class="p">)),[]),</span><span class="nb">title</span><span class="p">(</span><span class="s1">'原图频谱'</span><span class="p">);</span>
+<span class="n">I</span><span class="o">=</span><span class="n">imrotate</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="mi">45</span><span class="p">);</span>
+<span class="n">sp</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">fftshift</span><span class="p">(</span><span class="nb">fft2</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">)));</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="nb">uint8</span><span class="p">(</span><span class="nb">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">sp</span><span class="p">)),[]),</span><span class="nb">title</span><span class="p">(</span><span class="s1">'原图旋转45°的频谱'</span><span class="p">);</span>
+<span class="n">I</span><span class="o">=</span><span class="n">imrotate</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="mi">45</span><span class="p">);</span>
+<span class="n">sp</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">fftshift</span><span class="p">(</span><span class="nb">fft2</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">)));</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span><span class="nb">imshow</span><span class="p">(</span><span class="nb">uint8</span><span class="p">(</span><span class="nb">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">sp</span><span class="p">)),[]),</span><span class="nb">title</span><span class="p">(</span><span class="s1">'原图旋转90°的频谱'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h3 id="结果-4">结果</h3>
+
+<p>可以看出，当原图进行旋转时，频谱图确实以相同的角度和方向旋转。</p>
+
+<p><img src="/public/image/2019-09-26-5.jpg" alt="4.6" /></p>
+:ET

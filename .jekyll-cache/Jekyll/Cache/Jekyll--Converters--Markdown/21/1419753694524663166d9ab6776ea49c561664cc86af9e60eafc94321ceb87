@@ -1,0 +1,149 @@
+I"e!<h2 id="实验题目">实验题目</h2>
+
+<p>OSPF配置实验</p>
+
+<h2 id="实验目的">实验目的</h2>
+
+<p>掌握OSPF协议单区域配置方法。</p>
+
+<h2 id="实验内容">实验内容</h2>
+
+<ul>
+  <li>下面路由器均启动OSPF协议。实验结果和分析直接记录在下面每一个步骤后面。</li>
+  <li>Loopback网位于区0。</li>
+  <li>命令#relaod可以通过重启路由器。</li>
+  <li>Loopback 接口的名：loopback num   (num为编号，可以任意取)</li>
+</ul>
+
+<h3 id="1按下图配置两台路由器为ospf协议">1、按下图配置两台路由器为OSPF协议</h3>
+
+<h4 id="1a连通后截屏pc1-ping-pc2的结果">1A、连通后截屏PC1 ping PC2的结果</h4>
+
+<p><img src="/public/image/2019-06-14-1.jpg" alt="1A" />
+由于配置了端口的IP并开启了OSPF协议，所以路由器中生成了网络图，可以正确地有目的地址正确地把数据包转发出去。</p>
+
+<h4 id="1b分别显示并截屏路由器r1和r2的ls数据库信息databaserouter-lsanetwork-lsa">1B、分别显示并截屏路由器R1和R2的LS数据库信息(database,router LSA,network LSA)]</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># show ip ospf database                  ! 显示OSPF 链路状态数据库信息。</span>
+<span class="c"># show ip ospf database router           ! 显示router LSA</span>
+<span class="c"># show ip ospf database network          ！显示network LSA</span>
+</code></pre></div></div>
+
+<p>R1：
+<img src="/public/image/2019-06-14-2.jpg" alt="1B" />
+此时，R1连接了三个网络，R2连接了两个网络。
+<img src="/public/image/2019-06-14-3.jpg" alt="1B" />
+可以看到IP为6.6.6.6的路由器有三个网络的数据：两个Stub Network，一个Transit Network；7.7.7.7有两个网络的数据：一个 Transit Network，一个Stub Network。
+<img src="/public/image/2019-06-14-4.jpg" alt="1B" />
+R2：
+<img src="/public/image/2019-06-14-5.jpg" alt="1B" />
+<img src="/public/image/2019-06-14-6.jpg" alt="1B" />
+<img src="/public/image/2019-06-14-7.jpg" alt="1B" /></p>
+
+<h4 id="1c显示并截屏r1的邻居状态">1C、显示并截屏R1的邻居状态</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># show ip ospf neighbor</span>
+</code></pre></div></div>
+
+<p><img src="/public/image/2019-06-14-8.jpg" alt="1C" /></p>
+
+<h4 id="1d-显示并截屏r1的所有接口信息">1D、 显示并截屏R1的所有接口信息</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># show ip ospf interface</span>
+</code></pre></div></div>
+
+<p><img src="/public/image/2019-06-14-9.jpg" alt="1D" />
+依次是0/0端口、0/1端口以及环回接口。</p>
+
+<h4 id="1e显示并截屏r1和r2的路由表">1E、显示并截屏R1和R2的路由表</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># show ip route</span>
+</code></pre></div></div>
+
+<p>R1：
+<img src="/public/image/2019-06-14-10.jpg" alt="1E" />
+有一个网络的信息来自R2路由：192.168.3.0/24
+R2：
+<img src="/public/image/2019-06-14-11.jpg" alt="1E" />
+此时，R2路由表中有两个网络是来自R1路由的信息，即192.168.1.1/24以及192.168.4.1/24。</p>
+
+<h4 id="1f把r1和r2的当前配置信息保存在s1txt中">1F、把R1和R2的当前配置信息保存在s1.txt中</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># show run</span>
+</code></pre></div></div>
+
+<h4 id="1g">1G、</h4>
+
+<p>问题1：R1和R2的路由器ID是 6.6.6.6 和 7.7.7.7 ，是否符合RID的获得方法？(是/否) 是
+问题2：R1和R2之间的网络的DR（指定路由器）是  R1 ，BDR（指定路由器）是 R2  。
+问题3： 网络192.168.1.0/24、192.168.2.0/24、192.168.3.0/24、192.168.4.1/32的链路开销(metric)分别是  1  ，  1   ，  1  ，  0   。*指各直连路由器到这些网络的链路开销。</p>
+
+<h4 id="1i拔去r2连到pc2的接口连线截屏r1的路由表">1I、拔去R2连到PC2的接口连线，截屏R1的路由表</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># show ip route</span>
+</code></pre></div></div>
+
+<p><img src="/public/image/2019-06-14-12.jpg" alt="1I" />
+这是R2路由器的图，截错了。
+但推测R1路由表中应该是在原来的基础上缺少一个192.168.3.0/24的信息。</p>
+
+<h3 id="2接步骤1通过加大另一台路由器的优先权使之成为dr">2、接步骤1，通过加大另一台路由器的优先权使之成为DR</h3>
+
+<p>命令：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">(</span>config-if<span class="o">)</span><span class="c">#ip ospf priority 8    ! 合法的范围是0~255。 缺省的优先级为1。优先级为0不参与选举DR</span>
+</code></pre></div></div>
+
+<h4 id="2a问题在配置完毕后r1和r2之间的网络的dr是---r1--bdr是r2">2A、问题：在配置完毕后，R1和R2之间的网络的DR是   R1  ，BDR是R2</h4>
+
+<h4 id="2b在调试状态下先断开或者shutdown-r1和r2的连接然后接通看是否可以捕捉到指定路由器的选举过程">2B、在调试状态下，先断开或者shutdown R1和R2的连接，然后接通，看是否可以捕捉到指定路由器的选举过程</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#debug ip ospf   ！进入调试状态</span>
+<span class="c">#no debug all    ! 取消调试状态</span>
+</code></pre></div></div>
+
+<p>描述有关的发包情况。</p>
+
+<p><img src="/public/image/2019-06-14-13.jpg" alt="2B" /></p>
+
+<p>R1和R2会隔10秒就发一次hello包的头部和hello包，头部表明这个hello包是广播包，有包的类型、RouterID、校验和，hello包有子网掩码，以及路由器的优先级。在收到对方的包后，如果己方的优先级比对方低，则不再发送。当己方连续一段时间没有收到其他路由器的hello包后，则成为DR，次高优先级的成为BDR。并且开始向邻居发送自己的路由表。</p>
+
+<h4 id="2c问题接通后r1和r2之间的网络的dr是--r2---bdr是---r1">2C、问题：接通后，R1和R2之间的网络的DR是  R2   ，BDR是   R1</h4>
+
+<h4 id="2d在调试状态下查看并截屏r1和r2之间接口接通后数据库同步的发包情况">2D、在调试状态下，查看并截屏R1和R2之间接口接通后数据库同步的发包情况</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#debug ip ospf   ！进入调试状态</span>
+<span class="c">#no debug all    ! 取消调试状态</span>
+</code></pre></div></div>
+
+<p><img src="/public/image/2019-06-14-14.jpg" alt="2D" /></p>
+
+<h4 id="2e截屏show-ip-ospf-neighbor的结果">2E、截屏#show ip ospf neighbor的结果</h4>
+
+<p>R1：
+<img src="/public/image/2019-06-14-15.jpg" alt="2E" />
+R2：
+<img src="/public/image/2019-06-14-16.jpg" alt="2E" />
+可以看到邻居的优先级。</p>
+
+<h3 id="3接步骤2pc1和pc2同时在控制台窗口用命令telnet-19216822进入r2并在执行以下命令后截屏">3、接步骤2，PC1和PC2同时在控制台窗口用命令telnet 192.168.2.2进入R2，并在执行以下命令后截屏</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">(</span>config<span class="o">)</span><span class="c">#sh ip rou</span>
+</code></pre></div></div>
+
+<h4 id="3apc1-截屏">3A、PC1 截屏</h4>
+
+<p><img src="/public/image/2019-06-14-17.jpg" alt="3A" /></p>
+
+<h4 id="3bpc2-截屏">3B、PC2 截屏</h4>
+
+<p><img src="/public/image/2019-06-14-18.jpg" alt="3B" /></p>
+
+<h4 id="3c这个步骤说明了什么">3C、这个步骤说明了什么</h4>
+
+<p>说明了两个主机可以同时访问同一个路由器，而实验室中只能一台主机访问路由器是人为规定的。</p>
+
+<h2 id="实验体会">实验体会</h2>
+
+<p>在本次实验中，我们探究了OSPF协议在几种情况下的配置，掌握了OSPF协议单区域配置方法。通过本次实验，我对OSPF协议是怎样选举DR的，以及各路由是怎样转发数据包的，有了理解。总之，本次实验在课上就完成了，没有继续占用课下时间，还是比较不错的。</p>
+:ET

@@ -1,0 +1,300 @@
+I"b<h2 id="实验题目">实验题目</h2>
+
+<p>加载用户程序的监控程序</p>
+
+<h2 id="实验目的">实验目的</h2>
+
+<ul>
+  <li>掌握常用的 BIOS 调用</li>
+  <li>掌握 BIOS 编程</li>
+  <li>掌握加载用户程序的方法</li>
+</ul>
+
+<h2 id="实验要求">实验要求</h2>
+
+<ul>
+  <li>设计四个有输出的用户可执行程序，分别在屏幕1/4区域动态输出字符，如将用字符‘A’从屏幕左边某行位置45度角下斜射出，保持一个可观察的适当速度直线运动，碰到屏幕相应1/4区域的边后产生反射，改变方向运动，如此类推，不断运动；在此基础上，增加你的个性扩展，如同时控制两个运动的轨迹，或炫酷动态变色，个性画面，如此等等，自由不限。还要在屏幕某个区域特别的方式显示你的学号姓名等个人信息。</li>
+  <li>修改参考原型代码，允许键盘输入，用于指定运行这四个有输出的用户可执行程序之一，要确保系统执行代码不超过512字节，以便放在引导扇区</li>
+  <li>自行组织映像盘的空间存放四个用户可执行程序。</li>
+</ul>
+
+<h2 id="实验方案">实验方案</h2>
+
+<h3 id="实验环境">实验环境</h3>
+
+<h4 id="软件">软件</h4>
+
+<ul>
+  <li>Windows 10, 64-bit  (Build 17763) 10.0.17763</li>
+  <li>Windows Subsystem for Linux [Ubuntu 18.04.2 LTS]：WSL是以软件的形式运行在Windows下的Linux子系统，是近些年微软推出来的新工具，可以在Windows系统上原生运行Linux。</li>
+  <li>gcc version 7.3.0 (Ubuntu 7.3.0-27ubuntu1~18.04)：C语言程序编译器，Ubuntu自带。</li>
+  <li>NASM version 2.13.02：汇编程序编译器，通过<code class="highlighter-rouge">sudo apt install nasm</code>安装在WSL上。</li>
+  <li>Oracle VM VirtualBox 6.0.4 r128413 (Qt5.6.2)：轻量开源的虚拟机软件。</li>
+  <li>VSCode - Insiders v1.33.0：好用的文本编辑器，有丰富的插件。</li>
+  <li>hexdump for VSCode 1.7.2: VSCode中一个好用的十六进制显示插件。</li>
+</ul>
+
+<p>大部分开发环境安装在WSL上，较之于双系统、虚拟机等其他开发方案，更加方便，也方便直接使用Linux下的一些指令。</p>
+
+<h4 id="硬件">硬件</h4>
+
+<h5 id="开发环境配置">开发环境配置</h5>
+
+<p>所用机器型号为VAIO Z Flip 2016</p>
+
+<ul>
+  <li>Intel(R) Core(TM) i7-6567U CPU @3.30GHZ 3.31GHz</li>
+  <li>8.00GB RAM</li>
+</ul>
+
+<h5 id="虚拟机配置">虚拟机配置</h5>
+
+<ul>
+  <li>处理器内核总数：1</li>
+  <li>RAM：4MB</li>
+</ul>
+
+<h3 id="实验原理">实验原理</h3>
+
+<p>与<a href="https://wu-kan.github.io/操作系统/裸机控制权与引导程序">前一个实验</a>差不多。</p>
+
+<ol>
+  <li>虚拟软盘的第一个扇区用于存储主引导程序（即监控程序），需要保证最后两个字节为<code class="highlighter-rouge">55aa</code>。验证主引导程序有效后，跳转到<code class="highlighter-rouge">7c00h</code>开始执行。</li>
+  <li>引导程序接受键盘输入，选择程序，随后从软盘加载指定程序扇区的内容到内存并跳转执行。</li>
+  <li>中断标号<code class="highlighter-rouge">0x00</code>到<code class="highlighter-rouge">0x13</code>已经具有功能，<code class="highlighter-rouge">0x14</code>到<code class="highlighter-rouge">0x1f</code>为保留标号，<code class="highlighter-rouge">0x20</code>到<code class="highlighter-rouge">0xff</code>提供给用户自定义中断。因此定义<code class="highlighter-rouge">0x20h</code>号中断用于从用户程序返回监控程序。</li>
+  <li>在用户程序的循环中需要加入软件中断<code class="highlighter-rouge">int 20h</code>，用于监测是否有键盘返回，如果有则返回监控程序，否则继续执行。</li>
+</ol>
+
+<h2 id="实验过程">实验过程</h2>
+
+<h3 id="aasm">a.asm</h3>
+
+<p>本次实验要求写 4 个用户程序，分别是在屏幕的4个象限中弹来弹去。四个代码的程序几乎相同，只需要修改某些常量和变量的定义即可。这里只给出其中一个程序的代码。</p>
+
+<p>另外，本想直接用<a href="https://wu-kan.github.io/操作系统/裸机控制权与引导程序">前一个实验</a>的<code class="highlighter-rouge">c.asm</code>，却发现老师只考虑了边反射的情况，没有考虑四个角反射的情况，这会导致显示的内容从角飞出，在屏幕中乱飞。于是再次重构这段代码，使得编译后大小仅137bytes：</p>
+
+<ul>
+  <li>加载地址修改成<code class="highlighter-rouge">org 0A100h</code>，表明用户程序读入内存应从内存物理地址0A100h开始。</li>
+  <li>重新修改横纵坐标的变化方式，改为根据运行周期自动变化。</li>
+  <li>修改字符串显示方式，改为调用<code class="highlighter-rouge">int 10h</code>实现，并写了一个<code class="highlighter-rouge">%macro print</code>来简化这一过程（造轮子）,仍然支持根据行号自动变色。</li>
+  <li>屏幕显示空出前两行，用于显示引导程序的提示信息。</li>
+</ul>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">%macro</span> <span class="n">print</span> <span class="mi">4</span>	<span class="c">; string, length, x, y</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="n">cs</span>
+	<span class="k">mov</span> <span class="n">ds</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">bp</span><span class="p">,</span> <span class="kr">%1</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ds</span>
+	<span class="k">mov</span> <span class="n">es</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">cx</span><span class="p">,</span> <span class="kr">%2</span>
+	<span class="k">mov</span> <span class="n">ah</span><span class="p">,</span> <span class="mi">13</span><span class="n">h</span>
+	<span class="k">mov</span> <span class="n">al</span><span class="p">,</span> <span class="mi">00</span><span class="n">h</span>
+	<span class="k">mov</span> <span class="n">bh</span><span class="p">,</span> <span class="mi">00</span><span class="n">h</span>
+	<span class="k">mov</span> <span class="n">bl</span><span class="p">,</span> <span class="kr">%3</span>	<span class="c">; 根据行号自动变色</span>
+	<span class="k">mov</span> <span class="n">dh</span><span class="p">,</span> <span class="kr">%3</span>
+	<span class="k">mov</span> <span class="n">dl</span><span class="p">,</span> <span class="kr">%4</span>
+	<span class="k">int</span> <span class="mi">10</span><span class="n">h</span>
+<span class="cp">%endmacro</span>
+
+	<span class="n">N</span> <span class="k">equ</span> <span class="mi">12</span>	<span class="c">;显示区域高度</span>
+	<span class="n">M</span> <span class="k">equ</span> <span class="mi">32</span>	<span class="c">;显示区域宽度减去字符串长度</span>
+	<span class="n">TOP</span> <span class="k">equ</span> <span class="mi">2</span>	<span class="c">;显示区域上端点</span>
+	<span class="n">LEFT</span> <span class="k">equ</span> <span class="mi">40</span>	<span class="c">;显示区域左端点</span>
+	<span class="n">LENGTH</span> <span class="k">equ</span> <span class="mi">8</span>	<span class="c">;字符串的长度</span>
+	<span class="n">DELAY</span> <span class="k">equ</span> <span class="mi">99999999</span>
+	<span class="n">org</span> <span class="mi">0</span><span class="n">A100h</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span><span class="mi">0</span><span class="n">B800h</span>
+	<span class="k">mov</span> <span class="n">gs</span><span class="p">,</span><span class="n">ax</span>	<span class="c">; GS = 0xB800h，文本窗口显存起始地址</span>
+
+<span class="n">myLoop</span><span class="o">:</span>
+	<span class="k">dec</span> <span class="n">dword</span><span class="p">[count]</span>	<span class="c">; 递减计数变量</span>
+	<span class="k">jnz</span> <span class="n">myLoop</span>	<span class="c">; &gt;0：跳转</span>
+	<span class="k">mov</span> <span class="n">dword</span><span class="p">[count],</span> <span class="n">DELAY</span>
+
+	<span class="k">mov</span> <span class="n">word</span> <span class="n">ax</span><span class="p">,</span> <span class="p">[t]</span>	<span class="c">; ax = t</span>
+	<span class="k">mov</span> <span class="n">word</span> <span class="n">bx</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">N</span><span class="o">-</span><span class="mi">2</span>
+	<span class="k">xor</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dx</span>	<span class="c">; clear dx and prepare for division</span>
+	<span class="k">div</span> <span class="n">bx</span>  <span class="c">; dx = t mod (2N - 2)</span>
+	<span class="k">cmp</span> <span class="n">dx</span><span class="p">,</span> <span class="n">N</span> <span class="c">; compare dx and n</span>
+	<span class="k">jb</span> <span class="n">xok</span>  <span class="c">; if (dx &lt; n) jump xok</span>
+	<span class="k">sub</span> <span class="n">bx</span><span class="p">,</span> <span class="n">dx</span>
+	<span class="k">mov</span> <span class="n">dx</span><span class="p">,</span> <span class="n">bx</span> <span class="c">; dx = 2n - 2 - dx</span>
+<span class="n">xok</span><span class="o">:</span>
+	<span class="k">mov</span> <span class="n">word</span><span class="p">[x],</span> <span class="n">dx</span>
+	<span class="k">add</span> <span class="n">word</span><span class="p">[x],</span> <span class="n">TOP</span>
+
+	<span class="k">mov</span> <span class="n">word</span> <span class="n">ax</span><span class="p">,</span> <span class="p">[t]</span>
+	<span class="k">mov</span> <span class="n">word</span> <span class="n">bx</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">M</span><span class="o">-</span><span class="mi">2</span>
+	<span class="k">xor</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dx</span>
+	<span class="k">div</span> <span class="n">bx</span>
+	<span class="k">cmp</span> <span class="n">dx</span><span class="p">,</span> <span class="n">M</span>
+	<span class="k">jb</span> <span class="n">yok</span>
+	<span class="k">sub</span> <span class="n">bx</span><span class="p">,</span> <span class="n">dx</span>
+	<span class="k">mov</span> <span class="n">dx</span><span class="p">,</span> <span class="n">bx</span>
+<span class="n">yok</span><span class="o">:</span>
+	<span class="k">mov</span> <span class="n">word</span> <span class="p">[y],</span><span class="n">dx</span>
+	<span class="k">add</span> <span class="n">word</span> <span class="p">[y],</span><span class="n">LEFT</span>
+
+	<span class="k">inc</span> <span class="n">word</span><span class="p">[t]</span>
+	<span class="n">print</span> <span class="n">message</span><span class="p">,</span> <span class="n">LENGTH</span><span class="p">,</span> <span class="p">[x],</span> <span class="p">[y]</span>
+	<span class="k">int</span> <span class="mi">20</span><span class="n">h</span>
+	<span class="k">jmp</span> <span class="n">myLoop</span>
+<span class="n">datadef</span><span class="o">:</span>
+	<span class="n">count</span> <span class="kt">dd</span> <span class="mi">1</span>
+	<span class="n">t</span> <span class="n">dw</span> <span class="mi">0</span>
+	<span class="n">x</span> <span class="n">dw</span> <span class="mi">1</span>
+	<span class="n">y</span> <span class="n">dw</span> <span class="mi">0</span>
+	<span class="n">message</span> <span class="kt">db</span> <span class="err">'</span> <span class="n">wu</span><span class="o">-</span><span class="n">kan</span> <span class="err">'</span>
+</code></pre></div></div>
+
+<h3 id="wukosasm">wukos.asm</h3>
+
+<p>引导扇区的 bootloader，其功能有：</p>
+
+<ul>
+  <li>显示正在运行的是哪一个程序，或是选择页面提示语。</li>
+  <li>使用<code class="highlighter-rouge">int 13h</code>读取扇区，并把它放到内存合适的位置上。</li>
+  <li>使用<code class="highlighter-rouge">int 16h</code>读取键盘输入，用于选择程序。</li>
+</ul>
+
+<p>这里遇到一个问题，就是直接使用上面自动变色的程序时没有显示。因前两行的x坐标恰好对应了颜色中的黑底黑字。因此修改显示颜色<code class="highlighter-rouge">mov bl, 07h</code>（黑底白字）即可。</p>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">OffSetOfUserPrg</span> <span class="k">equ</span> <span class="mi">0</span><span class="n">A100h</span>
+<span class="n">org</span>  <span class="mi">7</span><span class="n">c00h</span>
+<span class="cp">%macro</span> <span class="n">print</span> <span class="mi">4</span>	<span class="c">; string, length, x, y</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="n">cs</span>
+	<span class="k">mov</span> <span class="n">ds</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">bp</span><span class="p">,</span> <span class="kr">%1</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ds</span>
+	<span class="k">mov</span> <span class="n">es</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">cx</span><span class="p">,</span> <span class="kr">%2</span>
+	<span class="k">mov</span> <span class="n">ah</span><span class="p">,</span> <span class="mi">13</span><span class="n">h</span>
+	<span class="k">mov</span> <span class="n">al</span><span class="p">,</span> <span class="mi">00</span><span class="n">h</span>
+	<span class="k">mov</span> <span class="n">bh</span><span class="p">,</span> <span class="mi">00</span><span class="n">h</span>
+	<span class="k">mov</span> <span class="n">bl</span><span class="p">,</span> <span class="mi">07</span><span class="n">h</span>	<span class="c">; 黑底白字</span>
+	<span class="k">mov</span> <span class="n">dh</span><span class="p">,</span> <span class="kr">%3</span>
+	<span class="k">mov</span> <span class="n">dl</span><span class="p">,</span> <span class="kr">%4</span>
+	<span class="k">int</span> <span class="mi">10</span><span class="n">h</span>
+<span class="cp">%endmacro</span>
+
+<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">0000</span><span class="n">h</span>
+<span class="k">mov</span> <span class="n">es</span><span class="p">,</span> <span class="n">ax</span>
+<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">20</span><span class="n">h</span>
+<span class="k">mov</span> <span class="n">bx</span><span class="p">,</span> <span class="mi">4</span>
+<span class="k">mul</span> <span class="n">bx</span>
+<span class="k">mov</span> <span class="n">si</span><span class="p">,</span> <span class="n">ax</span>
+<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="n">_int20h</span>
+<span class="k">mov</span> <span class="err">[</span><span class="n">es</span><span class="o">:</span><span class="n">si</span><span class="err">]</span><span class="p">,</span> <span class="n">ax</span>
+<span class="k">add</span> <span class="n">si</span><span class="p">,</span> <span class="mi">2</span>
+<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="n">cs</span>
+<span class="k">mov</span> <span class="err">[</span><span class="n">es</span><span class="o">:</span><span class="n">si</span><span class="err">]</span><span class="p">,</span> <span class="n">ax</span>
+<span class="n">begin</span><span class="o">:</span>
+	<span class="k">call</span> <span class="n">cls</span>
+	<span class="n">print</span> <span class="n">msg</span><span class="p">,</span> <span class="n">msglen</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+<span class="n">input</span><span class="o">:</span>
+	<span class="k">mov</span> <span class="n">ah</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">int</span> <span class="mi">16</span><span class="n">h</span>
+	<span class="k">cmp</span> <span class="n">al</span><span class="p">,</span> <span class="sc">'1'</span>
+	<span class="k">jl</span> <span class="n">input</span>
+	<span class="k">cmp</span> <span class="n">al</span><span class="p">,</span> <span class="sc">'4'</span>
+	<span class="k">jg</span> <span class="n">input</span>
+	<span class="k">mov</span> <span class="p">[sectorNum],</span> <span class="n">al</span>
+	<span class="k">call</span> <span class="n">cls</span>
+	<span class="n">print</span> <span class="n">msg1</span><span class="p">,</span> <span class="n">msglen1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="n">print</span> <span class="n">sectorNum</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">16</span>
+
+	<span class="k">mov</span> <span class="n">cl</span><span class="p">,</span> <span class="p">[sectorNum]</span>
+	<span class="k">sub</span> <span class="n">cl</span><span class="p">,</span> <span class="sc">'0'</span><span class="o">-</span><span class="mi">1</span>  <span class="c">;从第二个扇区开始</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="n">cs</span>
+	<span class="k">mov</span> <span class="n">es</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">ah</span><span class="p">,</span> <span class="mi">2</span>
+	<span class="k">mov</span> <span class="n">al</span><span class="p">,</span> <span class="mi">1</span>
+	<span class="k">mov</span> <span class="n">dl</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">mov</span> <span class="n">dh</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">mov</span> <span class="n">ch</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">mov</span> <span class="n">bx</span><span class="p">,</span> <span class="n">OffSetOfUserPrg</span>
+	<span class="k">int</span> <span class="mi">13</span><span class="n">H</span>
+	<span class="k">jmp</span> <span class="n">OffSetOfUserPrg</span>
+<span class="n">cls</span><span class="o">:</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">0</span><span class="n">B800h</span>
+	<span class="k">mov</span> <span class="n">es</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">si</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">mov</span> <span class="n">cx</span><span class="p">,</span> <span class="mi">80</span><span class="o">*</span><span class="mi">25</span>
+	<span class="k">mov</span> <span class="n">dx</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="n">clsLoop</span><span class="o">:</span>
+		<span class="k">mov</span> <span class="err">[</span><span class="n">es</span><span class="o">:</span><span class="n">si</span><span class="err">]</span><span class="p">,</span> <span class="n">dx</span>
+		<span class="k">add</span> <span class="n">si</span><span class="p">,</span> <span class="mi">2</span>
+	<span class="k">loop</span> <span class="n">clsLoop</span>
+	<span class="k">ret</span>
+<span class="n">int20h</span><span class="o">:</span>
+	<span class="k">mov</span> <span class="n">ah</span><span class="p">,</span> <span class="mi">01</span><span class="n">h</span>
+	<span class="k">int</span> <span class="mi">16</span><span class="n">h</span>
+	<span class="k">jz</span> <span class="n">noclick</span>
+	<span class="k">mov</span> <span class="n">ah</span><span class="p">,</span> <span class="mi">00</span><span class="n">h</span>
+	<span class="k">int</span> <span class="mi">16</span><span class="n">h</span>
+	<span class="k">cmp</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">2</span><span class="n">e03h</span>	<span class="c">; 检测Ctrl + C</span>
+	<span class="k">jne</span> <span class="n">noclick</span>
+	<span class="k">jmp</span> <span class="n">begin</span>
+<span class="n">noclick</span><span class="o">:</span>
+	<span class="k">iret</span>
+<span class="n">datadef</span><span class="o">:</span>
+	<span class="n">msg</span> <span class="kt">db</span> <span class="err">'</span><span class="n">Welcome</span> <span class="n">to</span> <span class="n">WuKOS</span><span class="p">,</span> <span class="n">press</span> <span class="mi">1</span><span class="o">~</span><span class="mi">4</span> <span class="n">to</span> <span class="n">run</span> <span class="n">a</span> <span class="n">program</span><span class="p">.</span><span class="err">'</span>
+	<span class="n">msglen</span> <span class="k">equ</span> <span class="p">(</span><span class="err">$</span><span class="o">-</span><span class="n">msg</span><span class="p">)</span>
+	<span class="n">msg1</span> <span class="kt">db</span> <span class="err">'</span><span class="n">This</span> <span class="n">is</span> <span class="n">program</span> <span class="mi">0</span><span class="p">,</span> <span class="n">press</span> <span class="n">Ctrl</span> <span class="o">+</span> <span class="n">C</span> <span class="n">to</span> <span class="n">return</span><span class="p">.</span><span class="err">'</span>
+	<span class="n">msglen1</span> <span class="k">equ</span> <span class="p">(</span><span class="err">$</span><span class="o">-</span><span class="n">msg1</span><span class="p">)</span>
+	<span class="n">sectorNum</span> <span class="kt">db</span> <span class="sc">'1'</span>
+</code></pre></div></div>
+
+<h3 id="编译烧盘">编译烧盘</h3>
+
+<p>在WSL终端下按顺序执行下述指令。主引导程序存储在虚拟软盘的第一个扇区，第一个用户程序存储在第二个扇区，第二个用户程序存储在第三个扇区，以此类推。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>nasm wukos.asm <span class="nt">-o</span> wukos.com
+nasm a.asm <span class="nt">-o</span> a.com
+nasm b.asm <span class="nt">-o</span> b.com
+nasm c.asm <span class="nt">-o</span> c.com
+nasm d.asm <span class="nt">-o</span> d.com
+/sbin/mkfs.msdos <span class="nt">-C</span> wukos.img 1440
+<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>wukos.com <span class="nv">of</span><span class="o">=</span>wukos.img <span class="nv">conv</span><span class="o">=</span>notrunc
+<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>a.com <span class="nv">of</span><span class="o">=</span>wukos.img <span class="nv">seek</span><span class="o">=</span>1 <span class="nv">conv</span><span class="o">=</span>notrunc
+<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>b.com <span class="nv">of</span><span class="o">=</span>wukos.img <span class="nv">seek</span><span class="o">=</span>2 <span class="nv">conv</span><span class="o">=</span>notrunc
+<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>c.com <span class="nv">of</span><span class="o">=</span>wukos.img <span class="nv">seek</span><span class="o">=</span>3 <span class="nv">conv</span><span class="o">=</span>notrunc
+<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>d.com <span class="nv">of</span><span class="o">=</span>wukos.img <span class="nv">seek</span><span class="o">=</span>4 <span class="nv">conv</span><span class="o">=</span>notrunc
+</code></pre></div></div>
+
+<h3 id="运行结果">运行结果</h3>
+
+<h4 id="引导界面">引导界面</h4>
+
+<p><img src="/public/image/2019-03-18-0.jpg" alt="图片描述" /></p>
+
+<h4 id="程序1">程序1</h4>
+
+<p><img src="/public/image/2019-03-18-1.jpg" alt="图片描述" /></p>
+
+<p>显示姓名。</p>
+
+<h4 id="程序2">程序2</h4>
+
+<p><img src="/public/image/2019-03-18-2.jpg" alt="图片描述" /></p>
+
+<p>显示学号。</p>
+
+<h4 id="程序3">程序3</h4>
+
+<p><img src="/public/image/2019-03-18-3.jpg" alt="图片描述" />
+显示邮箱。</p>
+
+<h4 id="程序4">程序4</h4>
+
+<p><img src="/public/image/2019-03-18-4.jpg" alt="图片描述" />
+显示博客。</p>
+
+<h2 id="实验总结">实验总结</h2>
+
+<p>重写了之前的代码，没有想到本来上次已经很小的290bytes还能压到更小的137bytes…</p>
+
+<p>还遇到了根据行号变色时第一行看不到输出的原因，仔细思考和查阅网上资料后发现00h用于表示不显示，在自动变色行号为0的时候就会导致看不到输出。</p>
+
+<p>现在对<code class="highlighter-rouge">org 7c00h</code>等语句有了更深的理解了。</p>
+:ET

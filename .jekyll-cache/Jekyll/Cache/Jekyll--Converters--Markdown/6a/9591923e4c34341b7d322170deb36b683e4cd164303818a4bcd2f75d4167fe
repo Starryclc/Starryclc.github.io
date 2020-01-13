@@ -1,0 +1,443 @@
+I"�v<h2 id="实验题目">实验题目</h2>
+
+<p>应用层实验</p>
+
+<h2 id="实验目的">实验目的</h2>
+
+<p>掌握应用层的基本工作原理和实现方法</p>
+
+<h2 id="实验工具">实验工具</h2>
+
+<h3 id="telnet">telnet</h3>
+
+<p>如果在命令行不能运行telnet，则需要安装telnet客户端程序。</p>
+
+<p>telnet的安装方法见https://jingyan.baidu.com/article/3ea51489ba79e252e61bba97.html</p>
+
+<p>在控制台可以采用鼠标右键菜单粘贴,拷贝要点击图标菜单“编辑/标记”</p>
+
+<p>控制台修改缓冲区：属性/布局/屏幕缓冲区大小/高度:9999</p>
+
+<p>窗口大小的宽度：200</p>
+
+<h3 id="securecrt">SecureCRT</h3>
+
+<ul>
+  <li>SecureCRT 下载: http://172.18.187.9/netdisk/default.aspx?vm=17net (软件下载)SecureCRT下载解压后直接可以使用。</li>
+  <li>采用SecureCRT中的telnet：连接/sessions/点击右键/新建会话/协议：telnet/下一步/主机名:域名或IP地址 端口号:80或21或110或25/下一步/取名会话/完成。</li>
+  <li>SecureCRT设置中文显示：选项/会话选项/外观/字体：新宋体；字符集：中文GB2312  字符编码：utf-8</li>
+  <li>为了可以看到更多的响应信息，需要增加缓冲区大小。</li>
+  <li>secureCRT:会话选项/终端/仿真/回滚缓冲区：10000</li>
+  <li>控制台:属性/布局/屏幕缓冲区大小/高度：9000</li>
+  <li>SecureCRT的SSL配置–在SecureCRT中会话配置/连接/协议：Telnet/SSL</li>
+</ul>
+
+<h2 id="注意事项">注意事项</h2>
+
+<ul>
+  <li>截屏时注意遮盖掉自己的邮箱密码</li>
+  <li>sina.com的邮箱的客户端访问设置：</li>
+  <li>QQ邮箱需要在Web访问方式下开启POP3和SMTP服务才允许在客户端访问(设置/账号/开启POP3/SMTP)，否则会出现错误“454 Authentication failed, please open smtp flag first!”</li>
+</ul>
+
+<p>要在客户端访问，QQ邮箱可能还会要求设置独立密码，即可以设置与QQ登录不同的密码。QQ Web邮箱查看源码的方法：</p>
+
+<ul>
+  <li>QQ邮箱编程必须使用Telnet/SSL协议(加密模式)：</li>
+  <li>SecureCRT的SSL配置–在SecureCRT中会话配置/连接/协议：Telnet/SSL</li>
+  <li>QQ邮箱的接收邮件服务器：pop.qq.com，端口号为995</li>
+  <li>QQ邮箱的发送邮件服务器：smtp.qq.com，端口号为465</li>
+  <li>客户端登录的用户名为QQ号的base64编码</li>
+  <li>客户端登录的密码也采用base64编码</li>
+</ul>
+
+<h2 id="实验内容">实验内容</h2>
+
+<p>先认真阅读课件“Chapter2-applicaton-layer.pdf”,再完成下面内容。注意：协议标准可以查阅RFC；选取的内容不要与课件相同；响应内容太长时自己选取截取前后部分以及其中重点部分。</p>
+
+<p>参考视频：http://172.18.187.9/video/</p>
+
+<p>使用自己编写的TcpClient，采用聊天程序的客户端。该客户端采用两个进程实现：一个输入和发送线程，一个接收线程。（选做）如果不自己编写TcpClient，可以尝试使用老师给的TcpClient.exe完成步骤一~步骤四，如果不愿意尝试，可以使用telnet来完成实验。
+源代码：</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;process.h&gt;
+#include &lt;ws2tcpip.h&gt; //gcc Client.c -lWs2_32 -o Client
+#pragma comment(lib, "ws2_32.lib")
+#define BUFLEN 20 &lt;&lt; 20 //20MB
+</span><span class="kt">int</span> <span class="n">finish</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kt">unsigned</span> <span class="kr">__stdcall</span> <span class="nf">recvMessage</span><span class="p">(</span><span class="n">SOCKET</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">static</span> <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="n">BUFLEN</span><span class="p">];</span>
+	<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">finish</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="n">recv</span><span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">BUFLEN</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">c</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+			<span class="n">buf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">printf</span><span class="p">(</span><span class="s">"%s"</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span>
+		<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">c</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"Recv connect closed.</span><span class="se">\n</span><span class="s">"</span><span class="p">),</span> <span class="n">finish</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+		<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">c</span> <span class="o">==</span> <span class="n">SOCKET_ERROR</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"Recv Error:</span><span class="se">\n</span><span class="s">%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">GetLastError</span><span class="p">());</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">)</span>
+		<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="n">WSADATA</span> <span class="n">wsadata</span><span class="p">;</span>
+	<span class="n">WSAStartup</span><span class="p">(</span><span class="n">MAKEWORD</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">wsadata</span><span class="p">);</span>
+	<span class="k">struct</span> <span class="n">addrinfo</span> <span class="o">*</span><span class="n">host</span><span class="p">;</span>
+	<span class="n">getaddrinfo</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">host</span><span class="p">);</span>
+	<span class="n">SOCKET</span> <span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="p">(</span><span class="n">host</span><span class="o">-&gt;</span><span class="n">ai_family</span><span class="p">,</span> <span class="n">host</span><span class="o">-&gt;</span><span class="n">ai_socktype</span><span class="p">,</span> <span class="n">host</span><span class="o">-&gt;</span><span class="n">ai_protocol</span><span class="p">);</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">connect</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">host</span><span class="o">-&gt;</span><span class="n">ai_addr</span><span class="p">,</span> <span class="n">host</span><span class="o">-&gt;</span><span class="n">ai_addrlen</span><span class="p">))</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Connect unsuccessfully.</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+	<span class="n">HANDLE</span> <span class="n">h</span> <span class="o">=</span> <span class="n">_beginthreadex</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">recvMessage</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">sock</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+	<span class="k">static</span> <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="n">BUFLEN</span><span class="p">];</span>
+	<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">finish</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="n">printf</span><span class="p">(</span><span class="s">"Input the message(end by EOF, Ctrl+Z in Windows) :</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span> <span class="o">!</span><span class="n">finish</span> <span class="o">&amp;&amp;</span> <span class="n">gets</span><span class="p">(</span><span class="n">buf</span> <span class="o">+</span> <span class="n">len</span><span class="p">);)</span>
+			<span class="n">buf</span><span class="p">[</span><span class="n">len</span> <span class="o">+=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">buf</span> <span class="o">+</span> <span class="n">len</span><span class="p">)]</span> <span class="o">=</span> <span class="sc">'\r'</span><span class="p">,</span> <span class="n">buf</span><span class="p">[</span><span class="o">++</span><span class="n">len</span><span class="p">]</span> <span class="o">=</span> <span class="sc">'\n'</span><span class="p">,</span> <span class="n">buf</span><span class="p">[</span><span class="o">++</span><span class="n">len</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="n">send</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+		<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">c</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"Send connect closed.</span><span class="se">\n</span><span class="s">"</span><span class="p">),</span> <span class="n">finish</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+		<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">c</span> <span class="o">==</span> <span class="n">SOCKET_ERROR</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"Send Error:</span><span class="se">\n</span><span class="s">%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">GetLastError</span><span class="p">());</span>
+	<span class="p">}</span>
+	<span class="n">CloseHandle</span><span class="p">(</span><span class="n">h</span><span class="p">);</span>
+	<span class="n">closesocket</span><span class="p">(</span><span class="n">sock</span><span class="p">);</span>
+	<span class="n">freeaddrinfo</span><span class="p">(</span><span class="n">host</span><span class="p">);</span>
+	<span class="n">WSACleanup</span><span class="p">();</span>
+	<span class="n">getch</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="http协议">HTTP协议</h3>
+
+<p>看完HTTP协议的课件后完成以下实验：</p>
+
+<h4 id="从学院网站sdcssysueducn找一网页下载">从学院网站（sdcs.sysu.edu.cn）找一网页下载。</h4>
+
+<p>下载一个<a href="http://sdcs.sysu.edu.cn/content/2564">老师的个人主页</a>。</p>
+
+<p>http请求：</p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">GET</span> <span class="nn">/content/2564.html</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="p">:</span> <span class="s">sdcs.sysu.edu.cn</span>
+</code></pre></div></div>
+
+<p>http响应：
+<img src="/public/image/2019-04-01-1.jpg" alt="图片描述" />
+<img src="/public/image/2019-04-01-2.jpg" alt="图片描述" /></p>
+
+<h4 id="从学院网站sdcssysueducn找一图片下载">从学院网站（sdcs.sysu.edu.cn）找一图片下载。</h4>
+
+<p>天河二号镇楼。
+<img src="http://sdcs.sysu.edu.cn/sites/sdcs.live1.dpcms8.sysu.edu.cn/files/styles/slideshow/public/slideshow/frontpic2.jpg" alt="图片描述" />
+http请求：</p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">GET</span> <span class="nn">/sites/sdcs.live1.dpcms8.sysu.edu.cn/files/styles/slideshow/public/slideshow/frontpic2.jpg</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="p">:</span> <span class="s">sdcs.sysu.edu.cn</span>
+</code></pre></div></div>
+
+<p>http响应：</p>
+
+<p><img src="/public/image/2019-04-01-3.jpg" alt="图片描述" /></p>
+
+<h4 id="在http请求的头部行中加入if-modified-since-fri-16-jan-2019-132217-gmt从学院网站下载2的图片">在http请求的头部行中加入<code class="highlighter-rouge">If-Modified-Since: Fri, 16 Jan 2019 13:22:17 GMT</code>从学院网站下载(2)的图片。</h4>
+
+<p>http请求：</p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">GET</span> <span class="nn">/sites/sdcs.live1.dpcms8.sysu.edu.cn/files/styles/slideshow/public/slideshow/frontpic2.jpg</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Modified-Since</span><span class="p">:</span> <span class="s">Fri, 16 Jan 2019 13:22:17 GMT</span>
+<span class="na">Host</span><span class="p">:</span> <span class="s">sdcs.sysu.edu.cn</span>
+</code></pre></div></div>
+
+<p>http响应：
+<img src="/public/image/2019-04-01-4.jpg" alt="图片描述" /></p>
+
+<h4 id="用流水线方式实现前面12即把它们的请求拷贝到一起后发送出去可能太长第一部分可以只有看到末尾">用流水线方式实现前面（1）（2），即把它们的请求拷贝到一起后发送出去（可能太长，第一部分可以只有看到末尾）。</h4>
+
+<p>http请求：</p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">GET</span> <span class="nn">/content/2564.html</span> <span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="p">:</span> <span class="s">sdcs.sysu.edu.cn</span>
+
+GET /sites/sdcs.live1.dpcms8.sysu.edu.cn/files/styles/slideshow/public/slideshow/frontpic2.jpg HTTP/1.1
+Host: sdcs.sysu.edu.cn
+</code></pre></div></div>
+
+<p>http响应：
+<img src="/public/image/2019-04-01-5.jpg" alt="图片描述" />
+<img src="/public/image/2019-04-01-6.jpg" alt="图片描述" /></p>
+
+<h3 id="ftp协议">FTP协议</h3>
+
+<p>看完FTP协议的课件后完成以下实验（测试服务器上的目录结构和文件见“参考资料”）：
+FTP服务器：IP地址为172.18.187.10，端口号为 21 （用户名：abc，密码：123666）</p>
+
+<h4 id="上传用学号命名的一个文本文件学号txt">上传用学号命名的一个文本文件(学号.txt)</h4>
+
+<p>控制连接的请求响应信息：</p>
+
+<pre><code class="language-ftp">user abc
+pass 123666
+pasv
+stor 17341163.txt
+</code></pre>
+
+<p>数据连接的截屏：
+<img src="/public/image/2019-04-01-7.jpg" alt="图片描述" />
+<img src="/public/image/2019-04-01-8.jpg" alt="图片描述" /></p>
+
+<h4 id="查看当前目录内容太多则选择一些并标注出1中自己上传的文件">查看当前目录内容(太多则选择一些)，并标注出(1)中自己上传的文件</h4>
+
+<p>控制连接的请求响应信息：</p>
+
+<pre><code class="language-ftp">pasv
+list
+</code></pre>
+
+<p>数据连接的截屏：
+<img src="/public/image/2019-04-01-9.jpg" alt="图片描述" /></p>
+
+<h4 id="下载1中自己上传的文本文件">下载(1)中自己上传的文本文件</h4>
+
+<p>控制连接的请求响应信息：</p>
+
+<pre><code class="language-ftp">pasv
+type I
+retr 17341163.txt
+</code></pre>
+
+<p>数据连接的截屏：</p>
+
+<p><img src="/public/image/2019-04-01-10.jpg" alt="图片描述" /></p>
+
+<h4 id="下载ebook下的一个二进制文件例如pdf文件">下载/ebook下的一个二进制文件(例如，.pdf文件)</h4>
+
+<p>控制连接的请求响应信息：</p>
+
+<pre><code class="language-ftp">pasv
+type I
+retr \ebook\ftp.pdf
+</code></pre>
+
+<p>数据连接的截屏：
+<img src="/public/image/2019-04-01-11.jpg" alt="图片描述" /></p>
+
+<h4 id="采用断点续传下载一个text下的一个文本文件的一部分">采用断点续传下载一个/text下的一个文本文件的一部分</h4>
+
+<p>控制连接的请求响应信息：</p>
+
+<pre><code class="language-ftp">pasv
+rest 20
+retr \text\123456.txt
+</code></pre>
+
+<p>数据连接的截屏：
+<img src="/public/image/2019-04-01-12.jpg" alt="图片描述" /></p>
+
+<h4 id="编写一个程序聊天程序的客户端用ftp协议下载指定文件选做">编写一个程序（聊天程序的客户端），用FTP协议下载指定文件（选做）</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+#include &lt;ws2tcpip.h&gt; //gcc ftpDownload.c -lWs2_32 -o ftpDownload
+#pragma comment(lib, "ws2_32.lib")
+#define BUFLEN 20 &lt;&lt; 20 //20MB
+</span><span class="kt">int</span> <span class="n">finish</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">)</span>
+		<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="n">WSADATA</span> <span class="n">wsadata</span><span class="p">;</span>
+	<span class="n">WSAStartup</span><span class="p">(</span><span class="n">MAKEWORD</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">wsadata</span><span class="p">);</span>
+	<span class="k">struct</span> <span class="n">addrinfo</span> <span class="o">*</span><span class="n">host</span><span class="p">;</span>
+	<span class="n">getaddrinfo</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">host</span><span class="p">);</span>
+	<span class="n">SOCKET</span> <span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="p">(</span><span class="n">host</span><span class="o">-&gt;</span><span class="n">ai_family</span><span class="p">,</span> <span class="n">host</span><span class="o">-&gt;</span><span class="n">ai_socktype</span><span class="p">,</span> <span class="n">host</span><span class="o">-&gt;</span><span class="n">ai_protocol</span><span class="p">);</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">connect</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">host</span><span class="o">-&gt;</span><span class="n">ai_addr</span><span class="p">,</span> <span class="n">host</span><span class="o">-&gt;</span><span class="n">ai_addrlen</span><span class="p">))</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Connect unsuccessfully.</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+	<span class="k">static</span> <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="n">BUFLEN</span><span class="p">];</span>
+	<span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="n">recv</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">BUFLEN</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">c</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+		<span class="n">buf</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">fwrite</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">buf</span><span class="p">),</span> <span class="n">c</span><span class="p">,</span> <span class="n">fopen</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="s">"wb"</span><span class="p">));</span>
+	<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">c</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Recv connect closed.</span><span class="se">\n</span><span class="s">"</span><span class="p">),</span> <span class="n">finish</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">c</span> <span class="o">==</span> <span class="n">SOCKET_ERROR</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Recv Error:</span><span class="se">\n</span><span class="s">%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">GetLastError</span><span class="p">());</span>
+	<span class="n">closesocket</span><span class="p">(</span><span class="n">sock</span><span class="p">);</span>
+	<span class="n">freeaddrinfo</span><span class="p">(</span><span class="n">host</span><span class="p">);</span>
+	<span class="n">WSACleanup</span><span class="p">();</span>
+	<span class="n">getch</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><img src="/public/image/2019-04-01-13.jpg" alt="图片描述" /></p>
+
+<h3 id="smtp协议">SMTP协议</h3>
+
+<p>邮箱zsusender3@sina.com的用户名zsusender3，密码：123456Aa</p>
+
+<p>老师的邮箱因为被太多人发了邮件所以被封了…所以这里使用我自己的邮箱了。使用qq邮箱的时候要用<a href="https://service.mail.qq.com/cgi-bin/help?subtype=1&amp;&amp;no=1001256&amp;&amp;id=28">授权码</a>代替密码登录。</p>
+
+<p>此外，由于使用了自己写的客户端，不支持SSL，因此需要连接的是QQ邮箱<code class="highlighter-rouge">smtp.qq.com</code>的<code class="highlighter-rouge">25</code>号端口了。</p>
+
+<p>看完SMTP协议的课件后做以下实验：</p>
+
+<h4 id="通过zsusender3sinacom发一封没有附件的邮件到你的邮箱">通过zsusender3@sina.com发一封没有附件的邮件到你的邮箱。</h4>
+
+<p>请求和响应信息：</p>
+
+<pre><code class="language-stmp">HELO 942759535
+AUTH LOGIN
+**********
+**********
+MAIL FROM:&lt;942759535@qq.com&gt;
+RCPT TO:&lt;wu.kan@foxmail.com&gt;
+DATA
+Date: Tue, 25 Mar 2019 14:24:01 +0800
+From: "WuK"&lt;942759535@qq.com&gt;
+To: "WuK"&lt;wu.kan@foxmail.com&gt;
+Subject: SDCS 17 isszym
+
+This is a SDCS message in MIME format. Hello! SDCS 17 from isszym
+.
+QUIT
+</code></pre>
+
+<p><img src="/public/image/2019-04-01-14.jpg" alt="图片描述" /></p>
+
+<h4 id="通过zsusender3sinacom发一封带附件二进制文件的邮件mimetxt到你的邮箱参考课件mimepdf和观看mime的视频">通过zsusender3@sina.com发一封带附件(二进制文件)的邮件(MIME.txt)到你的邮箱。参考课件“MIME.pdf”和观看MIME的视频。</h4>
+
+<p>请求和响应信息：</p>
+
+<pre><code class="language-stmp">HELO 942759535
+AUTH LOGIN
+**********
+**********
+MAIL FROM:&lt;942759535@qq.com&gt;
+RCPT TO:&lt;wu.kan@foxmail.com&gt;
+DATA
+X-QQ-FEAT: 7sdUmzD4oweFIsey27zpBk4l3+YhTr3obqJMN17W9QW8odzFKBJBpahQ2QmzM
+        BJeAZHPq1ECvrJ84Hb+axWE1UG7GMIdG62vK3iWwEjy1t/VPhXUc7alElXj5pGoS0SW7Pyb
+        VcEiB+T1hzoCsT/BuyKatavpoynp2t752fFOHyElV6X0XqqW0SwBdVpN6F8bRlyLSlPGwDF
+        eWhrWkQiprLVrSqO8quTiT3UEoUEnSEMCWe7EZt1poRy1geCSPyPoLCIUvyi2AmYHi5SzRA
+        FmswX+wEHO4+Ph
+X-QQ-SSF: 000100000000004000000000000000X
+X-HAS-ATTACH: no
+X-QQ-BUSINESS-ORIGIN: 2
+X-Originating-IP: 120.236.248.201
+X-QQ-STYLE:
+X-QQ-mid: webmail518t1555039835t5547251
+From: "=?utf-8?B?V3VL?=" &lt;wu.kan@foxmail.com&gt;
+To: "=?utf-8?B?d3Uua2Fu?=" &lt;wu.kan@foxmail.com&gt;
+Subject: homework
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+        boundary="----=_NextPart_5CB0065B_09778B80_1EF3FF40"
+Content-Transfer-Encoding: 8Bit
+Date: Fri, 12 Apr 2019 11:30:35 +0800
+X-Priority: 3
+Message-ID: &lt;tencent_66ACC76AC8805CE6DD63DF3E29BEB5129505@qq.com&gt;
+X-QQ-MIME: TCMime 1.0 by Tencent
+X-Mailer: QQMail 2.x
+X-QQ-Mailer: QQMail 2.x
+
+This is a multi-part message in MIME format.
+
+------=_NextPart_5CB0065B_09778B80_1EF3FF40
+Content-Type: multipart/alternative;
+        boundary="----=_NextPart_5CB0065B_09778B80_5050EE5C";
+
+------=_NextPart_5CB0065B_09778B80_5050EE5C
+Content-Type: text/plain;
+        charset="utf-8"
+Content-Transfer-Encoding: base64
+
+c2VuZCBhIGZpbGU=
+
+------=_NextPart_5CB0065B_09778B80_5050EE5C
+Content-Type: text/html;
+        charset="utf-8"
+Content-Transfer-Encoding: base64
+
+PGRpdj5zZW5kIGEgZmlsZTwvZGl2Pg==
+
+------=_NextPart_5CB0065B_09778B80_5050EE5C--
+
+------=_NextPart_5CB0065B_09778B80_1EF3FF40
+Content-Type: application/octet-stream;
+        charset="utf-8";
+        name="=?utf-8?B?5paw5bu65paH5pys5paH5qGjLnR4dA==?="
+Content-Disposition: attachment; filename="=?utf-8?B?5paw5bu65paH5pys5paH5qGjLnR4dA==?="
+Content-Transfer-Encoding: base64
+
+aGkhDQo=
+
+------=_NextPart_5CB0065B_09778B80_1EF3FF40--
+
+.
+</code></pre>
+
+<p><img src="/public/image/2019-04-01-21.jpg" alt="图片描述" />
+<img src="/public/image/2019-04-01-22.jpg" alt="图片描述" />
+成功收到，欧耶。
+<img src="/public/image/2019-04-01-25.jpg" alt="图片描述" /></p>
+
+<h4 id="选做从你的邮箱发一份邮件到同学的邮箱qq邮箱见注意事项">(选做)从你的邮箱发一份邮件到同学的邮箱。QQ邮箱见【注意事项】。</h4>
+
+<p>请求和响应信息：</p>
+
+<pre><code class="language-stmp">HELO 942759535
+AUTH LOGIN
+**********
+**********
+MAIL FROM:&lt;942759535@qq.com&gt;
+RCPT TO:&lt;702189255@qq.com&gt;
+DATA
+Date: Fri, 12 Fri 2019 11:00:00 +0800
+From: "WuK"&lt;942759535@qq.com&gt;
+To: "PengJX"&lt;702189255@qq.com&gt;
+Subject: Deep♂Dark♂Fantasy
+
+Oh♂That's♂good
+.
+</code></pre>
+
+<p><img src="/public/image/2019-04-01-15.jpg" alt="图片描述" />
+基友收到邮件截图如下，表示
+<img src="/public/image/2019-04-01-24.jpg" alt="图片描述" /></p>
+
+<h3 id="pop3协议">POP3协议</h3>
+
+<p>邮箱zsureceiver3@sina.com的用户名zsureceiver3，密码：123456Aa</p>
+
+<p>同上，这里使用了自己的QQ邮箱。尝试使用自己写的客户端，然而连接上服务器之后由于没有SSL被服务器拒绝了。因此这一部分使用SecureCRT完成。</p>
+
+<p>看完POP3协议的课件后做以下实验：</p>
+
+<h4 id="查看zsureceiver3sinacom中每个邮件大小">查看zsureceiver3@sina.com中每个邮件大小。</h4>
+
+<p>请求和响应信息：
+<img src="/public/image/2019-04-01-16.jpg" alt="图片描述" /></p>
+
+<h4 id="取回zsureceiver3sinacom最后一封邮件的邮件唯一标识符">取回zsureceiver3@sina.com最后一封邮件的邮件唯一标识符。</h4>
+
+<p>请求和响应信息：
+<img src="/public/image/2019-04-01-17.jpg" alt="图片描述" /></p>
+
+<h4 id="取回zsureceiver3sinacom最后一封邮件">取回zsureceiver3@sina.com最后一封邮件。</h4>
+
+<p>请求和响应信息：
+<img src="/public/image/2019-04-01-18.jpg" alt="图片描述" />
+<img src="/public/image/2019-04-01-19.jpg" alt="图片描述" /></p>
+
+<h4 id="取回三1中发到你邮箱的邮件qq邮件见注意事项">取回三(1)中发到你邮箱的邮件。QQ邮件见【注意事项】。</h4>
+
+<p>请求和响应信息：
+<img src="/public/image/2019-04-01-20.jpg" alt="图片描述" /></p>
+
+<h2 id="实验体会">实验体会</h2>
+
+<p>做完了应用层的实验，对大千网络背后的运行机理开始有了一些理解了，原来看似缤纷的因特网背后是由这些容易理解的协议罢了。并且，自己写的并不怎么复杂的客户端程序，经由这些简单的协议 就可以直接与现有的互联网产生交互，还是非常有意思的。</p>
+:ET

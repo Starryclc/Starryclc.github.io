@@ -1,0 +1,143 @@
+I")'<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">module</span> <span class="nn">Lab3</span> <span class="kr">where</span>
+<span class="kr">import</span> <span class="nn">Data.List</span>
+
+<span class="cm">{-
+一个布尔表达式就像一个算术表达式，只是这里的值都是布尔值True和False，
+其中的变量也只能代入布尔值，各种运算用运算表给出。
+布尔表达式的另一种解读是表示命题，如文件lab3.pdf所讲。
+如果不理解命题，就看作布尔表达式好了。
+本作业要求判断一个布尔表达式是不是永真式：即无论将变量代入什么值，其结果总是True。
+一、定义命题类型及其Show特例
+命题的集合可以如下定义
+-真命题(记作T)和假命题(记作F)是命题；
+-由一个字母表示的命题变元是一个命题；
+-如果P是命题,则它的否定是一个命题,记作~P；"~"称为否定联结词；
+-如果p,q是命题,则它们的合取是一个命题,记作p&amp;&amp;q; "&amp;&amp;"称为合取联结词；
+-如果p,q是命题,则它们的析取是一个命题,记作p||q; "||"称为析取联结词；
+-如果p,q是命题,则它们的蕴含是一个命题,记作p=&gt;q; "=&gt;"称为蕴含联结词；
+-所有的命题由以上规则经过有限步生成。
+所以,命题的集合是一个归纳定义的集合,可以用代数类型描述：
+-}</span>
+<span class="kr">data</span> <span class="kt">Prop</span><span class="o">=</span><span class="kt">Const</span> <span class="kt">Bool</span>
+    <span class="o">|</span> <span class="kt">Var</span> <span class="kt">Char</span>
+    <span class="o">|</span> <span class="kt">Not</span> <span class="kt">Prop</span>
+    <span class="o">|</span> <span class="kt">And</span> <span class="kt">Prop</span> <span class="kt">Prop</span>
+    <span class="o">|</span> <span class="kt">Or</span> <span class="kt">Prop</span> <span class="kt">Prop</span>
+    <span class="o">|</span> <span class="kt">Imply</span> <span class="kt">Prop</span> <span class="kt">Prop</span>
+    <span class="kr">deriving</span> <span class="kt">Eq</span>
+
+<span class="cm">{-
+习题1
+试将类型Prop定义成类Show的特例,使得Prop中元素能够显示成定义中我们习惯的表示。
+例如,Var 'A',And (Var 'P') (Var 'Q')分别显示成A和P&amp;&amp;Q等。
+-}</span>
+<span class="kr">instance</span> <span class="kt">Show</span> <span class="kt">Prop</span> <span class="kr">where</span>
+    <span class="n">show</span> <span class="p">(</span><span class="kt">Const</span> <span class="kt">True</span><span class="p">)</span><span class="o">=</span><span class="s">"True"</span>
+    <span class="n">show</span> <span class="p">(</span><span class="kt">Const</span> <span class="kt">False</span><span class="p">)</span><span class="o">=</span><span class="s">"False"</span>
+    <span class="n">show</span> <span class="p">(</span><span class="kt">Var</span> <span class="n">x</span><span class="p">)</span><span class="o">=</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+    <span class="n">show</span> <span class="p">(</span><span class="kt">Not</span> <span class="n">x</span><span class="p">)</span><span class="o">=</span><span class="s">"~"</span><span class="o">++</span><span class="n">show</span> <span class="n">x</span>
+    <span class="n">show</span> <span class="p">(</span><span class="kt">And</span> <span class="n">x</span> <span class="n">y</span><span class="p">)</span><span class="o">=</span><span class="p">(</span><span class="n">show</span> <span class="n">x</span><span class="p">)</span><span class="o">++</span><span class="s">"&amp;&amp;"</span><span class="o">++</span><span class="p">(</span><span class="n">show</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">show</span> <span class="p">(</span><span class="kt">Or</span> <span class="n">x</span> <span class="n">y</span><span class="p">)</span><span class="o">=</span><span class="p">(</span><span class="n">show</span> <span class="n">x</span><span class="p">)</span><span class="o">++</span><span class="s">"||"</span><span class="o">++</span><span class="p">(</span><span class="n">show</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">show</span> <span class="p">(</span><span class="kt">Imply</span> <span class="n">x</span> <span class="n">y</span><span class="p">)</span><span class="o">=</span><span class="p">(</span><span class="n">show</span> <span class="n">x</span><span class="p">)</span><span class="o">++</span><span class="s">"=&gt;"</span><span class="o">++</span><span class="p">(</span><span class="n">show</span> <span class="n">y</span><span class="p">)</span>
+
+<span class="cm">{-
+习题2
+定义下列值p1,p2,p3::Prop
+使得它们个表示下列命题:
+A&amp;&amp;~A
+A||~A
+A=&gt;(A&amp;&amp;B)
+-}</span>
+<span class="n">p1</span><span class="o">=</span><span class="kt">And</span> <span class="p">(</span><span class="kt">Var</span> <span class="sc">'A'</span><span class="p">)</span> <span class="p">(</span><span class="kt">Not</span> <span class="p">(</span><span class="kt">Var</span> <span class="sc">'A'</span><span class="p">))</span>
+<span class="n">p2</span><span class="o">=</span><span class="kt">Or</span> <span class="p">(</span><span class="kt">Var</span> <span class="sc">'A'</span><span class="p">)</span> <span class="p">(</span><span class="kt">Not</span> <span class="p">(</span><span class="kt">Var</span> <span class="sc">'A'</span><span class="p">))</span>
+<span class="n">p3</span><span class="o">=</span><span class="kt">Imply</span> <span class="p">(</span><span class="kt">Var</span> <span class="sc">'A'</span><span class="p">)</span> <span class="p">(</span><span class="kt">And</span> <span class="p">(</span><span class="kt">Var</span> <span class="sc">'A'</span><span class="p">)</span> <span class="p">(</span><span class="kt">Var</span> <span class="sc">'B'</span><span class="p">))</span>
+
+<span class="cm">{-
+二、命题真值表
+一个命题或者真,或者假。
+例如,不包含变元的命题T表示真命题,命 题F表示假命题。
+包含变元的命题的真假依赖于变元表示命题的真假,
+所以,一个命题可以看作它包含的变元的函数,称为真值函数,
+其中每个变元的取 值为真或者假,分别用TVue和False表示。
+每个命题的取值和其中变元的关系可以用一个表来表示,称之为命题函数的真值表。
+以下是命题联结词的真值表：
+对应任意的命题函数，给定变元的一个代换，根据上述真值表可计算相应的真值。
+例如,命题p3:A=&gt;(A &amp;&amp; B)在代换[('A',True),('B',False)]的真值是False。
+我们可以用下列类型表示代换：
+-}</span>
+<span class="kr">type</span> <span class="kt">Subst</span><span class="o">=</span><span class="p">[(</span><span class="kt">Char</span><span class="p">,</span><span class="kt">Bool</span><span class="p">)]</span>
+
+<span class="cm">{-
+习题3
+试根据以上解释定义函数:
+-}</span>
+<span class="n">eval</span><span class="o">::</span><span class="kt">Subst</span><span class="o">-&gt;</span><span class="kt">Prop</span><span class="o">-&gt;</span><span class="kt">Bool</span>
+
+<span class="cm">{-
+例如
+&gt;eval [('A',True),('B',False)] p3
+False
+-}</span>
+<span class="n">eval</span> <span class="n">sub</span> <span class="p">(</span><span class="kt">Const</span> <span class="n">p</span><span class="p">)</span><span class="o">=</span><span class="n">p</span>
+<span class="n">eval</span> <span class="n">sub</span> <span class="p">(</span><span class="kt">Var</span> <span class="n">p</span><span class="p">)</span><span class="o">=</span><span class="p">(</span><span class="n">getBool</span> <span class="n">sub</span> <span class="n">p</span><span class="p">)</span> <span class="kr">where</span>
+    <span class="n">getBool</span> <span class="n">sub</span> <span class="n">x</span><span class="o">=</span>
+        <span class="kr">if</span> <span class="n">length</span> <span class="n">xs</span> <span class="o">&gt;</span><span class="mi">1</span>
+            <span class="kr">then</span> <span class="n">error</span> <span class="s">"Variable has more than 2 values."</span>
+            <span class="kr">else</span> <span class="n">head</span> <span class="n">xs</span>
+        <span class="kr">where</span> <span class="n">xs</span><span class="o">=[</span><span class="n">k</span><span class="o">|</span>(y,k)&lt;-sub,x==y]
+eval sub (Not p)=not (eval sub p)
+eval sub (And p q)=(eval sub p)&amp;&amp;(eval sub q)
+eval sub (Or p q)=(eval sub p)||(eval sub q)
+eval sub (Imply p q)=((eval sub p)&amp;&amp;(eval sub q))||(not (eval sub p))
+
+{-
+习题4
+试定义下列函数：
+-}
+vars::Prop-&gt;[Char]
+substs::Prop-&gt;[Subst]
+
+{-
+其中vars p给出命题p中出现的所有不同变元,substs p给出命题p中变元的所有可能代换。例如
+vars p3=['A','B']
+substs p3=
+    [
+        [('A',True),('B',True)],
+        [('A',True),('B',False)],
+        [('A',False),('B',True)],
+        [('A',False),('B',False)]
+    ]
+-}
+vars (Const x)=[]
+vars (Var x)=[x]
+vars (Not p)=vars p
+vars (And p q)=nub((vars p)++(vars q))
+vars (Or p q)=nub((vars p)++(vars q))
+vars (Imply p q)=nub((vars p)++(vars q))
+
+substs p=getsub (vars p) where
+    getsub []=[]
+    getsub [x]=[[(x,True)]]++[[(x,False)]]
+    getsub (x:xs)=[(x,True):a|a&lt;-getsub(xs)]++[(x,False):a|a&lt;-getsub(xs)]
+
+{-
+三、定义一个判断命题是否永真的函数
+如果一个命题函数在变元的任意代换下真值是True,则称之为永真式。
+例如,命题p2是永真式。
+试定义判定一个命题是否永真式的函数,并说明你的函 数定义的正确性：
+习题5
+-}
+isTaut::Prop-&gt;Bool
+
+{-
+例如
+&gt;isTaut p1
+False
+&gt;isTaut p2
+True
+-}
+isTaut p=testisTaut p (substs p) where
+    testisTaut p [x]=(eval x p)
+    testisTaut p (x:xs)=if (eval x p) then testisTaut p xs else False
+</code></pre></div></div>
+:ET

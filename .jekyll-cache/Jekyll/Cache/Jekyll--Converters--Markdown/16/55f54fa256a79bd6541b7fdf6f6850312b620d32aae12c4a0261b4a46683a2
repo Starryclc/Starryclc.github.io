@@ -1,0 +1,441 @@
+I"��<h1 id="数学分析">数学分析</h1>
+<h2 id="增长趋势">增长趋势</h2>
+<p>$n\to+\infty,\forall p,q&gt;0,a&gt;1,{(\ln n)}^q\ll n^p\ll a^n\ll n!\ll n^n$</p>
+<h2 id="积分表">积分表</h2>
+<p>反读可得导数表，此处略。
+$\int k\,\mathrm{d}x=kx+C$
+$\int x^a\,dx=\frac{x^{a+1} }{a+1}+C$
+$\int\frac{1}{x}\,dx=\ln|x|+C$
+$\int e^x\,dx=e^x + C$
+$\int a^x\,dx=\frac{a^x}{\ln a}+C$
+$\int\cos x\,dx=\sin x+C$
+$\int\sin x\,dx=-\cos x+C$
+$\int\frac{1}{cos^2x}\,dx=\int\sec^2 x\,dx=\tan x+C$
+$\int\frac{1}{sin^2x}\,dx=\int\csc^2 x\,dx=-\cot x+C$
+$\int\frac{1}{\sqrt{1-x^2} }\,dx=\arcsin x+C=-\arccos x + C$
+$\int\frac{1}{1+x^2}\,dx=\arctan x+C=-arccot\,x+C$
+$\int\sec x\tan x\,dx=\sec x+C$
+$\int\csc x\cot x\,dx=-\csc x+C$
+$\int\tan x\,dx=-\ln|\cos x|+C$
+$\int\cot x\,dx=\ln|\sin x|+C$
+$\int\sec x\,dx=\ln|\sec x+\tan x|+C$
+$\int\csc x\,dx=\ln|\csc x-\cot x|+C$
+$\int sh\,x\,dx=ch\,x+C$
+$\int ch\,x\,dx=sh\,x+C$
+$\int\frac{1}{x^2+a^2}\,dx=\frac{1}{a}\arctan\frac{x}{a}+C$
+$\int\frac{1}{x^2-a^2}\,dx=\frac{1}{2a}\ln|\frac{x-a}{x+a}| + C$
+$\int\frac{1}{\sqrt{a^2-x^2} }\,dx=\arcsin\frac{x}{a}+C$
+$\int\frac{1}{\sqrt{x^2-a^2} }\,dx=\ln|x+\sqrt{x^2-a^2}|+C$
+$\int\frac{1}{\sqrt{x^2+a^2} }\,dx=\ln|x+\sqrt{x^2+a^2}|+C$</p>
+<h2 id="积分求几何量">积分求几何量</h2>
+<h3 id="面积">面积</h3>
+<p>若简单闭曲线$\begin{cases}x=x(t),\y=y(t),\end{cases}t\in[\alpha,\beta]$端点处连续（$x(\alpha)=x(\beta),y(\alpha)=y(\beta)$）且其他地方不自交，$x(t),y(t)$都逐段有连续微商，则此闭合曲线围起来的有界区域面积$S=-\int_\alpha^\beta x’(t)y(t)\,dt=-\int_\alpha^\beta y(t)\,dx(t)=-\oint_\Gamma y\,dx=\oint_\Gamma x\,dy$等式右边称为曲线$\Gamma$上的积分，其计算方法是带入参数方程到定积分计算式中，积分上下限为始点与终点对应的参数值。下限并不总是小于上限，参数从下限到上限变化时对应曲线的正向（沿正向观察时，曲线所围的区域永远在左侧）。
+极坐标下，连续非负曲线$r=r(\theta)$与向径$\theta=\alpha,\theta=\beta$，其中$0\leq\beta-\alpha\leq2\pi$所围成的平面图形面积$S=\frac{1}{2}\int_\alpha^\beta r^2(\theta)\,d\theta$</p>
+<h3 id="体积">体积</h3>
+<p>记立体过x点且垂直于x轴的截面面积为$S(x)$，则其体积$V=\int_a^bS(x)\,dx$连续曲线$y=f(x)\ge 0,x\in[a,b]$绕x轴旋转一周产生的旋转体体积$V=\pi\int_a^by^2\,dx$</p>
+<h3 id="弧长">弧长</h3>
+<p>若简单闭曲线$\begin{cases}x=x(t),\y=y(t),\end{cases}t\in[\alpha,\beta]$端点处重合（$x(\alpha)=x(\beta),y(\alpha)=y(\beta)$）且其他地方不自交，$x(t),y(t)$连续且满足$[x’(t)]^2+[y’(t)]^2\ne0,\forall t\in[\alpha,\beta]$此时称曲线光滑，其长度$s=\int_\alpha^\beta\sqrt{[x’(t)]^2+[y’(t)]^2}\,dt$此式可对称推广到高维空间曲线。
+极坐标下，$r=r(\theta),\theta\in[\alpha,\beta]$的长度为$s=\int_\alpha^\beta\sqrt{[r(\theta)]^2+[r’(\theta)]^2}\,d\theta$</p>
+<h3 id="曲率">曲率</h3>
+<p>若曲线由参数方程$\begin{cases}x=x(t),\y=y(t),\end{cases}t\in[\alpha,\beta]$给出且有二阶微商，则其在一点的曲率$K=\frac{|y’‘x’-y’x’’|}{[x’^2+y’^2]^{\frac{3}{2} } }$若$y=f(x)$，则$K=\frac{|y’’|}{(1+y’^2)^\frac{3}{2} }$同时记$\frac{1}{K}$为曲率半径。</p>
+<h3 id="旋转体侧面积">旋转体侧面积</h3>
+<p>若曲线由参数方程$\begin{cases}x=x(t),\y=y(t),\end{cases}t\in[\alpha,\beta]$给出，则其绕x轴旋转体的侧面积$s=2\pi\int_\alpha^\beta y(t)\sqrt{[x’(t)]^2+[y’(t)]^2}\,dt$</p>
+<h3 id="空间曲线的切线与法平面">空间曲线的切线与法平面</h3>
+<p>若已知曲线上一点$P(x_0,y_0,z_0)$处的切向量为$\tau(x_0,y_0,z_0)=(A,B,C)$则曲线在该点的切线方程为$\frac{x-x_0}A=\frac{y-y_0}B=\frac{z-z_0}C$法平面方程为$A(x-x_0)+B(y-y_0)+C(z-z_0)=0$当曲线由参数方程$\begin{cases}x=x(t),\y=y(t),\z=z(t),\end{cases}t\in[\alpha,\beta]$给出时，曲线在P点的切向量为$\tau=\pm(x’(t_0),y’(t_0),z’(t_0))$更一般地，若曲线用两曲面的交线给出$\begin{cases}F(x,y,z)=0,\G(x,y,z)=0,\end{cases}$且在P点的某邻域能确定函数组$y=y(x),z=z(x)$满足$y_0=y(x_0),z_0=z(x_0)$，且$y’(x),z’(x)$存在，则曲线在P点的切向量$\tau=\pm(\frac{\partial(F,G)}{\partial(y,z)},\frac{\partial(F,G)}{\partial(z,x)},\frac{\partial(F,G)}{\partial(x,y)})$</p>
+<h3 id="空间曲面的切平面与法线">空间曲面的切平面与法线</h3>
+<p>若已知曲面上一点$P(x_0,y_0,z_0)$处的切平面的法向量为$\vec n=(A’,B’,C’)$则曲线在该点的法线方程为$\frac{x-x_0}{A’}=\frac{y-y_0}{B’}=\frac{z-z_0}{C’}$切平面方程为$A’(x-x_0)+B’(y-y_0)+C’(z-z_0)=0$当曲面方程为$\pi:F(x,y,z)=0$在曲面上任取一条过P的曲线，设其方程为$\begin{cases}x=x(t),\y=y(t),\z=z(t),\end{cases}t\in[\alpha,\beta]$此时有$F(x(t),y(t),z(t))=0$令$t=t_0$两边对t求导，并写成向量的内积式，得$(F_x,F_y,F_z)_P\cdot(x’(t_0),y’(t_0),z’(t_0))=0$则曲线在P点的法向量为$\vec{n}=\pm(F_x,F_y,F_z)_P$若曲线由参数方程给出$\begin{cases}x=x(u,v),\y=y(u,v),\z=z(u,v),\end{cases}$
+则曲线在P点的法向量$\vec{n}=\pm(\frac{\partial(y,z)}{\partial(u,v)},\frac{\partial(z,x)}{\partial(u,v)},\frac{\partial(x,y)}{\partial(u,v)})$</p>
+<h3 id="方向导数">方向导数</h3>
+<p>设三元函数$u=f(x,y,z)$在点$P_0(x_0,y_0,z_0)$的某邻域内有定义，任意给定始于点$P_0$的射线$l$，$P(x,y,z)$为l上且含于定义域内的点。若极限$\lim_{r(p,p_0)\to0^+}\frac{f(P)-f(P_0)}{r(P,P_0)}=\lim_{r(p,p_0)\to0^+}\frac{\Delta_lf(P_0)}{r(P,P_0)}$存在，则称该极限值为函数$f$在点$P_0$沿方向$l$的方向导数，记为$\frac{\partial f}{\partial l}|<em>{P_0}$或$\frac{\partial f(P_0)}{\partial l}$，$\frac{\Delta_lf(P_0)}{r(P,P_0)}$称为函数在$P_0$点沿$l$方向的增量。特别地，$\frac{\partial f(P_0)}{\partial x}$就是函数在$P_0$点沿$x$轴正向的方向导数，$y,z$轴上的方向导数同理。若函数在$P_0$点可微，则其在$P_0$沿任何方向$l$的方向导数都存在，则有以下公式$\frac{\partial f(P_0)}{\partial l}=(\frac{\partial f}{\partial x},\frac{\partial f}{\partial y},\frac{\partial f}{\partial z})|</em>{P_0}\cdot\vec{l_0}$其中$\vec{l_0}=(\cos\alpha,\cos\beta,cos\gamma)=\frac{1}{\rho}(\Delta x,\Delta y,\Delta z)$为$l$的方向余弦。</p>
+<h2 id="泰勒公式">泰勒公式</h2>
+<p>用$f^{(n)}(x)$表示f(x)的n阶导数。
+只要让<code class="highlighter-rouge">余项&lt;EPS</code>即可计算指定函数到任意精确度。
+特别取a=0时称为麦克劳林公式。
+$f(x)=f(a)+f^{(1)}(a)(x-a)+\frac{f^{(2)}(a)}{2!}(x-a)^2+\ldots+\frac{f^{(n)}(a)}{n!}(x-a)^n+R_n(x)$
+$R_n(x)=o((x-a)^n)$，佩亚诺余项
+$R_n(x)=\frac{1}{n!}\int_a^x(x-t)^nf^{(n+1)}(t)\,dt$，积分余项
+$R_n(x)=\frac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1},a&lt;\xi&lt;x$，拉格朗日余项
+$R_n(x)=\frac{(x-a)^{n+1} }{n!}(1-\theta)^nf^{(n+1)}(a+\theta(x-a)),0&lt;\theta&lt;1$，柯西余项</p>
+<h3 id="指数函数">指数函数</h3>
+<p>$(e^x)^{(n)}=e^x$
+$e^x=1+x+\frac{x^2}{2!}+\frac{x^3}{3!}+\ldots+\frac{x^n}{n!}+R_n(x)$
+$R_n(x)=\frac{e^{\theta x} }{(n+1)!}x^{n+1},\xi=\theta x,0&lt;\theta&lt;1$</p>
+<h3 id="三角函数">三角函数</h3>
+<p>$(\sin x)^{(n)}=\sin(x+\frac{n\pi}{2})$
+$\sin x=x-\frac{x^3}{3!}+\frac{x^5}{5!}-\frac{x^7}{7!}+\ldots+(-1)^{k-1}\frac{x^{2k-1} }{(2k-1)!}+R_{2k}(x)$
+$R_{2k}(x)=(-1)^k\frac{\cos\theta x}{(2k+1)!}x^{2k+1}$
+$(\cos x)^{(n)}=\cos(x+\frac{n\pi}{2})$
+$\cos x=1-\frac{x^2}{2!}+\frac{x^4}{4!}-\frac{x^6}{6!}+\ldots+(-1)^{k-1}\frac{x^{2k-2} }{(2k-2)!}+R_{2k-1}(x)$
+$R_{2k-1}(x)=(-1)^k\frac{\cos\theta x}{(2k)!}x^{2k}$</p>
+<h3 id="对数函数">对数函数</h3>
+<p>$[\ln(1+x)]^{(n)}=(-1)^{n-1}(n-1)!(1+x)^{-n}$
+$\ln(1+x)=x-\frac{x^2}{2}+\frac{x^3}{3}-\frac{x^4}{4}+\ldots+(-1)^{n-1}\frac{x^n}{n}+R_n(x)$</p>
+<h3 id="幂函数">幂函数</h3>
+<p>$[(1+x)^a]^{(n)}=a(a-1)\ldots(a-n+1)(1+x)^{a-n}$
+$(1+x)^a=1+ax+\frac{a(a-1)}{2!}x^2+\dots+\frac{a(a-1)\ldots(a-n+1)}{n!}x^n+R_n(x)$</p>
+<h3 id="二元函数">二元函数</h3>
+<p>设$f(x,y)$在$P_0(x_0,y_0)$的某邻域$O(P_0)$内有直到$n+1$阶连续偏导数，则对$O(P_0)$内$\forall(x_0+\Delta x,y_0+\Delta y),\exists\theta\in(0,1)$，使得$f(x_0+\Delta x,y_0+\Delta y)=\sum_{k=0}^n\frac{1}{k!}(\frac{\partial}{\partial x}\Delta x+\frac{\partial}{\partial y}\Delta y)^kf(x_0,y_0)+R_n$其中$R_n=\frac{1}{(n+1)!}(\frac{\partial}{\partial x}\Delta x+\frac{\partial}{\partial y}\Delta y)^{n+1}f(x_0+\theta\Delta x,y_0+\theta\Delta y)$</p>
+<h2 id="级数部分和">级数部分和</h2>
+<h3 id="调和级数">调和级数</h3>
+<p>$n\to\infty,\sum_{i=1}^n\frac 1 i\to\ln n+r,r\approx0.5772156649015328\ldots$</p>
+<h3 id="幂级数">幂级数</h3>
+<p>快速计算幂级数的部分和$\sum_{i=1}^ni^k\mod M$可借助伯努利数，详见<a href="https://blog.csdn.net/w_weilan/article/details/80500741">模板·组合数学</a>。
+$\sum_{i=1}^ni^1=\frac 1 2n(n+1)$
+$\sum_{i=1}^ni^2=\frac 1 6n(n+1)(2n+1)$
+$\sum_{i=1}^ni^3=\frac 1 4[n(n+1)]^2$
+$\sum_{i=1}^ni^4=\frac 1{30}n(n+1)(2n+1)(3n^2+3n-1)$
+$\sum_{i=1}^ni^5=\frac 1{12}[n(n+1)]^2(2n^2+2n-1)$
+$\sum_{i=1}^ni^6=\frac 1{42}n(n+1)(2n+1)(3n^4+6n^3-3n+1)$</p>
+<h2 id="二分求零点三分求极值点">二分求零点、三分求极值点</h2>
+<p>需要$f(x)$在区间$[l,r]$上单调/凹凸性唯一。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">double</span> <span class="nf">bs</span><span class="p">(</span><span class="kt">double</span> <span class="n">l</span><span class="p">,</span><span class="kt">double</span> <span class="n">r</span><span class="p">,</span><span class="kt">double</span> <span class="n">f</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">))</span>
+<span class="p">{</span>
+ <span class="k">if</span><span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="o">&lt;</span><span class="n">EPS</span><span class="p">)</span><span class="k">return</span> <span class="n">l</span><span class="p">;</span>
+ <span class="kt">double</span> <span class="n">m</span><span class="o">=</span><span class="p">(</span><span class="n">l</span><span class="o">+</span><span class="n">r</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+ <span class="k">return</span> <span class="n">sgn</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">l</span><span class="p">)</span><span class="o">*</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">?</span><span class="n">bs</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">f</span><span class="p">)</span><span class="o">:</span><span class="n">ts</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">f</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kt">double</span> <span class="nf">ts</span><span class="p">(</span><span class="kt">double</span> <span class="n">l</span><span class="p">,</span><span class="kt">double</span> <span class="n">r</span><span class="p">,</span><span class="kt">double</span> <span class="n">f</span><span class="p">(</span><span class="kt">double</span> <span class="n">x</span><span class="p">))</span>
+<span class="p">{</span>
+ <span class="k">if</span><span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="o">&lt;</span><span class="n">EPS</span><span class="p">)</span><span class="k">return</span> <span class="n">l</span><span class="p">;</span>
+ <span class="kt">double</span> <span class="n">d</span><span class="o">=</span><span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="n">l</span><span class="p">)</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="n">lm</span><span class="o">=</span><span class="n">l</span><span class="o">+</span><span class="n">d</span><span class="p">,</span><span class="n">rm</span><span class="o">=</span><span class="n">r</span><span class="o">-</span><span class="n">d</span><span class="p">;</span>
+ <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">lm</span><span class="p">)</span><span class="o">&lt;</span><span class="n">f</span><span class="p">(</span><span class="n">rm</span><span class="p">)</span><span class="o">?</span><span class="n">ts</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">rm</span><span class="p">,</span><span class="n">f</span><span class="p">)</span><span class="o">:</span><span class="n">ts</span><span class="p">(</span><span class="n">lm</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">f</span><span class="p">);</span><span class="c1">//极小值</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h2 id="自适应辛普森求函数积分"><a href="https://vjudge.net/solution/16740138">自适应辛普森求函数积分</a></h2>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">Simpson</span>
+<span class="p">{</span>
+	<span class="n">lf</span> <span class="n">simpson</span><span class="p">(</span><span class="n">lf</span> <span class="n">a</span><span class="p">,</span><span class="n">lf</span> <span class="n">b</span><span class="p">,</span><span class="n">lf</span> <span class="n">f</span><span class="p">(</span><span class="n">lf</span> <span class="n">x</span><span class="p">))</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="o">*</span><span class="n">f</span><span class="p">((</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">f</span><span class="p">(</span><span class="n">b</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="mi">6</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">lf</span> <span class="n">ask</span><span class="p">(</span><span class="n">lf</span> <span class="n">a</span><span class="p">,</span><span class="n">lf</span> <span class="n">b</span><span class="p">,</span><span class="n">lf</span> <span class="n">f</span><span class="p">(</span><span class="n">lf</span> <span class="n">x</span><span class="p">),</span><span class="n">lf</span> <span class="n">e</span><span class="o">=</span><span class="n">EPS</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">lf</span> <span class="n">c</span><span class="o">=</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">L</span><span class="o">=</span><span class="n">simpson</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">f</span><span class="p">),</span><span class="n">R</span><span class="o">=</span><span class="n">simpson</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">f</span><span class="p">),</span><span class="n">A</span><span class="o">=</span><span class="n">simpson</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">f</span><span class="p">);</span>
+		<span class="k">return</span> <span class="n">fabs</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="n">R</span><span class="o">-</span><span class="n">A</span><span class="p">)</span><span class="o">&lt;</span><span class="n">EPS</span><span class="o">*</span><span class="mi">15</span><span class="o">?</span><span class="n">L</span><span class="o">+</span><span class="n">R</span><span class="o">+</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="n">R</span><span class="o">-</span><span class="n">A</span><span class="p">)</span><span class="o">/</span><span class="mi">15</span><span class="o">:</span><span class="n">ask</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">e</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">ask</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">e</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+<h2 id="插值法">插值法</h2>
+<p>拉格朗日插值法：插值多项式和插值基函数的形式对称，容易编程。但是，增加节点时，需要重新计算每一个插值基函数。要在$\pmod p$意义下进行的话，那么p只能是质数。
+牛顿插值法：当插值节点增加时，之前已计算的结果仍然能用，每增加一个节点，只要再增加一项即可，从而避免了重复性计算。如果要mod非质数的话，那么就要用牛顿插值法。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="n">complex</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">Coord</span><span class="p">;</span>
+<span class="cp">#define X real()
+#define Y imag()
+</span><span class="kt">double</span> <span class="nf">lagrange</span><span class="p">(</span><span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">Coord</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">p</span><span class="p">,</span><span class="kt">double</span> <span class="n">x</span><span class="p">)</span><span class="c1">//返回p确定的多项式函数在x处的值</span>
+<span class="p">{</span>
+	<span class="kt">double</span> <span class="n">ret</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">p</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="kt">double</span> <span class="n">tmp</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">Y</span><span class="p">;</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">p</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">i</span><span class="o">!=</span><span class="n">j</span><span class="p">)</span><span class="n">tmp</span><span class="o">*=</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">X</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">X</span><span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">X</span><span class="p">);</span>
+		<span class="n">ret</span><span class="o">+=</span><span class="n">tmp</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">lagrange</span><span class="p">(</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Coord</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">)</span><span class="c1">//返回p确定的多项式系数向量</span>
+<span class="p">{</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">ret</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">size</span><span class="p">()),</span><span class="n">sum</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+	<span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">Y</span><span class="p">,</span><span class="n">sum</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">p</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="n">p</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="n">j</span><span class="o">&gt;=</span><span class="n">i</span><span class="p">;</span> <span class="o">--</span><span class="n">j</span><span class="p">)</span>
+			<span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">Y</span><span class="o">=</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">Y</span><span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="n">Y</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">X</span><span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="n">i</span><span class="p">].</span><span class="n">X</span><span class="p">);</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="n">i</span><span class="p">;</span> <span class="o">~</span><span class="n">j</span><span class="p">;</span> <span class="o">--</span><span class="n">j</span><span class="p">)</span>
+			<span class="n">sum</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">j</span><span class="o">?</span><span class="n">sum</span><span class="p">[</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">:</span><span class="mi">0</span><span class="p">)</span><span class="o">-</span><span class="n">sum</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="n">X</span><span class="p">,</span>
+			       <span class="n">ret</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">+=</span><span class="n">sum</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">Y</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">double</span> <span class="nf">differenceQuotient</span><span class="p">(</span><span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">Coord</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">p</span><span class="p">,</span><span class="kt">int</span> <span class="n">k</span><span class="p">)</span><span class="c1">//计算差商</span>
+<span class="p">{</span>
+	<span class="kt">double</span> <span class="n">ret</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="n">k</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="kt">double</span> <span class="n">tmp</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">Y</span><span class="p">;</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;=</span><span class="n">k</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">i</span><span class="o">!=</span><span class="n">j</span><span class="p">)</span><span class="n">tmp</span><span class="o">/=</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">X</span><span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">X</span><span class="p">;</span>
+		<span class="n">ret</span><span class="o">+=</span><span class="n">tmp</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">double</span> <span class="nf">newton</span><span class="p">(</span><span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">Coord</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">p</span><span class="p">,</span><span class="kt">double</span> <span class="n">x</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">double</span> <span class="n">ret</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">Y</span><span class="p">;</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">p</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="kt">double</span> <span class="n">tmp</span><span class="o">=</span><span class="n">differenceQuotient</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">i</span><span class="p">);</span><span class="c1">//多次求，可O(n^3)预处理优化</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">i</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span><span class="n">tmp</span><span class="o">*=</span><span class="n">x</span><span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">X</span><span class="p">;</span>
+		<span class="n">ret</span><span class="o">+=</span><span class="n">tmp</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h1 id="转载">转载</h1>
+<blockquote>
+  <p>以下<strong>转载自</strong><a href="https://github.com/fengdu78/Coursera-ML-AndrewNg-Notes">斯坦福大学2014（吴恩达）机器学习教程中文笔记</a>，感谢编者黄海广博士。</p>
+</blockquote>
+
+<h2 id="导数定义">导数定义</h2>
+
+<p>导数和微分的概念</p>
+
+<p>$f’({ {x}<em>{0} })=\underset{\Delta x\to 0}{\mathop{\lim } }\,\frac{f({ {x}</em>{0} }+\Delta x)-f({ {x}_{0} })}{\Delta x}$    （1）</p>
+
+<p>或者：</p>
+
+<p>$f’({ {x}<em>{0} })=\underset{x\to { {x}</em>{0} } }{\mathop{\lim } }\,\frac{f(x)-f({ {x}<em>{0} })}{x-{ {x}</em>{0} } }$           （2）</p>
+
+<h2 id="左右导数导数的几何意义和物理意义">左右导数导数的几何意义和物理意义</h2>
+
+<p>函数$f(x)$在$x_0$处的左、右导数分别定义为：</p>
+
+<p>左导数：${ { {f}’}<em>{-} }({ {x}</em>{0} })=\underset{\Delta x\to { {0}^{-} } }{\mathop{\lim } }\,\frac{f({ {x}<em>{0} }+\Delta x)-f({ {x}</em>{0} })}{\Delta x}=\underset{x\to x_{0}^{-} }{\mathop{\lim } }\,\frac{f(x)-f({ {x}<em>{0} })}{x-{ {x}</em>{0} } },(x={ {x}_{0} }+\Delta x)$</p>
+
+<p>右导数：${ { {f}’}<em>{+} }({ {x}</em>{0} })=\underset{\Delta x\to { {0}^{+} } }{\mathop{\lim } }\,\frac{f({ {x}<em>{0} }+\Delta x)-f({ {x}</em>{0} })}{\Delta x}=\underset{x\to x_{0}^{+} }{\mathop{\lim } }\,\frac{f(x)-f({ {x}<em>{0} })}{x-{ {x}</em>{0} } }$</p>
+
+<h2 id="函数的可导性与连续性之间的关系">函数的可导性与连续性之间的关系</h2>
+
+<h3 id="th1">Th1</h3>
+<p>函数$f(x)$在$x_0$处可微$\Leftrightarrow f(x)$在$x_0$处可导</p>
+
+<h3 id="th2">Th2</h3>
+<p>若函数在点$x_0$处可导，则$y=f(x)$在点$x_0$处连续，反之则不成立。即函数连续不一定可导。</p>
+
+<h3 id="th3">Th3</h3>
+<p>${f}’({ {x}<em>{0} })$存在$\Leftrightarrow { { {f}’}</em>{-} }({ {x}<em>{0} })={ { {f}’}</em>{+} }({ {x}_{0} })$</p>
+
+<h2 id="平面曲线的切线和法线">平面曲线的切线和法线</h2>
+
+<p>切线方程 : $y-{ {y}<em>{0} }=f’({ {x}</em>{0} })(x-{ {x}<em>{0} })$
+法线方程：$y-{ {y}</em>{0} }=-\frac{1}{f’({ {x}<em>{0} })}(x-{ {x}</em>{0} }),f’({ {x}_{0} })\ne 0$</p>
+
+<h2 id="四则运算法则">四则运算法则</h2>
+<p>设函数$u=u(x)，v=v(x)$]在点$x$可导则
+(1) $(u\pm v{)}’={u}’\pm {v}’$       $d(u\pm v)=du\pm dv$
+(2)$(uv{)}’=u{v}’+v{u}’$        $d(uv)=udv+vdu$
+(3) $(\frac{u}{v}{)}’=\frac{v{u}’-u{v}’}{ { {v}^{2} } }(v\ne 0)$       $d(\frac{u}{v})=\frac{vdu-udv}{ { {v}^{2} } }$</p>
+
+<h2 id="基本导数与微分表">基本导数与微分表</h2>
+<p>(1) $y=c$（常数）       ${y}’=0$          $dy=0$
+(2) $y={ {x}^{\alpha } }$($\alpha $为实数)    ${y}’=\alpha { {x}^{\alpha -1} }$      $dy=\alpha { {x}^{\alpha -1} }dx$
+(3) $y={ {a}^{x} }$      ${y}’={ {a}^{x} }\ln a$         $dy={ {a}^{x} }\ln adx$
+  特例:   $({ { {e} }^{x} }{)}’={ { {e} }^{x} }$             $d({ { {e} }^{x} })={ { {e} }^{x} }dx$</p>
+
+<p>(4) ${y}’=\frac{1}{x\ln a}$</p>
+
+<p>$dy=\frac{1}{x\ln a}dx$
+  特例:$y=\ln x$                      $(\ln x{)}’=\frac{1}{x}$       $d(\ln x)=\frac{1}{x}dx$</p>
+
+<p>(5) $y=\sin x$</p>
+
+<p>${y}’=\cos x$        $d(\sin x)=\cos xdx$</p>
+
+<p>(6) $y=\cos x$</p>
+
+<p>${y}’=-\sin x$       $d(\cos x)=-\sin xdx$</p>
+
+<p>(7) $y=\tan x$</p>
+
+<p>${y}’=\frac{1}{ { {\cos }^{2} }x}={ {\sec }^{2} }x$  $d(\tan x)={ {\sec }^{2} }xdx$
+(8) $y=\cot x$ ${y}’=-\frac{1}{ { {\sin }^{2} }x}=-{ {\csc }^{2} }x$  $d(\cot x)=-{ {\csc }^{2} }xdx$
+(9) $y=\sec x$ ${y}’=\sec x\tan x$</p>
+
+<p>$d(\sec x)=\sec x\tan xdx$
+(10) $y=\csc x$ ${y}’=-\csc x\cot x$</p>
+
+<p>$d(\csc x)=-\csc x\cot xdx$
+(11) $y=\arcsin x$</p>
+
+<p>${y}’=\frac{1}{\sqrt{1-{ {x}^{2} } } }$</p>
+
+<p>$d(\arcsin x)=\frac{1}{\sqrt{1-{ {x}^{2} } } }dx$
+(12) $y=\arccos x$</p>
+
+<p>${y}’=-\frac{1}{\sqrt{1-{ {x}^{2} } } }$     $d(\arccos x)=-\frac{1}{\sqrt{1-{ {x}^{2} } } }dx$</p>
+
+<p>(13) $y=\arctan x$</p>
+
+<p>${y}’=\frac{1}{1+{ {x}^{2} } }$     $d(\arctan x)=\frac{1}{1+{ {x}^{2} } }dx$</p>
+
+<p>(14) $y=\operatorname{arc}\cot x$</p>
+
+<p>${y}’=-\frac{1}{1+{ {x}^{2} } }$</p>
+
+<p>$d(\operatorname{arc}\cot x)=-\frac{1}{1+{ {x}^{2} } }dx$
+(15) $y=shx$</p>
+
+<p>${y}’=chx$       $d(shx)=chxdx$</p>
+
+<p>(16) $y=chx$</p>
+
+<p>${y}’=shx$       $d(chx)=shxdx$</p>
+
+<h2 id="复合函数反函数隐函数以及参数方程所确定的函数的微分法">复合函数，反函数，隐函数以及参数方程所确定的函数的微分法</h2>
+
+<p>(1) 反函数的运算法则: 设$y=f(x)$在点$x$的某邻域内单调连续，在点$x$处可导且${f}’(x)\ne 0$，则其反函数在点$x$所对应的$y$处可导，并且有$\frac{dy}{dx}=\frac{1}{\frac{dx}{dy} }$
+(2) 复合函数的运算法则:若$\mu =\varphi (x)$在点$x$可导,而$y=f(\mu )$在对应点$\mu $($\mu =\varphi (x)$)可导,则复合函数$y=f(\varphi (x))$在点$x$可导,且${y}’={f}’(\mu )\cdot {\varphi }’(x)$
+(3) 隐函数导数$\frac{dy}{dx}$的求法一般有三种方法：
+1)方程两边对$x$求导，要记住$y$是$x$的函数，则$y$的函数是$x$的复合函数.例如$\frac{1}{y}$，${ {y}^{2} }$，$ln y$，${ { {e} }^{y} }$等均是$x$的复合函数.
+对$x$求导应按复合函数连锁法则做.
+2)公式法.由$F(x,y)=0$知 $\frac{dy}{dx}=-\frac{ { { { {F}’} }<em>{x} }(x,y)}{ { { { {F}’} }</em>{y} }(x,y)}$,其中，${ { {F}’}<em>{x} }(x,y)$，
+${ { {F}’}</em>{y} }(x,y)$分别表示$F(x,y)$对$x$和$y$的偏导数
+3)利用微分形式不变性</p>
+
+<h2 id="常用高阶导数公式">常用高阶导数公式</h2>
+
+<p>（1）$({ {a}^{x} }){ {\,}^{(n)} }={ {a}^{x} }{ {\ln }^{n} }a\quad (a&gt;{0})\quad \quad ({ { {e} }^{x} }){ {\,}^{(n)} }={e}{ {\,}^{x} }$
+（2）$(\sin kx{)}{ {\,}^{(n)} }={ {k}^{n} }\sin (kx+n\cdot \frac{\pi }{ {2} })$
+（3）$(\cos kx{)}{ {\,}^{(n)} }={ {k}^{n} }\cos (kx+n\cdot \frac{\pi }{ {2} })$
+（4）$({ {x}^{m} }){ {\,}^{(n)} }=m(m-1)\cdots (m-n+1){ {x}^{m-n} }$
+（5）$(\ln x){ {\,}^{(n)} }={ {(-{1})}^{(n-{1})} }\frac{(n-{1})!}{ { {x}^{n} } }$
+（6）莱布尼兹公式：若$u(x)\,,v(x)$均$n$阶可导，则
+ ${ {(uv)}^{(n)} }=\sum\limits_{i={0} }^{n}{c_{n}^{i}{ {u}^{(i)} }{ {v}^{(n-i)} } }$，其中${ {u}^{({0})} }=u$，${ {v}^{({0})} }=v$</p>
+
+<h2 id="微分中值定理泰勒公式">微分中值定理，泰勒公式</h2>
+
+<h3 id="th1费马定理">Th1(费马定理)</h3>
+
+<p>若函数$f(x)$满足条件：
+(1)函数$f(x)$在${ {x}<em>{0} }$的某邻域内有定义，并且在此邻域内恒有
+$f(x)\le f({ {x}</em>{0} })$或$f(x)\ge f({ {x}_{0} })$,</p>
+
+<p>(2) $f(x)$在${ {x}<em>{0} }$处可导,则有 ${f}’({ {x}</em>{0} })=0$</p>
+
+<h3 id="th2罗尔定理">Th2(罗尔定理)</h3>
+
+<p>设函数$f(x)$满足条件：
+(1)在闭区间$[a,b]$上连续；</p>
+
+<p>(2)在$(a,b)$内可导；</p>
+
+<p>(3)$f(a)=f(b)$；</p>
+
+<p>则在$(a,b)$内一存在个$\xi $，使  ${f}’(\xi )=0$</p>
+<h3 id="th3拉格朗日中值定理">Th3(拉格朗日中值定理)</h3>
+
+<p>设函数$f(x)$满足条件：
+(1)在$[a,b]$上连续；</p>
+
+<p>(2)在$(a,b)$内可导；</p>
+
+<p>则在$(a,b)$内一存在个$\xi $，使  $\frac{f(b)-f(a)}{b-a}={f}’(\xi )$</p>
+
+<h3 id="th4柯西中值定理">Th4(柯西中值定理)</h3>
+
+<p>设函数$f(x)$，$g(x)$满足条件：
+(1) 在$[a,b]$上连续；</p>
+
+<p>(2) 在$(a,b)$内可导且${f}’(x)$，${g}’(x)$均存在，且${g}’(x)\ne 0$</p>
+
+<p>则在$(a,b)$内存在一个$\xi $，使  $\frac{f(b)-f(a)}{g(b)-g(a)}=\frac{ {f}’(\xi )}{ {g}’(\xi )}$</p>
+
+<h2 id="洛必达法则">洛必达法则</h2>
+<p>法则Ⅰ ($\frac{0}{0}$型)
+设函数$f\left( x \right),g\left( x \right)$满足条件：
+ $\underset{x\to { {x}<em>{0} } }{\mathop{\lim } }\,f\left( x \right)=0,\underset{x\to { {x}</em>{0} } }{\mathop{\lim } }\,g\left( x \right)=0$;</p>
+
+<p>$f\left( x \right),g\left( x \right)$在${ {x}<em>{0} }$的邻域内可导，(在${ {x}</em>{0} }$处可除外)且${g}’\left( x \right)\ne 0$;</p>
+
+<p>$\underset{x\to { {x}_{0} } }{\mathop{\lim } }\,\frac{ {f}’\left( x \right)}{ {g}’\left( x \right)}$存在(或$\infty $)。</p>
+
+<p>则:
+$\underset{x\to { {x}<em>{0} } }{\mathop{\lim } }\,\frac{f\left( x \right)}{g\left( x \right)}=\underset{x\to { {x}</em>{0} } }{\mathop{\lim } }\,\frac{ {f}’\left( x \right)}{ {g}’\left( x \right)}$。
+法则${ {I}’}$ ($\frac{0}{0}$型)设函数$f\left( x \right),g\left( x \right)$满足条件：
+$\underset{x\to \infty }{\mathop{\lim } }\,f\left( x \right)=0,\underset{x\to \infty }{\mathop{\lim } }\,g\left( x \right)=0$;</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>存在一个$X&gt;0$,当$\left</td>
+      <td>x \right</td>
+      <td>&gt;X$时,$f\left( x \right),g\left( x \right)$可导,且${g}’\left( x \right)\ne 0$;$\underset{x\to { {x}_{0} } }{\mathop{\lim } }\,\frac{ {f}’\left( x \right)}{ {g}’\left( x \right)}$存在(或$\infty $)。</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>则:
+$\underset{x\to { {x}<em>{0} } }{\mathop{\lim } }\,\frac{f\left( x \right)}{g\left( x \right)}=\underset{x\to { {x}</em>{0} } }{\mathop{\lim } }\,\frac{ {f}’\left( x \right)}{ {g}’\left( x \right)}$
+法则Ⅱ($\frac{\infty }{\infty }$型) 设函数$f\left( x \right),g\left( x \right)$满足条件：
+$\underset{x\to { {x}<em>{0} } }{\mathop{\lim } }\,f\left( x \right)=\infty ,\underset{x\to { {x}</em>{0} } }{\mathop{\lim } }\,g\left( x \right)=\infty $;   $f\left( x \right),g\left( x \right)$在${ {x}<em>{0} }$ 的邻域内可导(在${ {x}</em>{0} }$处可除外)且${g}’\left( x \right)\ne 0$;$\underset{x\to { {x}<em>{0} } }{\mathop{\lim } }\,\frac{ {f}’\left( x \right)}{ {g}’\left( x \right)}$存在(或$\infty $)。则
+$\underset{x\to { {x}</em>{0} } }{\mathop{\lim } }\,\frac{f\left( x \right)}{g\left( x \right)}=\underset{x\to { {x}_{0} } }{\mathop{\lim } }\,\frac{ {f}’\left( x \right)}{ {g}’\left( x \right)}.$同理法则${I{I}’}$($\frac{\infty }{\infty }$型)仿法则${ {I}’}$可写出。</p>
+
+<h2 id="泰勒公式-1">泰勒公式</h2>
+
+<p>设函数$f(x)$在点${ {x}<em>{0} }$处的某邻域内具有$n+1$阶导数，则对该邻域内异于${ {x}</em>{0} }$的任意点$x$，在${ {x}<em>{0} }$与$x$之间至少存在
+一个$\xi $，使得：
+$f(x)=f({ {x}</em>{0} })+{f}’({ {x}<em>{0} })(x-{ {x}</em>{0} })+\frac{1}{2!}{f}’’({ {x}<em>{0} }){ {(x-{ {x}</em>{0} })}^{2} }+\cdots $ 
+$+\frac{ { {f}^{(n)} }({ {x}<em>{0} })}{n!}{ {(x-{ {x}</em>{0} })}^{n} }+{ {R}<em>{n} }(x)$
+ 其中 ${ {R}</em>{n} }(x)=\frac{ { {f}^{(n+1)} }(\xi )}{(n+1)!}{ {(x-{ {x}<em>{0} })}^{n+1} }$称为$f(x)$在点${ {x}</em>{0} }$处的$n$阶泰勒余项。</p>
+
+<p>令${ {x}<em>{0} }=0$，则$n$阶泰勒公式
+$f(x)=f(0)+{f}’(0)x+\frac{1}{2!}{f}’‘(0){ {x}^{2} }+\cdots +\frac{ { {f}^{(n)} }(0)}{n!}{ {x}^{n} }+{ {R}</em>{n} }(x)$……(1)
+其中 ${ {R}_{n} }(x)=\frac{ { {f}^{(n+1)} }(\xi )}{(n+1)!}{ {x}^{n+1} }$，$\xi $在0与$x$之间.(1)式称为麦克劳林公式</p>
+
+<h2 id="常用五种函数在-x_0-0处的泰勒公式">常用五种函数在${ {x}_{0} }=0$处的泰勒公式</h2>
+
+<p>(1) ${ { {e} }^{x} }=1+x+\frac{1}{2!}{ {x}^{2} }+\cdots +\frac{1}{n!}{ {x}^{n} }+\frac{ { {x}^{n+1} } }{(n+1)!}{ {e}^{\xi } }$</p>
+
+<p>或 $=1+x+\frac{1}{2!}{ {x}^{2} }+\cdots +\frac{1}{n!}{ {x}^{n} }+o({ {x}^{n} })$</p>
+
+<p>(2) $\sin x=x-\frac{1}{3!}{ {x}^{3} }+\cdots +\frac{ { {x}^{n} } }{n!}\sin \frac{n\pi }{2}+\frac{ { {x}^{n+1} } }{(n+1)!}\sin (\xi +\frac{n+1}{2}\pi )$</p>
+
+<p>或  $=x-\frac{1}{3!}{ {x}^{3} }+\cdots +\frac{ { {x}^{n} } }{n!}\sin \frac{n\pi }{2}+o({ {x}^{n} })$</p>
+
+<p>(3) $\cos x=1-\frac{1}{2!}{ {x}^{2} }+\cdots +\frac{ { {x}^{n} } }{n!}\cos \frac{n\pi }{2}+\frac{ { {x}^{n+1} } }{(n+1)!}\cos (\xi +\frac{n+1}{2}\pi )$</p>
+
+<p>或   $=1-\frac{1}{2!}{ {x}^{2} }+\cdots +\frac{ { {x}^{n} } }{n!}\cos \frac{n\pi }{2}+o({ {x}^{n} })$</p>
+
+<p>(4) $\ln (1+x)=x-\frac{1}{2}{ {x}^{2} }+\frac{1}{3}{ {x}^{3} }-\cdots +{ {(-1)}^{n-1} }\frac{ { {x}^{n} } }{n}+\frac{ { {(-1)}^{n} }{ {x}^{n+1} } }{(n+1){ {(1+\xi )}^{n+1} } }$</p>
+
+<p>或      $=x-\frac{1}{2}{ {x}^{2} }+\frac{1}{3}{ {x}^{3} }-\cdots +{ {(-1)}^{n-1} }\frac{ { {x}^{n} } }{n}+o({ {x}^{n} })$</p>
+
+<p>(5) ${ {(1+x)}^{m} }=1+mx+\frac{m(m-1)}{2!}{ {x}^{2} }+\cdots +\frac{m(m-1)\cdots (m-n+1)}{n!}{ {x}^{n} }$ 
+$+\frac{m(m-1)\cdots (m-n+1)}{(n+1)!}{ {x}^{n+1} }{ {(1+\xi )}^{m-n-1} }$</p>
+
+<p>或 ${ {(1+x)}^{m} }=1+mx+\frac{m(m-1)}{2!}{ {x}^{2} }+\cdots $ $+\frac{m(m-1)\cdots (m-n+1)}{n!}{ {x}^{n} }+o({ {x}^{n} })$</p>
+
+<h2 id="函数单调性的判断">函数单调性的判断</h2>
+<p><strong>Th1:</strong>  设函数$f(x)$在$(a,b)$区间内可导，如果对$\forall x\in (a,b)$，都有$f\,’(x)&gt;0$（或$f\,’(x)&lt;0$），则函数$f(x)$在$(a,b)$内是单调增加的（或单调减少）</p>
+
+<p><strong>Th2:</strong> （取极值的必要条件）设函数$f(x)$在${ {x}<em>{0} }$处可导，且在${ {x}</em>{0} }$处取极值，则$f\,’({ {x}_{0} })=0$。</p>
+
+<p><strong>Th3:</strong> （取极值的第一充分条件）设函数$f(x)$在${ {x}<em>{0} }$的某一邻域内可微，且$f\,’({ {x}</em>{0} })=0$（或$f(x)$在${ {x}<em>{0} }$处连续，但$f\,’({ {x}</em>{0} })$不存在。）
+(1)若当$x$经过${ {x}<em>{0} }$时，$f\,’(x)$由“+”变“-”，则$f({ {x}</em>{0} })$为极大值；
+(2)若当$x​$经过${ {x}<em>{0} }​$时，$f\,’(x)$由“-”变“+”，则$f({ {x}</em>{0} })$为极小值；
+(3)若$f\,’(x)$经过$x={ {x}<em>{0} }$的两侧不变号，则$f({ {x}</em>{0} })$不是极值。</p>
+
+<p><strong>Th4:</strong> (取极值的第二充分条件)设$f(x)$在点${ {x}<em>{0} }$处有$f’‘(x)\ne 0$，且$f\,’({ {x}</em>{0} })=0$，则 当$f’\,’({ {x}<em>{0} })&lt;0$时，$f({ {x}</em>{0} })$为极大值；
+当$f’\,’({ {x}<em>{0} })&gt;0$时，$f({ {x}</em>{0} })$为极小值。
+注：如果$f’\,’({ {x}_{0} })&lt;0$，此方法失效。</p>
+
+<h2 id="渐近线的求法">渐近线的求法</h2>
+<p>(1)水平渐近线   若$\underset{x\to +\infty }{\mathop{\lim } }\,f(x)=b$，或$\underset{x\to -\infty }{\mathop{\lim } }\,f(x)=b$，则</p>
+
+<p>$y=b$称为函数$y=f(x)$的水平渐近线。</p>
+
+<p>(2)铅直渐近线   若$\underset{x\to x_{0}^{-} }{\mathop{\lim } }\,f(x)=\infty $，或$\underset{x\to x_{0}^{+} }{\mathop{\lim } }\,f(x)=\infty $，则</p>
+
+<p>$x={ {x}_{0} }$称为$y=f(x)$的铅直渐近线。</p>
+
+<p>(3)斜渐近线   若$a=\underset{x\to \infty }{\mathop{\lim } }\,\frac{f(x)}{x},\quad b=\underset{x\to \infty }{\mathop{\lim } }\,[f(x)-ax]$，则
+$y=ax+b$称为$y=f(x)$的斜渐近线。</p>
+
+<h2 id="函数凹凸性的判断">函数凹凸性的判断</h2>
+<p><strong>Th1:</strong> (凹凸性的判别定理）若在I上$f’‘(x)&lt;0$（或$f’‘(x)&gt;0$），则$f(x)$在I上是凸的（或凹的）。</p>
+
+<p><strong>Th2:</strong> (拐点的判别定理1)若在${ {x}<em>{0} }$处$f’‘(x)=0$，（或$f’‘(x)$不存在），当$x$变动经过${ {x}</em>{0} }$时，$f’‘(x)$变号，则$({ {x}<em>{0} },f({ {x}</em>{0} }))$为拐点。</p>
+
+<p><strong>Th3:</strong> (拐点的判别定理2)设$f(x)$在${ {x}<em>{0} }$点的某邻域内有三阶导数，且$f’‘(x)=0$，$f’’‘(x)\ne 0$，则$({ {x}</em>{0} },f({ {x}_{0} }))$为拐点。</p>
+
+<h2 id="弧微分">弧微分</h2>
+
+<p>$dS=\sqrt{1+y{ {‘}^{2} } }dx$</p>
+
+<h2 id="曲率-1">曲率</h2>
+<p>若曲线由参数方程$\begin{cases}x=x(t),\y=y(t),\end{cases}t\in[\alpha,\beta]$给出且有二阶微商，则其在一点的曲率$K=\frac{|y’‘x’-y’x’’|}{[x’^2+y’^2]^{\frac{3}{2} } }$若$y=f(x)$，则$K=\frac{|y’’|}{(1+y’^2)^\frac{3}{2} }$同时记$\frac{1}{K}$为曲率半径。</p>
+
+<h2 id="曲率半径">曲率半径</h2>
+
+<p>曲线在点$M$处的曲率$k(k\ne 0)$与曲线在点$M$处的曲率半径$\rho $有如下关系：$\rho =\frac{1}{k}$。</p>
+:ET

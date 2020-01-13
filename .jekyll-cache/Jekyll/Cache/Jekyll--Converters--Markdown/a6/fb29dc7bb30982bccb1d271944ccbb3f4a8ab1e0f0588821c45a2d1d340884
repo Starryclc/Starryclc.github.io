@@ -1,0 +1,131 @@
+I"�c<p><a href="https://vjudge.net/problem/UVA-11426">题目链接</a></p>
+
+<p><a href="https://wu-kan.github.io/posts/acm/template/%E6%95%B0%E8%AE%BA">数论模板</a></p>
+
+<p>求$\sum_{i=1}^n\sum_{j=i+1}^n\gcd(i,j)$。</p>
+
+<h2 id="解法一蓝书解法计算贡献">解法一：蓝书解法，计算贡献</h2>
+
+<p>设$f(n)=\sum_{i=1}^{n-1}\gcd(i,n)$，则所求答案为f(n)的前缀和。
+注意到$\gcd(i,n)=k$的值一定是n的约数，按照这个约数进行分类。设满足$\gcd(x,n)=k$的约束有g(n,i)个，则$f(n)=sum{i\times g(n,i)|d\mod i==0}$。
+依次计算f(n)需要枚举每个n的约数i，速度较慢，但是对每个i枚举它的倍数ki来更新f(ki)的值，此时速度和普通筛法同阶。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;bits/stdc++.h&gt;
+</span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">EulerSieve</span>
+<span class="p">{</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">phi</span><span class="p">;</span>
+	<span class="n">EulerSieve</span><span class="p">(</span><span class="kt">int</span> <span class="n">N</span><span class="p">)</span><span class="o">:</span><span class="n">m</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">phi</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">phi</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="n">i</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">k</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="n">p</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">i</span><span class="p">),</span><span class="n">phi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+			<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">p</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">&amp;&amp;</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="n">i</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+			<span class="p">{</span>
+				<span class="n">phi</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="n">phi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+				<span class="k">if</span><span class="p">((</span><span class="n">m</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">==</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="k">break</span><span class="p">;</span>
+				<span class="n">phi</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">-=</span><span class="n">phi</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">};</span>
+<span class="k">struct</span> <span class="n">GCDExtremeII</span><span class="o">:</span><span class="n">EulerSieve</span>
+<span class="p">{</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="n">ll</span><span class="o">&gt;</span> <span class="n">f</span><span class="p">;</span>
+	<span class="n">GCDExtremeII</span><span class="p">(</span><span class="kt">int</span> <span class="n">N</span><span class="p">)</span><span class="o">:</span><span class="n">EulerSieve</span><span class="p">(</span><span class="n">N</span><span class="p">),</span><span class="n">f</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span> <span class="n">k</span><span class="o">*</span><span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">k</span><span class="p">)</span>
+				<span class="n">f</span><span class="p">[</span><span class="n">k</span><span class="o">*</span><span class="n">i</span><span class="p">]</span><span class="o">+=</span><span class="n">i</span><span class="o">*</span><span class="n">phi</span><span class="p">[</span><span class="n">k</span><span class="p">];</span>
+			<span class="n">f</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+=</span><span class="n">f</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span> <span class="n">g</span><span class="p">(</span><span class="mf">4e6</span><span class="o">+</span><span class="mi">9</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">;</span> <span class="o">~</span><span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">)</span><span class="o">&amp;&amp;</span><span class="n">n</span><span class="p">;)</span><span class="n">printf</span><span class="p">(</span><span class="s">"%lld</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="n">g</span><span class="p">.</span><span class="n">f</span><span class="p">[</span><span class="n">n</span><span class="p">]);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="解法二分块">解法二：分块</h2>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;bits/stdc++.h&gt;
+</span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">EulerSieve</span>
+<span class="p">{</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">phi</span><span class="p">;</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="n">ll</span><span class="o">&gt;</span> <span class="n">sum</span><span class="p">;</span>
+	<span class="n">EulerSieve</span><span class="p">(</span><span class="kt">int</span> <span class="n">N</span><span class="p">)</span><span class="o">:</span><span class="n">m</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">phi</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">sum</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">phi</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="n">i</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">k</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="n">p</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">i</span><span class="p">),</span><span class="n">phi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+			<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">p</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">&amp;&amp;</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="n">i</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+			<span class="p">{</span>
+				<span class="n">phi</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="n">phi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+				<span class="k">if</span><span class="p">((</span><span class="n">m</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">==</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="k">break</span><span class="p">;</span>
+				<span class="n">phi</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">-=</span><span class="n">phi</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="n">sum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">sum</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">phi</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+	<span class="p">}</span>
+<span class="p">}</span> <span class="n">e</span><span class="p">(</span><span class="mf">4e6</span><span class="o">+</span><span class="mi">9</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="k">for</span><span class="p">(</span><span class="n">ll</span> <span class="n">n</span><span class="p">,</span><span class="n">sum</span><span class="p">,</span><span class="n">tmp</span><span class="p">;</span> <span class="o">~</span><span class="n">scanf</span><span class="p">(</span><span class="s">"%lld"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">)</span><span class="o">&amp;&amp;</span><span class="n">n</span><span class="p">;)</span>
+	<span class="p">{</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="o">=</span><span class="n">sum</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">=</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+			<span class="n">tmp</span><span class="o">=</span><span class="n">n</span><span class="o">/</span><span class="n">i</span><span class="p">,</span><span class="n">sum</span><span class="o">+=</span><span class="n">tmp</span><span class="o">*</span><span class="n">tmp</span><span class="o">*</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">sum</span><span class="p">[</span><span class="n">j</span><span class="o">=</span><span class="n">n</span><span class="o">/</span><span class="n">tmp</span><span class="p">]</span><span class="o">-</span><span class="n">e</span><span class="p">.</span><span class="n">sum</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]);</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"%lld</span><span class="se">\n</span><span class="s">"</span><span class="p">,(</span><span class="n">sum</span><span class="o">-</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="解法三莫比乌斯反演">解法三：莫比乌斯反演</h2>
+
+<p>$ans=\sum_{d=1}^nd\sum_{i=1}^{n/d}\mu(i)[\frac{n}{id}]^2=\sum_{T=1}^n[\frac{n}{T}]^2\sum_{d|T}d\mu(\frac{T}{d})$
+数论分块可$O(\sqrt n)$查询，总时间复杂度$O(n\sqrt n)$。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;bits/stdc++.h&gt;
+</span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">EulerSieve</span>
+<span class="p">{</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">mu</span><span class="p">,</span><span class="n">sum</span><span class="p">;</span><span class="c1">//素数序列，最小素因子，欧拉函数，莫比乌斯函数</span>
+	<span class="n">EulerSieve</span><span class="p">(</span><span class="kt">int</span> <span class="n">N</span><span class="p">)</span><span class="o">:</span><span class="n">m</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">mu</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">sum</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">mu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="c1">//m[1]=0</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="n">i</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">k</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="c1">//防i*p[j]爆int</span>
+		<span class="p">{</span>
+			<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="n">p</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">i</span><span class="p">),</span><span class="n">mu</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=-</span><span class="mi">1</span><span class="p">;</span><span class="c1">//i是素数</span>
+			<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">p</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">&amp;&amp;</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="n">i</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+			<span class="p">{</span>
+				<span class="k">if</span><span class="p">((</span><span class="n">m</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">==</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+				<span class="p">{</span>
+					<span class="n">mu</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+					<span class="k">break</span><span class="p">;</span>
+				<span class="p">}</span>
+				<span class="n">mu</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">=-</span><span class="n">mu</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="n">sum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">sum</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">mu</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+	<span class="p">}</span>
+<span class="p">}</span> <span class="n">e</span><span class="p">(</span><span class="mf">4e6</span><span class="o">+</span><span class="mi">9</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="k">for</span><span class="p">(</span><span class="n">ll</span> <span class="n">n</span><span class="p">,</span><span class="n">sum</span><span class="p">,</span><span class="n">tmp</span><span class="p">;</span> <span class="o">~</span><span class="n">scanf</span><span class="p">(</span><span class="s">"%lld"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">)</span><span class="o">&amp;&amp;</span><span class="n">n</span><span class="p">;)</span>
+	<span class="p">{</span>
+		<span class="n">sum</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="k">for</span><span class="p">(</span><span class="n">ll</span> <span class="n">l</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">tmp</span><span class="p">,</span><span class="n">m</span><span class="o">=</span><span class="n">n</span><span class="o">/</span><span class="n">i</span><span class="p">;</span> <span class="n">l</span><span class="o">&lt;=</span><span class="n">m</span><span class="p">;</span> <span class="n">l</span><span class="o">=</span><span class="n">r</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+				<span class="n">tmp</span><span class="o">=</span><span class="n">m</span><span class="o">/</span><span class="n">l</span><span class="p">,</span><span class="n">sum</span><span class="o">+=</span><span class="n">i</span><span class="o">*</span><span class="n">tmp</span><span class="o">*</span><span class="n">tmp</span><span class="o">*</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">sum</span><span class="p">[</span><span class="n">r</span><span class="o">=</span><span class="n">m</span><span class="o">/</span><span class="n">tmp</span><span class="p">]</span><span class="o">-</span><span class="n">e</span><span class="p">.</span><span class="n">sum</span><span class="p">[</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">]);</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"%lld</span><span class="se">\n</span><span class="s">"</span><span class="p">,(</span><span class="n">sum</span><span class="o">-</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+:ET

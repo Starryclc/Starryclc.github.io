@@ -1,0 +1,434 @@
+I"�z<h1 id="项目概况">项目概况</h1>
+<p>项目名称：圣杯战争
+项目介绍：实现一个游戏的英雄系统、战斗系统、装备系统、技能系统等，可模拟游戏从者间的相互对抗</p>
+<h1 id="游戏背景">游戏背景</h1>
+<p>圣杯战争是TYPE-MOON出品的《Fate/stay night》和《Fate/Zero》等Fate系列作品中出现的概念。广义上的圣杯战争，就是围绕着能实现持有者心愿的“圣杯”的争夺战。
+本项目还原了这一概念，七名御主（Master，即玩家）操纵自己的从者（Servant）互相战斗，最后一名幸存的从者及其御主赢得胜利，获得圣杯。</p>
+<h1 id="需求分析">需求分析</h1>
+<ol>
+  <li>项目任务书中直接要求实现英雄系统、战斗系统、装备系统。</li>
+  <li>一个完整的游戏系统中，除上述系统之外，不可避免的还要包含<strong>技能系统</strong>，包括英雄主动使用的<strong>主动技能</strong>，和战斗时自动触发的<strong>被动技能</strong>。</li>
+  <li>为游戏的可玩性、竞技性，增加Buff/DeBuff机制。
+    <h1 id="实现思路">实现思路</h1>
+    <h2 id="从者">从者</h2>
+    <blockquote>
+      <p>一开始有想过给从者加很多参数：暴击、格挡、闪避、命中……甚至包含一个根据经验值自动成长的属性系统。然而，这样过于复杂的系统，很难去平衡属性之间的数值平衡，也是<strong>没有必要</strong>的。例如，闪避过高会拖慢游戏的节奏，而暴击过高又容易使游戏失衡。
+作为补充，设计了多样的宝具系统和Buff/DeBuff机制。如果要追求暴击、闪避、吸血之类的属性可以设计成宝具的被动技能或者Buff/DeBuff。</p>
+    </blockquote>
+  </li>
+</ol>
+
+<p>从者（Servant）是TYPE-MOON世界观中的魔术现象。死后升格为超越人的存在的英雄之魂被称为“英灵”，他们通过仪式被召唤到现世，成为可以被使役的存在，即为“从者”。通常情况下召唤出的从者只是英灵本体的分身，完成任务后便会消失返回英灵之座。
+设计的从者类<code class="highlighter-rouge">class Servant</code>包含属性见下表。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>变量名</th>
+      <th>作用</th>
+      <th>备注</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>NAME</td>
+      <td>表示从者名称</td>
+      <td>仅在初始化时赋值</td>
+    </tr>
+    <tr>
+      <td>HP</td>
+      <td>表示血量，范围[0,100]，0表示从者死亡</td>
+      <td>调用接口函数<code class="highlighter-rouge">addHP()</code>时，超出范围的生命值会被自动修正到上下界；某些Buff/DeBuff会对返回值产生影响（例如【必灭】，生命值回复效果减少一半，向上取整）</td>
+    </tr>
+    <tr>
+      <td>NP</td>
+      <td>表示能量，发动宝具主动技能的需要消耗的必要属性，范围[0,100]</td>
+      <td>调用接口函数<code class="highlighter-rouge">addNP()</code>时，超出范围的能量值会被自动修正到上下界；某些Buff/DeBuff会对返回值产生影响（同上）</td>
+    </tr>
+    <tr>
+      <td>ATK</td>
+      <td>表示攻击，造成伤害的必要属性</td>
+      <td>调用接口函数<code class="highlighter-rouge">getATK()</code>时，某些Buff/DeBuff会对返回值产生影响(同上)</td>
+    </tr>
+    <tr>
+      <td>DEF</td>
+      <td>表示防御，攻击属性的抗性</td>
+      <td>调用接口函数<code class="highlighter-rouge">getDEF()</code>时，某些Buff/DeBuff会对返回值产生影响（例如【破魔】，防御降低10%）</td>
+    </tr>
+    <tr>
+      <td>CLOCK</td>
+      <td>表示生物钟，用于计算技能冷却、宝具充能、BUFF持续时间</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>BUFF</td>
+      <td>BUFF池，存储被附加的增益状态以及对应的持续时间</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>DEBUFF</td>
+      <td>DEBUFF池，存储被附加的减益状态以及对应的持续时间</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>BAR</td>
+      <td>装备栏，用于存储宝具的<strong>指针</strong></td>
+      <td>由于装备栏中存储了宝具的指针，因此<strong>禁用</strong>了<code class="highlighter-rouge">Servant</code>类的拷贝操作和赋值操作</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="宝具">宝具</h2>
+<blockquote>
+  <p>设计一个新从者，只需要设计他的一件专属宝具，即可带来属性、技能、装备的多样化。</p>
+</blockquote>
+
+<p>宝具，是Servant所持有的武装、象征、绝招，被称为“贵い幻想（尊贵的幻想，Noble Phantasm）”。
+设计的宝具基类<code class="highlighter-rouge">class NoblePhantasm</code>包含如下特点：</p>
+
+<ul>
+  <li>装备时可为从者带来<strong>属性增益</strong>，脱下装备时减少相应增益。</li>
+  <li>可由从者使用<strong>主动技能</strong>。</li>
+  <li>战斗时自动触发<strong>被动技能</strong>。</li>
+</ul>
+
+<p>目前代码中已经派生的宝具类见下表。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>宝具</th>
+      <th>被动技能</th>
+      <th>主动技能</th>
+      <th>属性加成</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>誓约胜利之剑</td>
+      <td><strong>远离尘世的理想乡</strong>：触发时回复1点HP</td>
+      <td><strong>魔力放出</strong>：消耗所有NP并按比例对对手造成伤害</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>王之财宝</td>
+      <td> </td>
+      <td> </td>
+      <td>全属性+30</td>
+    </tr>
+    <tr>
+      <td>炽天覆七重圆环</td>
+      <td>免疫低于7的伤害</td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>十二试炼</td>
+      <td>每三次触发获得一层试炼，最多11层；每层试炼抵抗一点致命伤害</td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>万戒必破之符</td>
+      <td><strong>高速神言</strong>:触发时回复5点NP</td>
+      <td>造成伤害并清除增益效果</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>穿刺死棘之枪</td>
+      <td>造成伤害，10%触发【逆转因果：99点额外伤害】</td>
+      <td> </td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>破魔红蔷薇&amp;必灭黄蔷薇</td>
+      <td>造成伤害，随机给对手附加Debuff【破魔】【必灭】之一</td>
+      <td> </td>
+      <td> </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>本次大作业暂时只实现以上7件宝具。事实上，要加入新的宝具，只需增加一个<code class="highlighter-rouge">class NoblePhantasm</code>的派生类即可，详见<code class="highlighter-rouge">NoblePhantasm.cpp</code>中的具体实现。</p>
+<pre><code class="language-mermaid">sequenceDiagram
+从者-&gt;&gt;宝具:构造一个新的宝具对象
+宝具--&gt;&gt;从者:产生属性增益
+从者-&gt;&gt;宝具:加入装备栏
+从者-&gt;&gt;宝具:使用主动技能，触发被动技能
+从者-&gt;&gt;宝具:脱下宝具
+宝具--&gt;&gt;从者:去除属性增益
+从者-&gt;&gt;宝具:delete对应指针
+</code></pre>
+<h2 id="战斗">战斗</h2>
+<blockquote>
+  <p>单次战斗，定义成一名从者对另一从者使用<strong>某个</strong>宝具的<strong>主动</strong>技能。
+特别地，当这件宝具没有自定义的主动技能时，将调用<strong>宝具基类</strong>的主动技能（普通攻击）。</p>
+</blockquote>
+
+<p>战斗的流程如下（<strong>参见下面的时序图</strong>）：</p>
+<ol>
+  <li>攻方从者触发Buff、宝具被动。</li>
+  <li>受方从者触发Buff、宝具被动。</li>
+  <li>攻方发动宝具对受方造成伤害和效果。</li>
+  <li>攻方宝具被动、Buff结算。</li>
+  <li>受方宝具被动、Buff结算。
+    <pre><code class="language-mermaid">sequenceDiagram
+攻方从者--&gt;&gt;攻方宝具:触发被动
+受方从者--&gt;&gt;受方宝具:触发被动
+攻方从者-&gt;&gt;攻方宝具:发动主动技能
+攻方宝具-&gt;&gt;受方从者:造成伤害和效果
+攻方宝具--&gt;&gt;攻方从者:被动结算
+受方宝具--&gt;&gt;受方从者:被动结算
+攻方从者--&gt;&gt;攻方从者:属性结算
+受方从者--&gt;&gt;受方从者:属性结算
+</code></pre>
+    <h2 id="buffdebuff">Buff/DeBuff</h2>
+    <blockquote>
+      <p>Buff池的代码实现使用了<code class="highlighter-rouge">map&lt;string,int&gt;</code>，来保存Buff和对应的<strong>结束时间</strong>。查找/插入一个Buff的时间复杂度为O(logN)，其中N为Buff池中Buff的数量。</p>
+    </blockquote>
+  </li>
+</ol>
+
+<ul>
+  <li>Buff/DeBuff机制的实现依赖于Buff池。</li>
+  <li>战斗中Buff的触发早于宝具被动触发；结算晚于宝具被动结算。</li>
+</ul>
+
+<p>目前代码中已经实现的Buff/DeBuff见下表。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>名称</th>
+      <th>类别</th>
+      <th>效果</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>必灭</td>
+      <td>DeBuff</td>
+      <td>HP回复效果降低50%，向上取整</td>
+    </tr>
+    <tr>
+      <td>破魔</td>
+      <td>DeBuff</td>
+      <td>战斗时防御为真实值的90%</td>
+    </tr>
+    <tr>
+      <td>防御增益（懒得取名了，下同）</td>
+      <td>Buff</td>
+      <td>战斗时防御值为真实值的110%，与【破魔】可叠加，效果为真实防御值的99%</td>
+    </tr>
+    <tr>
+      <td>攻击增益</td>
+      <td>Buff</td>
+      <td>同【防御增益】</td>
+    </tr>
+    <tr>
+      <td>攻击减益</td>
+      <td>DeBuff</td>
+      <td>同【破魔】</td>
+    </tr>
+    <tr>
+      <td>能量回复减益</td>
+      <td>DeBuff</td>
+      <td>同【必灭】</td>
+    </tr>
+    <tr>
+      <td>增益免疫</td>
+      <td>DeBuff</td>
+      <td>Buff附加抗性</td>
+    </tr>
+    <tr>
+      <td>减益免疫</td>
+      <td>Buff</td>
+      <td>同【增益免疫】</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>本次大作业暂时只实现以上8个Buff。事实上，要加入新的Buff，只需在<code class="highlighter-rouge">class Servant</code>中对应函数位置增加代码即可，详见<code class="highlighter-rouge">Servant.cpp</code>中的具体实现。</p>
+<pre><code class="language-mermaid">sequenceDiagram
+Buff-&gt;&gt;从者:持续时间
+从者--&gt;&gt;从者:计算Buff消失时间
+从者-&gt;&gt;Buff池:加入Buff池
+Buff池--&gt;&gt;Buff池:检查是否已经存在此Buff或免疫抗性\n若存在则判断是否覆盖\n否则直接加入
+</code></pre>
+<pre><code class="language-mermaid">graph TB
+st1=&gt;start: 外部查询/修改从者属性
+op1=&gt;operation: 查询Buff/DeBuff池
+cond1=&gt;condition: 是否有相关Buff/DeBuff？
+cond2=&gt;condition: 是否在生效时间内？
+e=&gt;end: 查询/修改属性
+op2=&gt;operation: Buff/DeBuff生效
+st1-&gt;op1
+op1-&gt;cond1
+cond1(yes)-&gt;cond2
+cond1(no)-&gt;e
+cond2(no)-&gt;e
+cond2(yes)-&gt;op2-&gt;e
+</code></pre>
+<h1 id="代码测试">代码测试</h1>
+<p>文件夹中<code class="highlighter-rouge">main.cpp</code>中保存了一段用于测试的代码，运行后得到如下输出，符合预期：</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>【阿尔托莉雅】装备宝具【誓约胜利之剑】
+【库丘林】装备宝具【穿刺死棘之枪】
+【库丘林】装备宝具【破魔红蔷薇&amp;必灭黄蔷薇】
+【卫宫】装备宝具【王之财宝】
+【卫宫】装备宝具【炽天覆七重圆环】
+【美狄亚】装备宝具【万戒必破之符】
+【赫拉克勒斯】装备宝具【十二试炼】
+
+【阿尔托莉雅】当前状态：
+【HP:100】【NP:100】
+【ATK:100】【DEF:100】
+【宝具】:【誓约胜利之剑】
+【Buff】:
+【DeBuff】:
+
+【库丘林】对【阿尔托莉雅】释放宝具【破魔红蔷薇】，附加3回合DeBuff【破魔】，造成伤害【38】
+【卫宫】对【赫拉克勒斯】造成伤害【40】
+【赫拉克勒斯】对【卫宫】造成伤害【3】
+【卫宫】发动宝具【炽天覆七重圆环】，免疫本次不高于【7】的伤害
+【阿尔托莉雅】对【赫拉克勒斯】释放宝具【誓约胜利之剑】，造成伤害【50】
+【赫拉克勒斯】对【阿尔托莉雅】造成伤害【43】
+
+【阿尔托莉雅】当前状态：
+【HP:21】【NP:0】
+【ATK:100】【DEF:90】
+【宝具】:【誓约胜利之剑】
+【Buff】:
+【DeBuff】:【破魔】
+
+【美狄亚】对【美杜莎】释放宝具【万戒必破之符】，造成伤害【0】，并清除所有增益效果
+【卫宫】对【赫拉克勒斯】造成伤害【40】
+【赫拉克勒斯】发动宝具【十二试炼】，成功续命，剩余试炼数【0】
+【库丘林】对【卫宫】释放宝具【穿刺死棘之枪】，造成伤害【8】，逆转因果，造成【99】点额外伤害！
+【卫宫】死亡
+【美狄亚】NP不足
+</code></pre></div></div>
+<h1 id="代码接口">代码接口</h1>
+<p>仅给出对应头文件，具体实现参照对应的cpp文件。
+以下所有代码均写在<code class="highlighter-rouge">namespace wk</code>中，避免命名冲突。</p>
+
+<h2 id="wkrandomh">WkRandom.h</h2>
+<p>实现一个自用的伯努利概率分布函数。根据编译器版本不同，自动选择调用<code class="highlighter-rouge">&lt;random&gt;</code>库（C++11以上）或<code class="highlighter-rouge">rand()</code>函数实现。前者的准确度要高于后者。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">bool</span> <span class="nf">getRand</span><span class="p">(</span><span class="kt">double</span> <span class="n">p</span><span class="p">);</span><span class="c1">//产生随机数0/1，概率期望值为p</span>
+</code></pre></div></div>
+<h2 id="servanth">Servant.h</h2>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Servant</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+	<span class="n">Servant</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">NAME</span><span class="p">)</span><span class="o">:</span>
+		<span class="n">NAME</span><span class="p">(</span><span class="n">NAME</span><span class="p">),</span>
+		<span class="n">HP</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
+		<span class="n">NP</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+		<span class="n">ATK</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
+		<span class="n">DEF</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
+		<span class="n">CLOCK</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{}</span>
+	<span class="o">~</span><span class="n">Servant</span><span class="p">();</span><span class="c1">//要释放装备指针</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">();</span>
+	<span class="kt">void</span> <span class="n">print</span><span class="p">();</span><span class="c1">//输出当前状态</span>
+	<span class="c1">//下为属性相关函数会受(De)Buff影响</span>
+	<span class="kt">int</span> <span class="n">getHP</span><span class="p">();</span>
+	<span class="kt">void</span> <span class="n">addHP</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="kt">bool</span> <span class="n">buff</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span><span class="c1">//修改血量，超过上限100或下限0时自动修正</span>
+	<span class="kt">int</span> <span class="n">getNP</span><span class="p">();</span>
+	<span class="kt">void</span> <span class="n">addNP</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="kt">bool</span> <span class="n">buff</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span><span class="c1">//修改能量，超过上限100或下限0时自动修正</span>
+	<span class="kt">int</span> <span class="n">getATK</span><span class="p">();</span>
+	<span class="kt">void</span> <span class="n">addATK</span><span class="p">(</span><span class="kt">int</span><span class="p">);</span>
+	<span class="kt">int</span> <span class="n">getDEF</span><span class="p">();</span>
+	<span class="kt">void</span> <span class="n">addDEF</span><span class="p">(</span><span class="kt">int</span><span class="p">);</span>
+	<span class="c1">//下为Buff/DeBuff相关</span>
+	<span class="kt">int</span> <span class="n">getClock</span><span class="p">();</span><span class="c1">//外界不允许修改人物技能时钟，没有set/add函数</span>
+	<span class="kt">bool</span> <span class="n">hasBuff</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">);</span>
+	<span class="kt">bool</span> <span class="n">hasDeBuff</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">);</span>
+	<span class="kt">void</span> <span class="n">addBuff</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">,</span><span class="kt">int</span><span class="p">,</span><span class="kt">bool</span> <span class="n">buff</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span><span class="c1">//附加持续时间t的Buff</span>
+	<span class="kt">void</span> <span class="n">addDeBuff</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="p">,</span><span class="kt">int</span><span class="p">,</span><span class="kt">bool</span> <span class="n">buff</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span><span class="c1">//附加持续时间t的DeBuff</span>
+	<span class="kt">void</span> <span class="n">clearBuff</span><span class="p">();</span>
+	<span class="kt">void</span> <span class="n">clearDeBuff</span><span class="p">();</span>
+	<span class="c1">//下为宝具/技能相关</span>
+	<span class="kt">void</span> <span class="n">equip</span><span class="p">(</span><span class="n">NoblePhantasm</span><span class="o">*</span><span class="p">);</span><span class="c1">//装备宝具（到装备栏最后）</span>
+	<span class="kt">void</span> <span class="n">sold</span><span class="p">();</span><span class="c1">//出售（最后一件）宝具</span>
+	<span class="kt">void</span> <span class="n">swapBar</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="p">);</span><span class="c1">//交换装备栏中宝具的次序</span>
+	<span class="kt">void</span> <span class="n">pre</span><span class="p">();</span><span class="c1">//触发宝具被动</span>
+	<span class="kt">void</span> <span class="n">pos</span><span class="p">();</span><span class="c1">//宝具被动结算</span>
+	<span class="kt">void</span> <span class="n">attack</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">defender</span><span class="p">,</span><span class="kt">int</span> <span class="n">k</span><span class="p">);</span><span class="c1">//发动宝具k攻击敌方，k非法时退出</span>
+<span class="nl">private:</span>
+	<span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">NAME</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="n">HP</span><span class="p">,</span><span class="c1">//血量</span>
+	    <span class="n">NP</span><span class="p">,</span><span class="c1">//能量</span>
+	    <span class="n">ATK</span><span class="p">,</span><span class="c1">//攻击力</span>
+	    <span class="n">DEF</span><span class="p">,</span><span class="c1">//防御力</span>
+	    <span class="n">CLOCK</span><span class="p">;</span><span class="c1">//记录人物时钟</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">BUFF</span><span class="p">,</span><span class="n">DEBUFF</span><span class="p">;</span><span class="c1">//Buff、DeBuff池</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">NoblePhantasm</span><span class="o">*&gt;</span> <span class="n">BAR</span><span class="p">;</span><span class="c1">//装备栏</span>
+	<span class="n">Servant</span><span class="p">(</span><span class="k">const</span> <span class="n">Servant</span><span class="o">&amp;</span><span class="p">);</span><span class="c1">//禁用拷贝构造函数</span>
+	<span class="n">Servant</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">Servant</span><span class="o">&amp;</span><span class="p">);</span><span class="c1">//禁用赋值函数</span>
+<span class="p">};</span>
+</code></pre></div></div>
+<h2 id="noblephantasmh">NoblePhantasm.h</h2>
+<p>实现了一个宝具基类NoblePhantasm，并派生了七种各有特色的宝具类，其特性见代码注释。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NoblePhantasm</span><span class="c1">//宝具基类</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+	<span class="k">virtual</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">()</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="c1">//纯虚函数，每件宝具都要有自己的名字</span>
+	<span class="k">virtual</span> <span class="kt">bool</span> <span class="n">buy</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">user</span><span class="p">);</span><span class="c1">//虚函数，装备宝具时的属性增益</span>
+	<span class="k">virtual</span> <span class="kt">bool</span> <span class="n">sold</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">user</span><span class="p">);</span><span class="c1">//虚函数，脱下宝具时的属性消减</span>
+	<span class="k">virtual</span> <span class="kt">bool</span> <span class="n">act</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">attacker</span><span class="p">,</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">defender</span><span class="p">);</span><span class="c1">//虚函数，主动发动的技能</span>
+	<span class="k">virtual</span> <span class="kt">void</span> <span class="n">pre</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">user</span><span class="p">)</span> <span class="p">{}</span> <span class="c1">//虚函数，战斗前触发被动</span>
+	<span class="k">virtual</span> <span class="kt">void</span> <span class="n">pos</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">user</span><span class="p">)</span> <span class="p">{}</span> <span class="c1">//虚函数，战斗后被动结算</span>
+	<span class="k">virtual</span> <span class="o">~</span><span class="n">NoblePhantasm</span><span class="p">()</span> <span class="p">{}</span> <span class="c1">//虚函数，析构函数需要用虚函数</span>
+<span class="p">};</span>
+<span class="k">class</span> <span class="nc">Excalibur</span><span class="o">:</span><span class="k">public</span> <span class="n">NoblePhantasm</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">();</span><span class="c1">//誓约胜利之剑</span>
+	<span class="kt">bool</span> <span class="n">act</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">attacker</span><span class="p">,</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">defender</span><span class="p">);</span><span class="c1">//消耗自身所有NP并造成一定比例伤害</span>
+	<span class="kt">void</span> <span class="n">pre</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">user</span><span class="p">);</span><span class="c1">//【远离尘世的理想乡】回复1点HP</span>
+<span class="p">};</span>
+<span class="k">class</span> <span class="nc">GateOfBabylon</span><span class="o">:</span><span class="k">public</span> <span class="n">NoblePhantasm</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">();</span><span class="c1">//王之财宝</span>
+	<span class="kt">bool</span> <span class="n">buy</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">user</span><span class="p">);</span><span class="c1">//无技能宝具，全属性加成30</span>
+	<span class="kt">bool</span> <span class="n">sold</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">user</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="k">class</span> <span class="nc">LawAias</span><span class="o">:</span><span class="k">public</span> <span class="n">NoblePhantasm</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">();</span><span class="c1">//炽天覆七重圆环</span>
+	<span class="kt">void</span> <span class="n">pre</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">user</span><span class="p">);</span><span class="c1">//免疫低于7的伤害</span>
+	<span class="kt">void</span> <span class="n">pos</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">user</span><span class="p">);</span>
+<span class="nl">private:</span>
+	<span class="kt">int</span> <span class="n">hp</span><span class="p">;</span><span class="c1">//触发被动时记录血量，结算时伤害低于7则回复</span>
+<span class="p">};</span>
+<span class="k">class</span> <span class="nc">GodHand</span><span class="o">:</span><span class="k">public</span> <span class="n">NoblePhantasm</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+	<span class="n">GodHand</span><span class="p">()</span><span class="o">:</span><span class="n">mp</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="n">last</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{}</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">();</span><span class="c1">//十二试炼</span>
+	<span class="kt">void</span> <span class="n">pos</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">user</span><span class="p">);</span><span class="c1">//三回合充能一次，每层充能抵抗一点致命伤害，至多11层</span>
+<span class="nl">private:</span>
+	<span class="kt">int</span> <span class="n">mp</span><span class="p">,</span><span class="n">last</span><span class="p">;</span><span class="c1">//充能层数，前一次充能时间</span>
+<span class="p">};</span>
+<span class="k">class</span> <span class="nc">RuleBreaker</span><span class="o">:</span><span class="k">public</span> <span class="n">NoblePhantasm</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">();</span><span class="c1">//万戒必破之符</span>
+	<span class="kt">bool</span> <span class="n">act</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">attacker</span><span class="p">,</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">defender</span><span class="p">);</span><span class="c1">//主动技能：造成伤害&amp;消除增益效果</span>
+	<span class="kt">void</span> <span class="n">pre</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">user</span><span class="p">);</span><span class="c1">//被动技能【高速神言】：NP恢复速度增加</span>
+<span class="p">};</span>
+<span class="k">class</span> <span class="nc">GaeBolg</span><span class="o">:</span><span class="k">public</span> <span class="n">NoblePhantasm</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">();</span><span class="c1">//穿刺死棘之枪</span>
+	<span class="kt">bool</span> <span class="n">act</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">attacker</span><span class="p">,</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">defender</span><span class="p">);</span><span class="c1">//低NP消耗&amp;&amp;造成伤害&amp;概率附加99点额外伤害</span>
+<span class="p">};</span>
+<span class="k">class</span> <span class="nc">GaeDeargBuidhe</span><span class="o">:</span><span class="k">public</span> <span class="n">NoblePhantasm</span>
+<span class="p">{</span>
+<span class="nl">public:</span><span class="c1">//【破魔】弱化防御；【必灭】弱化治疗</span>
+	<span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">();</span><span class="c1">//破魔红蔷薇&amp;必灭黄蔷薇</span>
+	<span class="kt">bool</span> <span class="n">act</span><span class="p">(</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">attacker</span><span class="p">,</span><span class="n">Servant</span> <span class="o">&amp;</span><span class="n">defender</span><span class="p">);</span><span class="c1">//为对手附加Debuff【破魔】【必灭】之一</span>
+<span class="p">};</span>
+</code></pre></div></div>
+:ET

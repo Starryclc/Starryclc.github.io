@@ -1,0 +1,1056 @@
+I"��<ul>
+  <li><a href="ai.berkeley.edu/project_overview.html">官网</a></li>
+</ul>
+
+<p><img src="http://ai.berkeley.edu/images/pacman_game.gif" alt="图示" /></p>
+
+<p>The Pac-Man projects were developed for UC Berkeley’s introductory artificial intelligence course, CS 188. They apply an array of AI techniques to playing Pac-Man. However, these projects don’t focus on building AI for video games. Instead, they teach foundational AI concepts, such as informed state-space search, probabilistic inference, and reinforcement learning. These concepts underly real-world application areas such as natural language processing, computer vision, and robotics.</p>
+
+<p>We designed these projects with three goals in mind. The projects allow students to visualize the results of the techniques they implement. They also contain code examples and clear directions, but do not force students to wade through undue amounts of scaffolding. Finally, Pac-Man provides a challenging problem environment that demands creative solutions; real-world AI problems are challenging, and Pac-Man is too.</p>
+
+<p>In our course, these projects have boosted enrollment, teaching reviews, and student engagement. The projects have been field-tested, refined, and debugged over multiple semesters at Berkeley. We are now happy to release them to other universities for educational use. )</p>
+
+<h2 id="search">Search</h2>
+
+<h3 id="searchpy">search.py</h3>
+
+<p>由于要实现很多不同的搜索，这里封装了一个<code class="highlighter-rouge">frontierSearch</code>类，根据传入容器的不同（队列、栈、优先队列），就可以直接实现不同的搜索方式（广度优先、深度优先、花费优先等等）。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># search.py
+# ---------
+# Licensing Information:  You are free to use or extend these projects for
+# educational purposes provided that (1) you do not distribute or publish
+# solutions, (2) you retain this notice, and (3) you provide clear
+# attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
+#
+# Attribution Information: The Pacman AI projects were developed at UC Berkeley.
+# The core projects and autograders were primarily created by John DeNero
+# (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
+# Student side autograding was added by Brad Miller, Nick Hay, and
+# Pieter Abbeel (pabbeel@cs.berkeley.edu).
+</span>
+
+<span class="s">"""
+In search.py, you will implement generic search algorithms which are called by
+Pacman agents (in searchAgents.py).
+"""</span>
+
+<span class="kn">import</span> <span class="nn">util</span>
+
+
+<span class="k">class</span> <span class="nc">SearchProblem</span><span class="p">:</span>
+    <span class="s">"""
+    This class outlines the structure of a search problem, but doesn't implement
+    any of the methods (in object-oriented terminology: an abstract class).
+
+    You do not need to change anything in this class, ever.
+    """</span>
+
+    <span class="k">def</span> <span class="nf">getStartState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">"""
+        Returns the start state for the search problem.
+        """</span>
+        <span class="n">util</span><span class="o">.</span><span class="n">raiseNotDefined</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">isGoalState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="s">"""
+          state: Search state
+
+        Returns True if and only if the state is a valid goal state.
+        """</span>
+        <span class="n">util</span><span class="o">.</span><span class="n">raiseNotDefined</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">getSuccessors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="s">"""
+          state: Search state
+
+        For a given state, this should return a list of triples, (successor,
+        action, stepCost), where 'successor' is a successor to the current
+        state, 'action' is the action required to get there, and 'stepCost' is
+        the incremental cost of expanding to that successor.
+        """</span>
+        <span class="n">util</span><span class="o">.</span><span class="n">raiseNotDefined</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">getCostOfActions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+        <span class="s">"""
+         actions: A list of actions to take
+
+        This method returns the total cost of a particular sequence of actions.
+        The sequence must be composed of legal moves.
+        """</span>
+        <span class="n">util</span><span class="o">.</span><span class="n">raiseNotDefined</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">tinyMazeSearch</span><span class="p">(</span><span class="n">problem</span><span class="p">):</span>
+    <span class="s">"""
+    Returns a sequence of moves that solves tinyMaze.  For any other maze, the
+    sequence of moves will be incorrect, so only use this for tinyMaze.
+    """</span>
+    <span class="kn">from</span> <span class="nn">game</span> <span class="kn">import</span> <span class="n">Directions</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">Directions</span><span class="o">.</span><span class="n">SOUTH</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">Directions</span><span class="o">.</span><span class="n">WEST</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">w</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">frontierSearch</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span> <span class="n">frontier</span><span class="p">):</span>
+    <span class="n">frontier</span><span class="o">.</span><span class="n">push</span><span class="p">(([],</span> <span class="n">problem</span><span class="o">.</span><span class="n">getStartState</span><span class="p">()))</span>
+    <span class="n">visited</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">frontier</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">():</span>
+        <span class="n">moves</span><span class="p">,</span> <span class="n">curr</span> <span class="o">=</span> <span class="n">frontier</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">problem</span><span class="o">.</span><span class="n">isGoalState</span><span class="p">(</span><span class="n">curr</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">moves</span>
+        <span class="k">if</span> <span class="n">curr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">:</span>
+            <span class="n">visited</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">successor</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">_stepCost</span> <span class="ow">in</span> <span class="n">problem</span><span class="o">.</span><span class="n">getSuccessors</span><span class="p">(</span><span class="n">curr</span><span class="p">):</span>
+                <span class="n">frontier</span><span class="o">.</span><span class="n">push</span><span class="p">((</span><span class="n">moves</span> <span class="o">+</span> <span class="p">[</span><span class="n">action</span><span class="p">],</span> <span class="n">successor</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">depthFirstSearch</span><span class="p">(</span><span class="n">problem</span><span class="p">):</span>
+    <span class="s">"""
+    Search the deepest nodes in the search tree first.
+
+    Your search algorithm needs to return a list of actions that reaches the
+    goal. Make sure to implement a graph search algorithm.
+
+    To get started, you might want to try some of these simple commands to
+    understand the search problem that is being passed in:
+
+    print "Start:", problem.getStartState()
+    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    """</span>
+    <span class="s">"*** YOUR CODE HERE ***"</span>
+    <span class="k">return</span> <span class="n">frontierSearch</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span> <span class="n">util</span><span class="o">.</span><span class="n">Stack</span><span class="p">())</span>
+    <span class="c1"># util.raiseNotDefined()
+</span>
+
+<span class="k">def</span> <span class="nf">breadthFirstSearch</span><span class="p">(</span><span class="n">problem</span><span class="p">):</span>
+    <span class="s">"""Search the shallowest nodes in the search tree first."""</span>
+    <span class="s">"*** YOUR CODE HERE ***"</span>
+    <span class="k">return</span> <span class="n">frontierSearch</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span> <span class="n">util</span><span class="o">.</span><span class="n">Queue</span><span class="p">())</span>
+    <span class="c1"># util.raiseNotDefined()
+</span>
+
+<span class="k">def</span> <span class="nf">uniformCostSearch</span><span class="p">(</span><span class="n">problem</span><span class="p">):</span>
+    <span class="s">"""Search the node of least total cost first."""</span>
+    <span class="s">"*** YOUR CODE HERE ***"</span>
+    <span class="k">return</span> <span class="n">aStarSearch</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span> <span class="n">nullHeuristic</span><span class="p">)</span>
+    <span class="c1"># util.raiseNotDefined()
+</span>
+
+<span class="k">def</span> <span class="nf">nullHeuristic</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">problem</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="s">"""
+    A heuristic function estimates the cost from the current state to the nearest
+    goal in the provided SearchProblem.  This heuristic is trivial.
+    """</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span> <span class="nf">aStarSearch</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span> <span class="n">heuristic</span><span class="o">=</span><span class="n">nullHeuristic</span><span class="p">):</span>
+    <span class="s">"""Search the node that has the lowest combined cost and heuristic first."""</span>
+    <span class="s">"*** YOUR CODE HERE ***"</span>
+    <span class="k">def</span> <span class="nf">cost</span><span class="p">((</span><span class="n">moves</span><span class="p">,</span> <span class="n">pos</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">problem</span><span class="o">.</span><span class="n">getCostOfActions</span><span class="p">(</span><span class="n">moves</span><span class="p">)</span> <span class="o">+</span> <span class="n">heuristic</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">problem</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">frontierSearch</span><span class="p">(</span><span class="n">problem</span><span class="p">,</span> <span class="n">util</span><span class="o">.</span><span class="n">PriorityQueueWithFunction</span><span class="p">(</span><span class="n">cost</span><span class="p">))</span>
+    <span class="c1"># util.raiseNotDefined()
+</span>
+
+<span class="c1"># Abbreviations
+</span><span class="n">bfs</span> <span class="o">=</span> <span class="n">breadthFirstSearch</span>
+<span class="n">dfs</span> <span class="o">=</span> <span class="n">depthFirstSearch</span>
+<span class="n">astar</span> <span class="o">=</span> <span class="n">aStarSearch</span>
+<span class="n">ucs</span> <span class="o">=</span> <span class="n">uniformCostSearch</span>
+</code></pre></div></div>
+
+<h3 id="searchagentspy">searchAgents.py</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># searchAgents.py
+# ---------------
+# Licensing Information:  You are free to use or extend these projects for
+# educational purposes provided that (1) you do not distribute or publish
+# solutions, (2) you retain this notice, and (3) you provide clear
+# attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
+#
+# Attribution Information: The Pacman AI projects were developed at UC Berkeley.
+# The core projects and autograders were primarily created by John DeNero
+# (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
+# Student side autograding was added by Brad Miller, Nick Hay, and
+# Pieter Abbeel (pabbeel@cs.berkeley.edu).
+</span>
+
+<span class="s">"""
+This file contains all of the agents that can be selected to control Pacman.  To
+select an agent, use the '-p' option when running pacman.py.  Arguments can be
+passed to your agent using '-a'.  For example, to load a SearchAgent that uses
+depth first search (dfs), run the following command:
+
+&gt; python pacman.py -p SearchAgent -a fn=depthFirstSearch
+
+Commands to invoke other search strategies can be found in the project
+description.
+
+Please only change the parts of the file you are asked to.  Look for the lines
+that say
+
+"*** YOUR CODE HERE ***"
+
+The parts you fill in start about 3/4 of the way down.  Follow the project
+description for details.
+
+Good luck and happy searching!
+"""</span>
+
+<span class="kn">from</span> <span class="nn">game</span> <span class="kn">import</span> <span class="n">Directions</span>
+<span class="kn">from</span> <span class="nn">game</span> <span class="kn">import</span> <span class="n">Agent</span>
+<span class="kn">from</span> <span class="nn">game</span> <span class="kn">import</span> <span class="n">Actions</span>
+<span class="kn">import</span> <span class="nn">util</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">search</span>
+
+
+<span class="k">class</span> <span class="nc">GoWestAgent</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+    <span class="s">"An agent that goes West until it can't."</span>
+
+    <span class="k">def</span> <span class="nf">getAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="s">"The agent receives a GameState (defined in pacman.py)."</span>
+        <span class="k">if</span> <span class="n">Directions</span><span class="o">.</span><span class="n">WEST</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">getLegalPacmanActions</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">Directions</span><span class="o">.</span><span class="n">WEST</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Directions</span><span class="o">.</span><span class="n">STOP</span>
+
+<span class="c1">#######################################################
+# This portion is written for you, but will only work #
+#       after you fill in parts of search.py          #
+#######################################################
+</span>
+
+<span class="k">class</span> <span class="nc">SearchAgent</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+    <span class="s">"""
+    This very general search agent finds a path using a supplied search
+    algorithm for a supplied search problem, then returns actions to follow that
+    path.
+
+    As a default, this agent runs DFS on a PositionSearchProblem to find
+    location (1,1)
+
+    Options for fn include:
+      depthFirstSearch or dfs
+      breadthFirstSearch or bfs
+
+
+    Note: You should NOT change any code in SearchAgent
+    """</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="s">'depthFirstSearch'</span><span class="p">,</span> <span class="n">prob</span><span class="o">=</span><span class="s">'PositionSearchProblem'</span><span class="p">,</span> <span class="n">heuristic</span><span class="o">=</span><span class="s">'nullHeuristic'</span><span class="p">):</span>
+        <span class="c1"># Warning: some advanced Python magic is employed below to find the right functions and problems
+</span>
+        <span class="c1"># Get the search function from the name and heuristic
+</span>        <span class="k">if</span> <span class="n">fn</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">search</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="nb">AttributeError</span><span class="p">,</span> <span class="n">fn</span> <span class="o">+</span> <span class="s">' is not a search function in search.py.'</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">search</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">'heuristic'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">func</span><span class="o">.</span><span class="n">func_code</span><span class="o">.</span><span class="n">co_varnames</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">'[SearchAgent] using function '</span> <span class="o">+</span> <span class="n">fn</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">searchFunction</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">heuristic</span> <span class="ow">in</span> <span class="nb">globals</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">heur</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">heuristic</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">heuristic</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">search</span><span class="p">):</span>
+                <span class="n">heur</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">search</span><span class="p">,</span> <span class="n">heuristic</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="nb">AttributeError</span><span class="p">,</span> <span class="n">heuristic</span> <span class="o">+</span> <span class="s">' is not a function in searchAgents.py or search.py.'</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">'[SearchAgent] using function </span><span class="si">%</span><span class="s">s and heuristic </span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span>
+                  <span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">heuristic</span><span class="p">))</span>
+            <span class="c1"># Note: this bit of Python trickery combines the search algorithm and the heuristic
+</span>            <span class="bp">self</span><span class="o">.</span><span class="n">searchFunction</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">heuristic</span><span class="o">=</span><span class="n">heur</span><span class="p">)</span>
+
+        <span class="c1"># Get the search problem type from the name
+</span>        <span class="k">if</span> <span class="n">prob</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">globals</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">prob</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">'Problem'</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="nb">AttributeError</span><span class="p">,</span> <span class="n">prob</span> <span class="o">+</span> <span class="s">' is not a search problem type in SearchAgents.py.'</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchType</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">prob</span><span class="p">]</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">'[SearchAgent] using problem type '</span> <span class="o">+</span> <span class="n">prob</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">registerInitialState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="s">"""
+        This is the first time that the agent sees the layout of the game
+        board. Here, we choose a path to the goal. In this phase, the agent
+        should compute the path to the goal and store it in a local variable.
+        All of the work is done in this method!
+
+        state: a GameState object (pacman.py)
+        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchFunction</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nb">Exception</span><span class="p">,</span> <span class="s">"No search function provided for SearchAgent"</span>
+        <span class="n">starttime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">problem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchType</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>  <span class="c1"># Makes a new search problem
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">actions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchFunction</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span>  <span class="c1"># Find a path
+</span>        <span class="n">totalCost</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">getCostOfActions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">'Path found with total cost of </span><span class="si">%</span><span class="s">d in </span><span class="si">%.1</span><span class="s">f seconds'</span> <span class="o">%</span>
+              <span class="p">(</span><span class="n">totalCost</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">starttime</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s">'_expanded'</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">problem</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">'Search nodes expanded: </span><span class="si">%</span><span class="s">d'</span> <span class="o">%</span> <span class="n">problem</span><span class="o">.</span><span class="n">_expanded</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">getAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="s">"""
+        Returns the next action in the path chosen earlier (in
+        registerInitialState).  Return Directions.STOP if there is no further
+        action to take.
+
+        state: a GameState object (pacman.py)
+        """</span>
+        <span class="k">if</span> <span class="s">'actionIndex'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionIndex</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">actionIndex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Directions</span><span class="o">.</span><span class="n">STOP</span>
+
+
+<span class="k">class</span> <span class="nc">PositionSearchProblem</span><span class="p">(</span><span class="n">search</span><span class="o">.</span><span class="n">SearchProblem</span><span class="p">):</span>
+    <span class="s">"""
+    A search problem defines the state space, start state, goal test, successor
+    function and cost function.  This search problem can be used to find paths
+    to a particular point on the pacman board.
+
+    The state space consists of (x,y) positions in a pacman game.
+
+    Note: this search problem is fully specified; you should NOT change it.
+    """</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gameState</span><span class="p">,</span> <span class="n">costFn</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">visualize</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="s">"""
+        Stores the start and goal.
+
+        gameState: A GameState object (pacman.py)
+        costFn: A function from a search state (tuple) to a non-negative number
+        goal: A position in the gameState
+        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">walls</span> <span class="o">=</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getWalls</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startState</span> <span class="o">=</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getPacmanPosition</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">startState</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goal</span> <span class="o">=</span> <span class="n">goal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">costFn</span> <span class="o">=</span> <span class="n">costFn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visualize</span> <span class="o">=</span> <span class="n">visualize</span>
+        <span class="k">if</span> <span class="n">warn</span> <span class="ow">and</span> <span class="p">(</span><span class="n">gameState</span><span class="o">.</span><span class="n">getNumFood</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">gameState</span><span class="o">.</span><span class="n">hasFood</span><span class="p">(</span><span class="o">*</span><span class="n">goal</span><span class="p">)):</span>
+            <span class="k">print</span> <span class="s">'Warning: this does not look like a regular search maze'</span>
+
+        <span class="c1"># For display purposes
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_visited</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visitedlist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expanded</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">[],</span> <span class="mi">0</span>  <span class="c1"># DO NOT CHANGE
+</span>
+    <span class="k">def</span> <span class="nf">getStartState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">startState</span>
+
+    <span class="k">def</span> <span class="nf">isGoalState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">isGoal</span> <span class="o">=</span> <span class="n">state</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">goal</span>
+
+        <span class="c1"># For display purposes only
+</span>        <span class="k">if</span> <span class="n">isGoal</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">visualize</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_visitedlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+            <span class="kn">import</span> <span class="nn">__main__</span>
+            <span class="k">if</span> <span class="s">'_display'</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">__main__</span><span class="p">):</span>
+                <span class="c1"># @UndefinedVariable
+</span>                <span class="k">if</span> <span class="s">'drawExpandedCells'</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">__main__</span><span class="o">.</span><span class="n">_display</span><span class="p">):</span>
+                    <span class="n">__main__</span><span class="o">.</span><span class="n">_display</span><span class="o">.</span><span class="n">drawExpandedCells</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_visitedlist</span><span class="p">)</span>  <span class="c1"># @UndefinedVariable
+</span>
+        <span class="k">return</span> <span class="n">isGoal</span>
+
+    <span class="k">def</span> <span class="nf">getSuccessors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="s">"""
+        Returns successor states, the actions they require, and a cost of 1.
+
+         As noted in search.py:
+             For a given state, this should return a list of triples,
+         (successor, action, stepCost), where 'successor' is a
+         successor to the current state, 'action' is the action
+         required to get there, and 'stepCost' is the incremental
+         cost of expanding to that successor
+        """</span>
+
+        <span class="n">successors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Directions</span><span class="o">.</span><span class="n">NORTH</span><span class="p">,</span> <span class="n">Directions</span><span class="o">.</span><span class="n">SOUTH</span><span class="p">,</span> <span class="n">Directions</span><span class="o">.</span><span class="n">EAST</span><span class="p">,</span> <span class="n">Directions</span><span class="o">.</span><span class="n">WEST</span><span class="p">]:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">state</span>
+            <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">Actions</span><span class="o">.</span><span class="n">directionToVector</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="n">nextx</span><span class="p">,</span> <span class="n">nexty</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">dx</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">walls</span><span class="p">[</span><span class="n">nextx</span><span class="p">][</span><span class="n">nexty</span><span class="p">]:</span>
+                <span class="n">nextState</span> <span class="o">=</span> <span class="p">(</span><span class="n">nextx</span><span class="p">,</span> <span class="n">nexty</span><span class="p">)</span>
+                <span class="n">cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">costFn</span><span class="p">(</span><span class="n">nextState</span><span class="p">)</span>
+                <span class="n">successors</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">nextState</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">cost</span><span class="p">))</span>
+
+        <span class="c1"># Bookkeeping for display purposes
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_expanded</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># DO NOT CHANGE
+</span>        <span class="k">if</span> <span class="n">state</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visited</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_visited</span><span class="p">[</span><span class="n">state</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_visitedlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">successors</span>
+
+    <span class="k">def</span> <span class="nf">getCostOfActions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+        <span class="s">"""
+        Returns the cost of a particular sequence of actions. If those actions
+        include an illegal move, return 999999.
+        """</span>
+        <span class="k">if</span> <span class="n">actions</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">999999</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getStartState</span><span class="p">()</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="c1"># Check figure out the next state and see whether its' legal
+</span>            <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">Actions</span><span class="o">.</span><span class="n">directionToVector</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">dx</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">walls</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="mi">999999</span>
+            <span class="n">cost</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">costFn</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">cost</span>
+
+
+<span class="k">class</span> <span class="nc">StayEastSearchAgent</span><span class="p">(</span><span class="n">SearchAgent</span><span class="p">):</span>
+    <span class="s">"""
+    An agent for position search with a cost function that penalizes being in
+    positions on the West side of the board.
+
+    The cost function for stepping into a position (x,y) is 1/2^x.
+    """</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchFunction</span> <span class="o">=</span> <span class="n">search</span><span class="o">.</span><span class="n">uniformCostSearch</span>
+
+        <span class="k">def</span> <span class="nf">costFn</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span> <span class="k">return</span> <span class="mf">.5</span> <span class="o">**</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchType</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">state</span><span class="p">:</span> <span class="n">PositionSearchProblem</span><span class="p">(</span>
+            <span class="n">state</span><span class="p">,</span> <span class="n">costFn</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">StayWestSearchAgent</span><span class="p">(</span><span class="n">SearchAgent</span><span class="p">):</span>
+    <span class="s">"""
+    An agent for position search with a cost function that penalizes being in
+    positions on the East side of the board.
+
+    The cost function for stepping into a position (x,y) is 2^x.
+    """</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchFunction</span> <span class="o">=</span> <span class="n">search</span><span class="o">.</span><span class="n">uniformCostSearch</span>
+
+        <span class="k">def</span> <span class="nf">costFn</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span> <span class="k">return</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchType</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">state</span><span class="p">:</span> <span class="n">PositionSearchProblem</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">costFn</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">manhattanHeuristic</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">problem</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="s">"The Manhattan distance heuristic for a PositionSearchProblem"</span>
+    <span class="n">xy1</span> <span class="o">=</span> <span class="n">position</span>
+    <span class="n">xy2</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">goal</span>
+    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">xy1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">xy2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">xy1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xy2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">euclideanHeuristic</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">problem</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="s">"The Euclidean distance heuristic for a PositionSearchProblem"</span>
+    <span class="n">xy1</span> <span class="o">=</span> <span class="n">position</span>
+    <span class="n">xy2</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">goal</span>
+    <span class="k">return</span> <span class="p">((</span><span class="n">xy1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">xy2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">xy1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xy2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+
+<span class="c1">#####################################################
+# This portion is incomplete.  Time to write code!  #
+#####################################################
+</span>
+
+<span class="k">class</span> <span class="nc">CornersProblem</span><span class="p">(</span><span class="n">search</span><span class="o">.</span><span class="n">SearchProblem</span><span class="p">):</span>
+    <span class="s">"""
+    This search problem finds paths through all four corners of a layout.
+
+    You must select a suitable state space and successor function
+    """</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startingGameState</span><span class="p">):</span>
+        <span class="s">"""
+        Stores the walls, pacman's starting position and corners.
+        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">walls</span> <span class="o">=</span> <span class="n">startingGameState</span><span class="o">.</span><span class="n">getWalls</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startingPosition</span> <span class="o">=</span> <span class="n">startingGameState</span><span class="o">.</span><span class="n">getPacmanPosition</span><span class="p">()</span>
+        <span class="n">top</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walls</span><span class="o">.</span><span class="n">height</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">walls</span><span class="o">.</span><span class="n">width</span><span class="o">-</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">corners</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">top</span><span class="p">),</span> <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">top</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">corner</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">corners</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">startingGameState</span><span class="o">.</span><span class="n">hasFood</span><span class="p">(</span><span class="o">*</span><span class="n">corner</span><span class="p">):</span>
+                <span class="k">print</span> <span class="s">'Warning: no food in corner '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">corner</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expanded</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># DO NOT CHANGE; Number of search nodes expanded
+</span>        <span class="c1"># Please add any code here which you would like to use
+</span>        <span class="c1"># in initializing the problem
+</span>        <span class="s">"*** YOUR CODE HERE ***"</span>
+
+    <span class="k">def</span> <span class="nf">getStartState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">"""
+        Returns the start state (in your state space, not the full Pacman state
+        space)
+        """</span>
+        <span class="s">"*** YOUR CODE HERE ***"</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startingPosition</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="c1"># util.raiseNotDefined()
+</span>
+    <span class="k">def</span> <span class="nf">isGoalState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="s">"""
+        Returns whether this search state is a goal state of the problem.
+        """</span>
+        <span class="s">"*** YOUR CODE HERE ***"</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cnt</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">pos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">corners</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pos</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">cnt</span> <span class="o">=</span> <span class="n">cnt</span><span class="o">+</span><span class="mi">1</span>
+            <span class="k">return</span> <span class="n">cnt</span> <span class="o">==</span> <span class="mi">4</span>
+        <span class="k">return</span> <span class="bp">False</span>
+        <span class="c1"># util.raiseNotDefined()
+</span>
+    <span class="k">def</span> <span class="nf">getSuccessors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="s">"""
+        Returns successor states, the actions they require, and a cost of 1.
+
+         As noted in search.py:
+            For a given state, this should return a list of triples, (successor,
+            action, stepCost), where 'successor' is a successor to the current
+            state, 'action' is the action required to get there, and 'stepCost'
+            is the incremental cost of expanding to that successor
+        """</span>
+        <span class="n">successors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Directions</span><span class="o">.</span><span class="n">NORTH</span><span class="p">,</span> <span class="n">Directions</span><span class="o">.</span><span class="n">SOUTH</span><span class="p">,</span> <span class="n">Directions</span><span class="o">.</span><span class="n">EAST</span><span class="p">,</span> <span class="n">Directions</span><span class="o">.</span><span class="n">WEST</span><span class="p">]:</span>
+            <span class="c1"># Add a successor state to the successor list if the action is legal
+</span>            <span class="c1"># Here's a code snippet for figuring out whether a new position hits a wall:
+</span>            <span class="s">"*** YOUR CODE HERE ***"</span>
+            <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">Actions</span><span class="o">.</span><span class="n">directionToVector</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="n">nex</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dx</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dy</span><span class="p">))</span>
+            <span class="n">hitsWall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walls</span><span class="p">[</span><span class="n">nex</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">nex</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">hitsWall</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">nex</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">corners</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">nex</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+                        <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nex</span><span class="p">)</span>
+                <span class="n">successors</span><span class="o">.</span><span class="n">append</span><span class="p">(((</span><span class="n">nex</span><span class="p">,</span> <span class="n">path</span><span class="p">),</span> <span class="n">action</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expanded</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># DO NOT CHANGE
+</span>        <span class="k">return</span> <span class="n">successors</span>
+
+    <span class="k">def</span> <span class="nf">getCostOfActions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+        <span class="s">"""
+        Returns the cost of a particular sequence of actions.  If those actions
+        include an illegal move, return 999999.  This is implemented for you.
+        """</span>
+        <span class="k">if</span> <span class="n">actions</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">999999</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startingPosition</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">Actions</span><span class="o">.</span><span class="n">directionToVector</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">dx</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">walls</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="mi">999999</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">cornersHeuristic</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">problem</span><span class="p">):</span>
+    <span class="s">"""
+    A heuristic for the CornersProblem that you defined.
+
+      state:   The current search state
+               (a data structure you chose in your search problem)
+
+      problem: The CornersProblem instance for this layout.
+
+    This function should always return a number that is a lower bound on the
+    shortest path from the state to a goal of the problem; i.e.  it should be
+    admissible (as well as consistent).
+    """</span>
+    <span class="n">corners</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">corners</span>  <span class="c1"># These are the corner coordinates
+</span>    <span class="c1"># These are the walls of the maze, as a Grid (game.py)
+</span>    <span class="n">walls</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">walls</span>
+
+    <span class="s">"*** YOUR CODE HERE ***"</span>
+    <span class="n">h_sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">unVis</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">corners</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">unVis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">corners</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">while</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unVis</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">dis</span><span class="p">,</span> <span class="n">corner</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([(</span><span class="n">util</span><span class="o">.</span><span class="n">manhattanDistance</span><span class="p">(</span>
+            <span class="n">cur</span><span class="p">,</span> <span class="n">corner</span><span class="p">),</span> <span class="n">corner</span><span class="p">)</span> <span class="k">for</span> <span class="n">corner</span> <span class="ow">in</span> <span class="n">unVis</span><span class="p">])</span>
+        <span class="n">h_sum</span> <span class="o">=</span> <span class="n">h_sum</span> <span class="o">+</span> <span class="n">dis</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">corner</span>
+        <span class="n">unVis</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">corner</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">h_sum</span>  <span class="c1"># Default to trivial solution
+</span>
+
+<span class="k">class</span> <span class="nc">AStarCornersAgent</span><span class="p">(</span><span class="n">SearchAgent</span><span class="p">):</span>
+    <span class="s">"A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchFunction</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">prob</span><span class="p">:</span> <span class="n">search</span><span class="o">.</span><span class="n">aStarSearch</span><span class="p">(</span>
+            <span class="n">prob</span><span class="p">,</span> <span class="n">cornersHeuristic</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchType</span> <span class="o">=</span> <span class="n">CornersProblem</span>
+
+
+<span class="k">class</span> <span class="nc">FoodSearchProblem</span><span class="p">:</span>
+    <span class="s">"""
+    A search problem associated with finding the a path that collects all of the
+    food (dots) in a Pacman game.
+
+    A search state in this problem is a tuple ( pacmanPosition, foodGrid ) where
+      pacmanPosition: a tuple (x,y) of integers specifying Pacman's position
+      foodGrid:       a Grid (see game.py) of either True or False, specifying remaining food
+    """</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startingGameState</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="n">startingGameState</span><span class="o">.</span><span class="n">getPacmanPosition</span><span class="p">(),</span>
+                      <span class="n">startingGameState</span><span class="o">.</span><span class="n">getFood</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">walls</span> <span class="o">=</span> <span class="n">startingGameState</span><span class="o">.</span><span class="n">getWalls</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startingGameState</span> <span class="o">=</span> <span class="n">startingGameState</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expanded</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># DO NOT CHANGE
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">heuristicInfo</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># A dictionary for the heuristic to store information
+</span>
+    <span class="k">def</span> <span class="nf">getStartState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span>
+
+    <span class="k">def</span> <span class="nf">isGoalState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">getSuccessors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="s">"Returns successor states, the actions they require, and a cost of 1."</span>
+        <span class="n">successors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expanded</span> <span class="o">+=</span> <span class="mi">1</span>  <span class="c1"># DO NOT CHANGE
+</span>        <span class="k">for</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Directions</span><span class="o">.</span><span class="n">NORTH</span><span class="p">,</span> <span class="n">Directions</span><span class="o">.</span><span class="n">SOUTH</span><span class="p">,</span> <span class="n">Directions</span><span class="o">.</span><span class="n">EAST</span><span class="p">,</span> <span class="n">Directions</span><span class="o">.</span><span class="n">WEST</span><span class="p">]:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">Actions</span><span class="o">.</span><span class="n">directionToVector</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span>
+            <span class="n">nextx</span><span class="p">,</span> <span class="n">nexty</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">dx</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">walls</span><span class="p">[</span><span class="n">nextx</span><span class="p">][</span><span class="n">nexty</span><span class="p">]:</span>
+                <span class="n">nextFood</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">nextFood</span><span class="p">[</span><span class="n">nextx</span><span class="p">][</span><span class="n">nexty</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">successors</span><span class="o">.</span><span class="n">append</span><span class="p">((((</span><span class="n">nextx</span><span class="p">,</span> <span class="n">nexty</span><span class="p">),</span> <span class="n">nextFood</span><span class="p">),</span> <span class="n">direction</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">successors</span>
+
+    <span class="k">def</span> <span class="nf">getCostOfActions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+        <span class="s">"""Returns the cost of a particular sequence of actions.  If those actions
+        include an illegal move, return 999999"""</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getStartState</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">actions</span><span class="p">:</span>
+            <span class="c1"># figure out the next state and see whether it's legal
+</span>            <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">Actions</span><span class="o">.</span><span class="n">directionToVector</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">dx</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">walls</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="mi">999999</span>
+            <span class="n">cost</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">cost</span>
+
+
+<span class="k">class</span> <span class="nc">AStarFoodSearchAgent</span><span class="p">(</span><span class="n">SearchAgent</span><span class="p">):</span>
+    <span class="s">"A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchFunction</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">prob</span><span class="p">:</span> <span class="n">search</span><span class="o">.</span><span class="n">aStarSearch</span><span class="p">(</span>
+            <span class="n">prob</span><span class="p">,</span> <span class="n">foodHeuristic</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">searchType</span> <span class="o">=</span> <span class="n">FoodSearchProblem</span>
+
+
+<span class="k">def</span> <span class="nf">foodHeuristic</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">problem</span><span class="p">):</span>
+    <span class="s">"""
+    Your heuristic for the FoodSearchProblem goes here.
+
+    This heuristic must be consistent to ensure correctness.  First, try to come
+    up with an admissible heuristic; almost all admissible heuristics will be
+    consistent as well.
+
+    If using A* ever finds a solution that is worse uniform cost search finds,
+    your heuristic is *not* consistent, and probably not admissible!  On the
+    other hand, inadmissible or inconsistent heuristics may find optimal
+    solutions, so be careful.
+
+    The state is a tuple ( pacmanPosition, foodGrid ) where foodGrid is a Grid
+    (see game.py) of either True or False. You can call foodGrid.asList() to get
+    a list of food coordinates instead.
+
+    If you want access to info like walls, capsules, etc., you can query the
+    problem.  For example, problem.walls gives you a Grid of where the walls
+    are.
+
+    If you want to *store* information to be reused in other calls to the
+    heuristic, there is a dictionary called problem.heuristicInfo that you can
+    use. For example, if you only want to count the walls once and store that
+    value, try: problem.heuristicInfo['wallCount'] = problem.walls.count()
+    Subsequent calls to this heuristic can access
+    problem.heuristicInfo['wallCount']
+    """</span>
+    <span class="n">position</span><span class="p">,</span> <span class="n">foodGrid</span> <span class="o">=</span> <span class="n">state</span>
+    <span class="s">"*** YOUR CODE HERE ***"</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">startingGameState</span>
+    <span class="n">foodList</span> <span class="o">=</span> <span class="n">foodGrid</span><span class="o">.</span><span class="n">asList</span><span class="p">()</span>
+    <span class="n">foodCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">foodList</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">foodCount</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mazeDistance</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">foodList</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">gs</span><span class="p">)</span>
+    <span class="s">"Find the 'diam' of the points and the min distance to one of the end points of the diam"</span>
+    <span class="n">diam</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">dis</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">foodCount</span><span class="p">):</span>
+        <span class="n">dis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mazeDistance</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">foodList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">gs</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="n">diam</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+                <span class="n">diam</span><span class="p">,</span> <span class="p">(</span><span class="n">mazeDistance</span><span class="p">(</span><span class="n">foodList</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">foodList</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">gs</span><span class="p">),</span> <span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">dis</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">dis</span><span class="p">[</span><span class="n">ii</span><span class="p">])))</span>
+    <span class="k">return</span> <span class="n">diam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">diam</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">ClosestDotSearchAgent</span><span class="p">(</span><span class="n">SearchAgent</span><span class="p">):</span>
+    <span class="s">"Search for all food using a sequence of searches"</span>
+
+    <span class="k">def</span> <span class="nf">registerInitialState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">currentState</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="k">while</span><span class="p">(</span><span class="n">currentState</span><span class="o">.</span><span class="n">getFood</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">nextPathSegment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findPathToClosestDot</span><span class="p">(</span>
+                <span class="n">currentState</span><span class="p">)</span>  <span class="c1"># The missing piece
+</span>            <span class="bp">self</span><span class="o">.</span><span class="n">actions</span> <span class="o">+=</span> <span class="n">nextPathSegment</span>
+            <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">nextPathSegment</span><span class="p">:</span>
+                <span class="n">legal</span> <span class="o">=</span> <span class="n">currentState</span><span class="o">.</span><span class="n">getLegalActions</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">legal</span><span class="p">:</span>
+                    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">action</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">currentState</span><span class="p">))</span>
+                    <span class="k">raise</span> <span class="nb">Exception</span><span class="p">,</span> <span class="s">'findPathToClosestDot returned an illegal move: </span><span class="si">%</span><span class="s">s!</span><span class="se">\n</span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">t</span>
+                <span class="n">currentState</span> <span class="o">=</span> <span class="n">currentState</span><span class="o">.</span><span class="n">generateSuccessor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionIndex</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">print</span> <span class="s">'Path found with cost </span><span class="si">%</span><span class="s">d.'</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actions</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">findPathToClosestDot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gameState</span><span class="p">):</span>
+        <span class="s">"""
+        Returns a path (a list of actions) to the closest dot, starting from
+        gameState.
+        """</span>
+        <span class="c1"># Here are some useful elements of the startState
+</span>        <span class="n">startPosition</span> <span class="o">=</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getPacmanPosition</span><span class="p">()</span>
+        <span class="n">food</span> <span class="o">=</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getFood</span><span class="p">()</span>
+        <span class="n">walls</span> <span class="o">=</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getWalls</span><span class="p">()</span>
+        <span class="n">problem</span> <span class="o">=</span> <span class="n">AnyFoodSearchProblem</span><span class="p">(</span><span class="n">gameState</span><span class="p">)</span>
+
+        <span class="s">"*** YOUR CODE HERE ***"</span>
+        <span class="n">util</span><span class="o">.</span><span class="n">raiseNotDefined</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">AnyFoodSearchProblem</span><span class="p">(</span><span class="n">PositionSearchProblem</span><span class="p">):</span>
+    <span class="s">"""
+    A search problem for finding a path to any food.
+
+    This search problem is just like the PositionSearchProblem, but has a
+    different goal test, which you need to fill in below.  The state space and
+    successor function do not need to be changed.
+
+    The class definition above, AnyFoodSearchProblem(PositionSearchProblem),
+    inherits the methods of the PositionSearchProblem.
+
+    You can use this search problem to help you fill in the findPathToClosestDot
+    method.
+    """</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gameState</span><span class="p">):</span>
+        <span class="s">"Stores information from the gameState.  You don't need to change this."</span>
+        <span class="c1"># Store the food for later reference
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">food</span> <span class="o">=</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getFood</span><span class="p">()</span>
+
+        <span class="c1"># Store info for the PositionSearchProblem (no need to change this)
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">walls</span> <span class="o">=</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getWalls</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startState</span> <span class="o">=</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getPacmanPosition</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">costFn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_visited</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visitedlist</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expanded</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">[],</span> <span class="mi">0</span>  <span class="c1"># DO NOT CHANGE
+</span>
+    <span class="k">def</span> <span class="nf">isGoalState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="s">"""
+        The state is Pacman's position. Fill this in with a goal test that will
+        complete the problem definition.
+        """</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">state</span>
+
+        <span class="s">"*** YOUR CODE HERE ***"</span>
+        <span class="n">util</span><span class="o">.</span><span class="n">raiseNotDefined</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">mazeDistance</span><span class="p">(</span><span class="n">point1</span><span class="p">,</span> <span class="n">point2</span><span class="p">,</span> <span class="n">gameState</span><span class="p">):</span>
+    <span class="s">"""
+    Returns the maze distance between any two points, using the search functions
+    you have already built. The gameState can be any game state -- Pacman's
+    position in that state is ignored.
+
+    Example usage: mazeDistance( (2,4), (5,6), gameState)
+
+    This might be a useful helper function for your ApproximateSearchAgent.
+    """</span>
+    <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">point1</span>
+    <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">point2</span>
+    <span class="n">walls</span> <span class="o">=</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getWalls</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">walls</span><span class="p">[</span><span class="n">x1</span><span class="p">][</span><span class="n">y1</span><span class="p">],</span> <span class="s">'point1 is a wall: '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">point1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">walls</span><span class="p">[</span><span class="n">x2</span><span class="p">][</span><span class="n">y2</span><span class="p">],</span> <span class="s">'point2 is a wall: '</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">point2</span><span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">PositionSearchProblem</span><span class="p">(</span>
+        <span class="n">gameState</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">point1</span><span class="p">,</span> <span class="n">goal</span><span class="o">=</span><span class="n">point2</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">visualize</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">search</span><span class="o">.</span><span class="n">bfs</span><span class="p">(</span><span class="n">prob</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h2 id="multi-agent-search">Multi-Agent Search</h2>
+
+<h3 id="multiagentspy">multiAgents.py</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># multiAgents.py
+# --------------
+# Licensing Information:  You are free to use or extend these projects for
+# educational purposes provided that (1) you do not distribute or publish
+# solutions, (2) you retain this notice, and (3) you provide clear
+# attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
+#
+# Attribution Information: The Pacman AI projects were developed at UC Berkeley.
+# The core projects and autograders were primarily created by John DeNero
+# (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
+# Student side autograding was added by Brad Miller, Nick Hay, and
+# Pieter Abbeel (pabbeel@cs.berkeley.edu).
+</span>
+
+<span class="kn">from</span> <span class="nn">util</span> <span class="kn">import</span> <span class="n">manhattanDistance</span>
+<span class="kn">from</span> <span class="nn">game</span> <span class="kn">import</span> <span class="n">Directions</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">util</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">game</span> <span class="kn">import</span> <span class="n">Agent</span>
+
+
+<span class="k">class</span> <span class="nc">ReflexAgent</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+    <span class="s">"""
+    A reflex agent chooses an action at each choice point by examining
+    its alternatives via a state evaluation function.
+
+    The code below is provided as a guide.  You are welcome to change
+    it in any way you see fit, so long as you don't touch our method
+    headers.
+    """</span>
+
+    <span class="k">def</span> <span class="nf">getAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gameState</span><span class="p">):</span>
+        <span class="s">"""
+        You do not need to change this method, but you're welcome to.
+
+        getAction chooses among the best options according to the evaluation function.
+
+        Just like in the previous project, getAction takes a GameState and returns
+        some Directions.X for some X in the set {North, South, West, East, Stop}
+        """</span>
+        <span class="c1"># Collect legal moves and successor states
+</span>        <span class="n">legalMoves</span> <span class="o">=</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getLegalActions</span><span class="p">()</span>
+
+        <span class="c1"># Choose one of the best actions
+</span>        <span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluationFunction</span><span class="p">(</span>
+            <span class="n">gameState</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">legalMoves</span><span class="p">]</span>
+        <span class="n">bestScore</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+        <span class="n">bestIndices</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="p">))</span> <span class="k">if</span> <span class="n">scores</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="n">bestScore</span><span class="p">]</span>
+        <span class="c1"># Pick randomly among the best
+</span>        <span class="n">chosenIndex</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">bestIndices</span><span class="p">)</span>
+
+        <span class="s">"Add more of your code here if you want to"</span>
+
+        <span class="k">return</span> <span class="n">legalMoves</span><span class="p">[</span><span class="n">chosenIndex</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">evaluationFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentGameState</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="s">"""
+        Design a better evaluation function here.
+
+        The evaluation function takes in the current and proposed successor
+        GameStates (pacman.py) and returns a number, where higher numbers are better.
+
+        The code below extracts some useful information from the state, like the
+        remaining food (newFood) and Pacman position after moving (newPos).
+        newScaredTimes holds the number of moves that each ghost will remain
+        scared because of Pacman having eaten a power pellet.
+
+        Print out these variables to see what you're getting, then combine them
+        to create a masterful evaluation function.
+        """</span>
+        <span class="c1"># Useful information you can extract from a GameState (pacman.py)
+</span>        <span class="n">successorGameState</span> <span class="o">=</span> <span class="n">currentGameState</span><span class="o">.</span><span class="n">generatePacmanSuccessor</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="n">newPos</span> <span class="o">=</span> <span class="n">successorGameState</span><span class="o">.</span><span class="n">getPacmanPosition</span><span class="p">()</span>
+        <span class="n">newFood</span> <span class="o">=</span> <span class="n">successorGameState</span><span class="o">.</span><span class="n">getFood</span><span class="p">()</span>
+        <span class="n">newGhostStates</span> <span class="o">=</span> <span class="n">successorGameState</span><span class="o">.</span><span class="n">getGhostStates</span><span class="p">()</span>
+        <span class="n">newScaredTimes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ghostState</span><span class="o">.</span><span class="n">scaredTimer</span> <span class="k">for</span> <span class="n">ghostState</span> <span class="ow">in</span> <span class="n">newGhostStates</span><span class="p">]</span>
+
+        <span class="s">"*** YOUR CODE HERE ***"</span>
+        <span class="k">if</span> <span class="n">successorGameState</span><span class="o">.</span><span class="n">isWin</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxint</span>
+        <span class="k">if</span> <span class="n">successorGameState</span><span class="o">.</span><span class="n">isLose</span><span class="p">():</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">maxint</span>
+
+        <span class="n">ghostPositions</span> <span class="o">=</span> <span class="p">[</span><span class="n">ghostState</span><span class="o">.</span><span class="n">getPosition</span><span class="p">(</span>
+        <span class="p">)</span> <span class="k">for</span> <span class="n">ghostState</span> <span class="ow">in</span> <span class="n">newGhostStates</span> <span class="k">if</span> <span class="n">ghostState</span><span class="o">.</span><span class="n">scaredTimer</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ghostPositions</span><span class="p">:</span>
+            <span class="n">closestGhost</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">util</span><span class="o">.</span><span class="n">manhattanDistance</span><span class="p">(</span>
+                <span class="n">newPos</span><span class="p">,</span> <span class="n">ghostPos</span><span class="p">)</span> <span class="k">for</span> <span class="n">ghostPos</span> <span class="ow">in</span> <span class="n">ghostPositions</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">closestGhost</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">maxint</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxint</span>
+
+        <span class="n">closestFood</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">util</span><span class="o">.</span><span class="n">manhattanDistance</span><span class="p">(</span><span class="n">newPos</span><span class="p">,</span> <span class="n">foodPos</span><span class="p">)</span>
+                           <span class="k">for</span> <span class="n">foodPos</span> <span class="ow">in</span> <span class="n">newFood</span><span class="o">.</span><span class="n">asList</span><span class="p">()])</span>
+
+        <span class="k">return</span> <span class="n">successorGameState</span><span class="o">.</span><span class="n">getScore</span><span class="p">()</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">newScaredTimes</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">closestFood</span> <span class="o">*</span> <span class="n">closestGhost</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">scoreEvaluationFunction</span><span class="p">(</span><span class="n">currentGameState</span><span class="p">):</span>
+    <span class="s">"""
+      This default evaluation function just returns the score of the state.
+      The score is the same one displayed in the Pacman GUI.
+
+      This evaluation function is meant for use with adversarial search agents
+      (not reflex agents).
+    """</span>
+    <span class="k">return</span> <span class="n">currentGameState</span><span class="o">.</span><span class="n">getScore</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">MultiAgentSearchAgent</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+    <span class="s">"""
+      This class provides some common elements to all of your
+      multi-agent searchers.  Any methods defined here will be available
+      to the MinimaxPacmanAgent, AlphaBetaPacmanAgent &amp; ExpectimaxPacmanAgent.
+
+      You *do not* need to make any changes here, but you can if you want to
+      add functionality to all your adversarial search agents.  Please do not
+      remove anything, however.
+
+      Note: this is an abstract class: one that should not be instantiated.  It's
+      only partially specified, and designed to be extended.  Agent (game.py)
+      is another abstract class.
+    """</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evalFn</span><span class="o">=</span><span class="s">'scoreEvaluationFunction'</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="s">'2'</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Pacman is always agent index 0
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">evaluationFunction</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">evalFn</span><span class="p">,</span> <span class="nb">globals</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">MinimaxAgent</span><span class="p">(</span><span class="n">MultiAgentSearchAgent</span><span class="p">):</span>
+    <span class="s">"""
+    Your minimax agent (question 2)
+    """</span>
+
+    <span class="k">def</span> <span class="nf">getAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gameState</span><span class="p">):</span>
+        <span class="s">"""
+        Returns the minimax action from the current gameState using self.depth
+        and self.evaluationFunction.
+
+        Here are some method calls that might be useful when implementing minimax.
+
+        gameState.getLegalActions(agentIndex):
+            Returns a list of legal actions for an agent
+            agentIndex=0 means Pacman, ghosts are &gt;= 1
+
+        gameState.generateSuccessor(agentIndex, action):
+            Returns the successor game state after an agent takes an action
+
+        gameState.getNumAgents():
+            Returns the total number of agents in the game
+        """</span>
+        <span class="s">"*** YOUR CODE HERE ***"</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">MinimaxSearch</span><span class="p">(</span><span class="n">gameState</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># util.raiseNotDefined()
+</span>
+    <span class="k">def</span> <span class="nf">MinimaxSearch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gameState</span><span class="p">,</span> <span class="n">currentDepth</span><span class="p">,</span> <span class="n">agentIndex</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">agentIndex</span> <span class="o">&gt;=</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getNumAgents</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">MinimaxSearch</span><span class="p">(</span><span class="n">gameState</span><span class="p">,</span> <span class="n">currentDepth</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">currentDepth</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="ow">or</span> <span class="n">gameState</span><span class="o">.</span><span class="n">isWin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">gameState</span><span class="o">.</span><span class="n">isLose</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluationFunction</span><span class="p">(</span><span class="n">gameState</span><span class="p">)</span>
+
+        <span class="n">legalMoves</span> <span class="o">=</span> <span class="p">[</span><span class="n">action</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getLegalActions</span><span class="p">(</span>
+            <span class="n">agentIndex</span><span class="p">)</span> <span class="k">if</span> <span class="n">action</span> <span class="o">!=</span> <span class="s">'Stop'</span><span class="p">]</span>
+
+        <span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">MinimaxSearch</span><span class="p">(</span><span class="n">gameState</span><span class="o">.</span><span class="n">generateSuccessor</span><span class="p">(</span>
+            <span class="n">agentIndex</span><span class="p">,</span> <span class="n">action</span><span class="p">),</span> <span class="n">currentDepth</span><span class="p">,</span> <span class="n">agentIndex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">legalMoves</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">agentIndex</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">bestScore</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">currentDepth</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># pacman first move
+</span>                <span class="n">bestIndices</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="p">))</span> <span class="k">if</span> <span class="n">scores</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="n">bestScore</span><span class="p">]</span>
+                <span class="n">chosenIndex</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">bestIndices</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">legalMoves</span><span class="p">[</span><span class="n">chosenIndex</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">bestScore</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">AlphaBetaAgent</span><span class="p">(</span><span class="n">MultiAgentSearchAgent</span><span class="p">):</span>
+    <span class="s">"""
+    Your minimax agent with alpha-beta pruning (question 3)
+    """</span>
+
+    <span class="k">def</span> <span class="nf">getAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gameState</span><span class="p">):</span>
+        <span class="s">"""
+        Returns the minimax action using self.depth and self.evaluationFunction
+        """</span>
+        <span class="s">"*** YOUR CODE HERE ***"</span>
+        <span class="c1"># util.raiseNotDefined()
+</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">AlphaBeta</span><span class="p">(</span><span class="n">gameState</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">maxint</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxint</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">AlphaBetaSearch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gameState</span><span class="p">,</span> <span class="n">currentDepth</span><span class="p">,</span> <span class="n">agentIndex</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">agentIndex</span> <span class="o">&gt;=</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getNumAgents</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">AlphaBetaSearch</span><span class="p">(</span><span class="n">gameState</span><span class="p">,</span> <span class="n">currentDepth</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">currentDepth</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="ow">or</span> <span class="n">gameState</span><span class="o">.</span><span class="n">isWin</span><span class="p">()</span> <span class="ow">or</span> <span class="n">gameState</span><span class="o">.</span><span class="n">isLose</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluationFunction</span><span class="p">(</span><span class="n">gameState</span><span class="p">)</span>
+
+        <span class="n">legalMoves</span> <span class="o">=</span> <span class="p">[</span><span class="n">action</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">gameState</span><span class="o">.</span><span class="n">getLegalActions</span><span class="p">(</span>
+            <span class="n">agentIndex</span><span class="p">)</span> <span class="k">if</span> <span class="n">action</span> <span class="o">!=</span> <span class="s">'Stop'</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">agentIndex</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">currentDepth</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># pacman first move
+</span>                <span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AlphaBetaSearch</span><span class="p">(</span><span class="n">gameState</span><span class="o">.</span><span class="n">generateSuccessor</span><span class="p">(</span>
+                    <span class="n">agentIndex</span><span class="p">,</span> <span class="n">action</span><span class="p">),</span> <span class="n">currentDepth</span><span class="p">,</span> <span class="n">agentIndex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span> <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">legalMoves</span><span class="p">]</span>
+                <span class="n">bestScore</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+                <span class="n">bestIndices</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="p">))</span> <span class="k">if</span> <span class="n">scores</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="n">bestScore</span><span class="p">]</span>
+                <span class="n">chosenIndex</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">bestIndices</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">legalMoves</span><span class="p">[</span><span class="n">chosenIndex</span><span class="p">]</span>
+            <span class="n">bestScore</span> <span class="o">=</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">maxint</span>
+            <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">legalMoves</span><span class="p">:</span>
+                <span class="n">bestScore</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">bestScore</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">AlphaBetaSearch</span><span class="p">(</span><span class="n">gameState</span><span class="o">.</span><span class="n">generateSuccessor</span><span class="p">(</span><span class="n">agentIndex</span><span class="p">,</span> <span class="n">action</span><span class="p">),</span>  <span class="n">currentDepth</span><span class="p">,</span> <span class="n">agentIndex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">bestScore</span> <span class="o">&gt;=</span> <span class="n">beta</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">bestScore</span>
+                <span class="n">alpha</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">bestScore</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">bestScore</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bestScore</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxint</span>
+            <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">legalMoves</span><span class="p">:</span>
+                <span class="n">bestScore</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">bestScore</span><span class="p">,</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">AlphaBetaSearch</span><span class="p">(</span><span class="n">gameState</span><span class="o">.</span><span class="n">generateSuccessor</span><span class="p">(</span><span class="n">agentIndex</span><span class="p">,</span> <span class="n">action</span><span class="p">),</span> <span class="n">currentDepth</span><span class="p">,</span> <span class="n">agentIndex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">alpha</span> <span class="o">&gt;=</span> <span class="n">bestScore</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">bestScore</span>
+                <span class="n">beta</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">bestScore</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">bestScore</span>
+
+
+<span class="k">class</span> <span class="nc">ExpectimaxAgent</span><span class="p">(</span><span class="n">MultiAgentSearchAgent</span><span class="p">):</span>
+    <span class="s">"""
+    Your expectimax agent (question 4)
+    """</span>
+
+    <span class="k">def</span> <span class="nf">getAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gameState</span><span class="p">):</span>
+        <span class="s">"""
+        Returns the expectimax action using self.depth and self.evaluationFunction
+
+        All ghosts should be modeled as choosing uniformly at random from their
+        legal moves.
+        """</span>
+        <span class="s">"*** YOUR CODE HERE ***"</span>
+        <span class="n">util</span><span class="o">.</span><span class="n">raiseNotDefined</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">betterEvaluationFunction</span><span class="p">(</span><span class="n">currentGameState</span><span class="p">):</span>
+    <span class="s">"""
+    Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
+    evaluation function (question 5).
+
+    DESCRIPTION: &lt;write something here so we know what you did&gt;
+    """</span>
+    <span class="s">"*** YOUR CODE HERE ***"</span>
+    <span class="n">util</span><span class="o">.</span><span class="n">raiseNotDefined</span><span class="p">()</span>
+
+
+<span class="c1"># Abbreviation
+</span><span class="n">better</span> <span class="o">=</span> <span class="n">betterEvaluationFunction</span>
+</code></pre></div></div>
+:ET

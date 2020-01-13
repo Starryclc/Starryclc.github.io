@@ -1,0 +1,93 @@
+I"<h2 id="什么是计算机图形学">什么是计算机图形学</h2>
+
+<p>计算机图形学 (简称CG) 是一种使用数学算法将二维或三维图形转化为计算机显示器的栅格形式的科学。简单地说，计算机图形学的主要研究内容就是研究如何在计算机中表示图形、以及利用计算机进行图形的计算、处理和显示的相关原理与算法。</p>
+
+<h2 id="the-basic-content-of-computer-graphics">The Basic Content of Computer Graphics</h2>
+
+<h3 id="modeling-shape建模">Modeling (Shape，建模)</h3>
+
+<p>creating and representing the geometry of objects in the 3D world.</p>
+
+<h4 id="how-do-we-represent-objectsenvironments">How do we represent objects/environments</h4>
+
+<ul>
+  <li>Shape: the geometry of the object.</li>
+  <li>Appearance: emission, reflection, and transmission of light.</li>
+</ul>
+
+<h4 id="how-do-we-construct-these-models">How do we construct these models</h4>
+
+<ul>
+  <li>Formula description</li>
+  <li>Interactive manipulation</li>
+  <li>Procedurally generating</li>
+  <li>Scan a real object</li>
+</ul>
+
+<h3 id="rendering-displaying">Rendering (Displaying)</h3>
+
+<p>is a term inherited from art and deals with the creation of 2D shaded images from 3D computer models.</p>
+
+<h4 id="generation-of-2d-images-from-a-3d-models">Generation of 2D images from a 3D Models</h4>
+
+<ul>
+  <li>Input: graphics: object (shape, material, …)</li>
+  <li>Output: image: array of pixels (RGB)</li>
+</ul>
+
+<h4 id="photorealistic-rendering">Photorealistic rendering</h4>
+
+<ul>
+  <li>Physically-based simulation of light, camera</li>
+  <li>Shadows, realistic illumination</li>
+  <li>Special effects, movies</li>
+</ul>
+
+<h4 id="non-photorealistic-rendering">Non-Photorealistic Rendering</h4>
+
+<ul>
+  <li>Stylized</li>
+  <li>Artwork, illustrations</li>
+</ul>
+
+<h4 id="interactive-rendering">Interactive rendering</h4>
+
+<ul>
+  <li>Produce images within milliseconds</li>
+  <li>Using specialized hardware, graphics processing units (GPUs)</li>
+  <li>Standardized APIs (OpenGL, DirectX)</li>
+  <li>Often “as photorealistic as possible”</li>
+  <li>Hard shadows, fake soft shadows, only single bounce of light</li>
+  <li>Games</li>
+</ul>
+
+<h3 id="animation-simulating">Animation (Simulating)</h3>
+
+<p>describing how objects change in time.</p>
+
+<h4 id="making-geometric-models-move-and-deform">Making geometric models move and deform</h4>
+
+<h4 id="how-do-we-represent-the-motion-of-objects">How do we represent the motion of objects</h4>
+
+<p>Positions, angles, etc.</p>
+
+<h4 id="how-do-we-controlspecify-this-motion">How do we control/specify this motion</h4>
+
+<ul>
+  <li>Generate poses by hand</li>
+  <li>Behavioral simulation</li>
+  <li>Physical simulation</li>
+  <li>Motion capture</li>
+</ul>
+
+<h2 id="summary">Summary</h2>
+
+<p>简单地说，计算机图形学的主要研究内容就是研究如何在计算机中表示图形、以及利用 计算机进行图形的计算、处理和显示的相关原理与算法。</p>
+
+<ul>
+  <li>The Basic Content of Computer Graphics.</li>
+  <li>Modeling (shape): creating and representing the geometry of objects in the 3D world.</li>
+  <li>Rendering (displaying): is a term inherited from art and deals with the creation of 2D shaded images from 3D computer models.</li>
+  <li>Animation (simulating): describing how objects change in time.</li>
+</ul>
+:ET

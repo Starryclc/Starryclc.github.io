@@ -1,0 +1,26 @@
+I")<p><a href="https://vjudge.net/problem/POJ-3250">题目链接</a>
+维护一个递减的单调栈，每次插入后当前这只牛可以被<code class="highlighter-rouge">q.size()-1</code>只左边的高于他的牛看到。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;cstdio&gt;
+#include&lt;deque&gt;
+</span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">N</span><span class="o">=</span><span class="mf">8e4</span><span class="o">+</span><span class="mi">9</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="kt">int</span> <span class="n">ll</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="n">ll</span><span class="o">&gt;</span> <span class="n">pil</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">MonotoneQueue</span><span class="o">:</span><span class="n">deque</span><span class="o">&lt;</span><span class="n">pil</span><span class="o">&gt;</span>
+<span class="p">{</span>
+	<span class="kt">void</span> <span class="n">push</span><span class="p">(</span><span class="n">pil</span> <span class="n">p</span><span class="p">,</span><span class="kt">int</span> <span class="n">k</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">while</span><span class="p">(</span><span class="o">!</span><span class="n">empty</span><span class="p">()</span><span class="o">&amp;&amp;</span><span class="n">back</span><span class="p">().</span><span class="n">second</span><span class="o">&gt;=</span><span class="n">p</span><span class="p">.</span><span class="n">second</span><span class="p">)</span><span class="n">pop_back</span><span class="p">();</span>
+		<span class="k">for</span><span class="p">(</span><span class="n">push_back</span><span class="p">(</span><span class="n">p</span><span class="p">);</span> <span class="n">p</span><span class="p">.</span><span class="n">first</span><span class="o">-</span><span class="n">front</span><span class="p">().</span><span class="n">first</span><span class="o">&gt;=</span><span class="n">k</span><span class="p">;)</span><span class="n">pop_front</span><span class="p">();</span>
+	<span class="p">}</span>
+<span class="p">}</span> <span class="n">q</span><span class="p">;</span>
+<span class="kt">long</span> <span class="kt">long</span> <span class="n">ans</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">n</span><span class="p">,</span><span class="n">h</span><span class="p">;</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="k">for</span><span class="p">(</span><span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span> <span class="n">n</span><span class="o">--</span><span class="p">;)</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">h</span><span class="p">),</span><span class="n">q</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">pil</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="o">-</span><span class="n">h</span><span class="p">),</span><span class="n">N</span><span class="p">),</span><span class="n">ans</span><span class="o">+=</span><span class="n">q</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"%lld"</span><span class="p">,</span><span class="n">ans</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+:ET

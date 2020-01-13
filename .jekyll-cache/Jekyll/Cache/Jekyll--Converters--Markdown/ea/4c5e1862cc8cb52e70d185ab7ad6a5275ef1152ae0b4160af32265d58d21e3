@@ -1,0 +1,200 @@
+I"��<p>使用<code class="highlighter-rouge">python</code>库<code class="highlighter-rouge">pomegranate</code>的构建贝叶斯网络求条件概率的两个例子。</p>
+
+<h2 id="环境配置">环境配置</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>pomegranate
+</code></pre></div></div>
+
+<h2 id="burglary">Burglary</h2>
+
+<h3 id="源代码">源代码</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pomegranate</span>
+
+<span class="n">B</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">DiscreteDistribution</span><span class="p">({</span><span class="s">'B'</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span> <span class="s">'~B'</span><span class="p">:</span> <span class="mf">0.999</span><span class="p">})</span>
+<span class="n">E</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">DiscreteDistribution</span><span class="p">({</span><span class="s">'E'</span><span class="p">:</span> <span class="mf">0.002</span><span class="p">,</span> <span class="s">'~E'</span><span class="p">:</span> <span class="mf">0.998</span><span class="p">})</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">ConditionalProbabilityTable</span><span class="p">(</span>
+    <span class="p">[[</span><span class="s">'B'</span><span class="p">,</span> <span class="s">'E'</span><span class="p">,</span> <span class="s">'A'</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'B'</span><span class="p">,</span> <span class="s">'E'</span><span class="p">,</span> <span class="s">'~A'</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'B'</span><span class="p">,</span> <span class="s">'~E'</span><span class="p">,</span> <span class="s">'A'</span><span class="p">,</span> <span class="mf">0.94</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'B'</span><span class="p">,</span> <span class="s">'~E'</span><span class="p">,</span> <span class="s">'~A'</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'~B'</span><span class="p">,</span> <span class="s">'E'</span><span class="p">,</span> <span class="s">'A'</span><span class="p">,</span> <span class="mf">0.29</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'~B'</span><span class="p">,</span> <span class="s">'E'</span><span class="p">,</span> <span class="s">'~A'</span><span class="p">,</span> <span class="mf">0.71</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'~B'</span><span class="p">,</span> <span class="s">'~E'</span><span class="p">,</span> <span class="s">'A'</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'~B'</span><span class="p">,</span> <span class="s">'~E'</span><span class="p">,</span> <span class="s">'~A'</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">]],</span> <span class="p">[</span><span class="n">B</span><span class="p">,</span> <span class="n">E</span><span class="p">])</span>
+<span class="n">J</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">ConditionalProbabilityTable</span><span class="p">(</span>
+    <span class="p">[[</span><span class="s">'A'</span><span class="p">,</span> <span class="s">'J'</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'A'</span><span class="p">,</span> <span class="s">'~J'</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'~A'</span><span class="p">,</span> <span class="s">'J'</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'~A'</span><span class="p">,</span> <span class="s">'~J'</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">]],</span> <span class="p">[</span><span class="n">A</span><span class="p">])</span>
+<span class="n">M</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">ConditionalProbabilityTable</span><span class="p">(</span>
+    <span class="p">[[</span><span class="s">'A'</span><span class="p">,</span> <span class="s">'M'</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'A'</span><span class="p">,</span> <span class="s">'~M'</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'~A'</span><span class="p">,</span> <span class="s">'M'</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">],</span>
+     <span class="p">[</span><span class="s">'~A'</span><span class="p">,</span> <span class="s">'~M'</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">]],</span> <span class="p">[</span><span class="n">A</span><span class="p">])</span>
+
+<span class="n">SB</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'B'</span><span class="p">)</span>
+<span class="n">SE</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'E'</span><span class="p">)</span>
+<span class="n">SA</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'A'</span><span class="p">)</span>
+<span class="n">SJ</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'J'</span><span class="p">)</span>
+<span class="n">SM</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'M'</span><span class="p">)</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">BayesianNetwork</span><span class="p">(</span><span class="s">"Burglary"</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_states</span><span class="p">(</span><span class="n">SB</span><span class="p">,</span> <span class="n">SE</span><span class="p">,</span> <span class="n">SA</span><span class="p">,</span> <span class="n">SJ</span><span class="p">,</span> <span class="n">SM</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">SB</span><span class="p">,</span> <span class="n">SA</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">SE</span><span class="p">,</span> <span class="n">SA</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">SA</span><span class="p">,</span> <span class="n">SJ</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">SA</span><span class="p">,</span> <span class="n">SM</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">bake</span><span class="p">()</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"P(A) ="</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">({})[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">'A'</span><span class="p">])</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"P(J&amp;&amp;~M) ="</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">({})[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">'J'</span><span class="p">]</span> <span class="o">*</span>
+      <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">({</span><span class="s">'J'</span><span class="p">:</span> <span class="s">'J'</span><span class="p">})[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">'~M'</span><span class="p">])</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"P(A|J&amp;&amp;~M) ="</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">({</span><span class="s">'J'</span><span class="p">:</span> <span class="s">'J'</span><span class="p">,</span> <span class="s">'M'</span><span class="p">:</span> <span class="s">'~M'</span><span class="p">})[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">'A'</span><span class="p">])</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"P(B|A) ="</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">({</span><span class="s">'A'</span><span class="p">:</span> <span class="s">'A'</span><span class="p">})[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">'B'</span><span class="p">])</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"P(B|J&amp;&amp;~M) ="</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">({</span><span class="s">'J'</span><span class="p">:</span> <span class="s">'J'</span><span class="p">,</span> <span class="s">'M'</span><span class="p">:</span> <span class="s">'~M'</span><span class="p">})[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">'B'</span><span class="p">])</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"P(J&amp;&amp;~M|~B) ="</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">({</span><span class="s">'B'</span><span class="p">:</span> <span class="s">'~B'</span><span class="p">})[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">'J'</span><span class="p">]</span> <span class="o">*</span>
+      <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">({</span><span class="s">'B'</span><span class="p">:</span> <span class="s">'~B'</span><span class="p">,</span> <span class="s">'J'</span><span class="p">:</span> <span class="s">'J'</span><span class="p">})[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">'~M'</span><span class="p">])</span>
+</code></pre></div></div>
+
+<h3 id="运行结果">运行结果</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>P<span class="o">(</span>A<span class="o">)</span> <span class="o">=</span>
+0.002516442000000935
+P<span class="o">(</span>J&amp;&amp;~M<span class="o">)</span> <span class="o">=</span>
+0.05005487546100034
+P<span class="o">(</span>A|J&amp;&amp;~M<span class="o">)</span> <span class="o">=</span>
+0.01357388933131146
+P<span class="o">(</span>B|A<span class="o">)</span> <span class="o">=</span>
+0.3735512282818995
+P<span class="o">(</span>B|J&amp;&amp;~M<span class="o">)</span> <span class="o">=</span>
+0.005129858133403528
+P<span class="o">(</span>J&amp;&amp;~M|~B<span class="o">)</span> <span class="o">=</span>
+0.04984794900000031
+</code></pre></div></div>
+
+<h2 id="diagnosing">Diagnosing</h2>
+
+<h3 id="源代码-1">源代码</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pomegranate</span>
+
+<span class="n">PatientAge</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">DiscreteDistribution</span><span class="p">(</span>
+    <span class="p">{</span><span class="s">'0-30'</span><span class="p">:</span> <span class="mf">0.10</span><span class="p">,</span> <span class="s">'31-65'</span><span class="p">:</span> <span class="mf">0.30</span><span class="p">,</span> <span class="s">'65+'</span><span class="p">:</span> <span class="mf">0.60</span><span class="p">})</span>
+<span class="n">CTScanResult</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">DiscreteDistribution</span><span class="p">(</span>
+    <span class="p">{</span><span class="s">'Ischemic Stroke'</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">})</span>
+<span class="n">MRIScanResult</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">DiscreteDistribution</span><span class="p">(</span>
+    <span class="p">{</span><span class="s">'Ischemic Stroke'</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">})</span>
+<span class="n">Anticoagulants</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">DiscreteDistribution</span><span class="p">(</span>
+    <span class="p">{</span><span class="s">'Used'</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s">'Not used'</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">})</span>
+<span class="n">StrokeType</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">ConditionalProbabilityTable</span><span class="p">([</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]],</span> <span class="p">[</span><span class="n">CTScanResult</span><span class="p">,</span> <span class="n">MRIScanResult</span><span class="p">])</span>
+<span class="n">Mortality</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">ConditionalProbabilityTable</span><span class="p">([</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Used'</span><span class="p">,</span> <span class="s">'False'</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Used'</span><span class="p">,</span> <span class="s">'False'</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'Used'</span><span class="p">,</span> <span class="s">'False'</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'Not used'</span><span class="p">,</span> <span class="s">'False'</span><span class="p">,</span> <span class="mf">0.56</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Not used'</span><span class="p">,</span> <span class="s">'False'</span><span class="p">,</span> <span class="mf">0.58</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'Not used'</span><span class="p">,</span> <span class="s">'False'</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span>  <span class="s">'Used'</span><span class="p">,</span> <span class="s">'True'</span><span class="p">,</span> <span class="mf">0.72</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Used'</span><span class="p">,</span> <span class="s">'True'</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'Used'</span><span class="p">,</span> <span class="s">'True'</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span>  <span class="s">'Not used'</span><span class="p">,</span> <span class="s">'True'</span><span class="p">,</span> <span class="mf">0.44</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'Not used'</span><span class="p">,</span> <span class="s">'True'</span><span class="p">,</span> <span class="mf">0.42</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'Not used'</span><span class="p">,</span> <span class="s">'True'</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">]],</span>
+    <span class="p">[</span><span class="n">StrokeType</span><span class="p">,</span> <span class="n">Anticoagulants</span><span class="p">])</span>
+<span class="n">Disability</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">ConditionalProbabilityTable</span><span class="p">([</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span>   <span class="s">'0-30'</span><span class="p">,</span> <span class="s">'Negligible'</span><span class="p">,</span> <span class="mf">0.80</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'0-30'</span><span class="p">,</span> <span class="s">'Negligible'</span><span class="p">,</span> <span class="mf">0.70</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'0-30'</span><span class="p">,</span> <span class="s">'Negligible'</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'31-65'</span><span class="p">,</span> <span class="s">'Negligible'</span><span class="p">,</span> <span class="mf">0.60</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'31-65'</span><span class="p">,</span> <span class="s">'Negligible'</span><span class="p">,</span> <span class="mf">0.50</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'31-65'</span><span class="p">,</span> <span class="s">'Negligible'</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'65+'</span><span class="p">,</span> <span class="s">'Negligible'</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'65+'</span><span class="p">,</span> <span class="s">'Negligible'</span><span class="p">,</span> <span class="mf">0.20</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'65+'</span><span class="p">,</span> <span class="s">'Negligible'</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'0-30'</span><span class="p">,</span> <span class="s">'Moderate'</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'0-30'</span><span class="p">,</span> <span class="s">'Moderate'</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'0-30'</span><span class="p">,</span> <span class="s">'Moderate'</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'31-65'</span><span class="p">,</span> <span class="s">'Moderate'</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'31-65'</span><span class="p">,</span> <span class="s">'Moderate'</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'31-65'</span><span class="p">,</span> <span class="s">'Moderate'</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span>  <span class="s">'65+'</span><span class="p">,</span> <span class="s">'Moderate'</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'65+'</span><span class="p">,</span> <span class="s">'Moderate'</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'65+'</span><span class="p">,</span> <span class="s">'Moderate'</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'0-30'</span><span class="p">,</span> <span class="s">'Severe'</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'0-30'</span><span class="p">,</span> <span class="s">'Severe'</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'0-30'</span><span class="p">,</span> <span class="s">'Severe'</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'31-65'</span><span class="p">,</span> <span class="s">'Severe'</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'31-65'</span><span class="p">,</span> <span class="s">'Severe'</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'31-65'</span><span class="p">,</span> <span class="s">'Severe'</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Ischemic Stroke'</span><span class="p">,</span> <span class="s">'65+'</span><span class="p">,</span> <span class="s">'Severe'</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span> <span class="s">'65+'</span><span class="p">,</span> <span class="s">'Severe'</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">],</span>
+    <span class="p">[</span><span class="s">'Stroke Mimic'</span><span class="p">,</span> <span class="s">'65+'</span><span class="p">,</span> <span class="s">'Severe'</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">]],</span>
+    <span class="p">[</span><span class="n">StrokeType</span><span class="p">,</span> <span class="n">PatientAge</span><span class="p">])</span>
+
+<span class="n">S1</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">PatientAge</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'PatientAge'</span><span class="p">)</span>
+<span class="n">S2</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">CTScanResult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'CTScanResult'</span><span class="p">)</span>
+<span class="n">S3</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">MRIScanResult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'MRIScanResult'</span><span class="p">)</span>
+<span class="n">S4</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">StrokeType</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'StrokeType'</span><span class="p">)</span>
+<span class="n">S5</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">Anticoagulants</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'Anticoagulants'</span><span class="p">)</span>
+<span class="n">S6</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">Mortality</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'Mortality'</span><span class="p">)</span>
+<span class="n">S7</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">Disability</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'Disability'</span><span class="p">)</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">pomegranate</span><span class="o">.</span><span class="n">BayesianNetwork</span><span class="p">(</span><span class="s">"Diagnosing"</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_states</span><span class="p">(</span><span class="n">S1</span><span class="p">,</span> <span class="n">S2</span><span class="p">,</span> <span class="n">S3</span><span class="p">,</span> <span class="n">S4</span><span class="p">,</span> <span class="n">S5</span><span class="p">,</span> <span class="n">S6</span><span class="p">,</span> <span class="n">S7</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">S2</span><span class="p">,</span> <span class="n">S4</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">S3</span><span class="p">,</span> <span class="n">S4</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">S4</span><span class="p">,</span> <span class="n">S6</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">S5</span><span class="p">,</span> <span class="n">S6</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">S1</span><span class="p">,</span> <span class="n">S7</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">S4</span><span class="p">,</span> <span class="n">S7</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">bake</span><span class="p">()</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"p1 ="</span><span class="p">,</span>
+      <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">({</span><span class="s">'PatientAge'</span><span class="p">:</span> <span class="s">'31-65'</span><span class="p">,</span>
+                           <span class="s">'CTScanResult'</span><span class="p">:</span> <span class="s">'Ischemic Stroke'</span><span class="p">})[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">'True'</span><span class="p">])</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"p2 ="</span><span class="p">,</span>
+      <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">({</span><span class="s">'PatientAge'</span><span class="p">:</span> <span class="s">'65+'</span><span class="p">,</span>
+                           <span class="s">'MRIScanResult'</span><span class="p">:</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">})[</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">'Moderate'</span><span class="p">])</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"p3 ="</span><span class="p">,</span>
+      <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">({</span><span class="s">'PatientAge'</span><span class="p">:</span> <span class="s">'65+'</span><span class="p">,</span>
+                           <span class="s">'CTScanResult'</span><span class="p">:</span> <span class="s">'Hemmorraghic Stroke'</span><span class="p">,</span>
+                           <span class="s">'MRIScanResult'</span><span class="p">:</span> <span class="s">'Ischemic Stroke'</span><span class="p">})[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">'Stroke Mimic'</span><span class="p">])</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">"p4 ="</span><span class="p">,</span>
+      <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">({</span><span class="s">'PatientAge'</span><span class="p">:</span> <span class="s">'0-30'</span><span class="p">})[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s">'Not used'</span><span class="p">])</span>
+</code></pre></div></div>
+
+<h3 id="运行结果-1">运行结果</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>p1 <span class="o">=</span> 0.5948499999999999
+p2 <span class="o">=</span> 0.2600000000000001
+p3 <span class="o">=</span> 0.10000000000000045
+p4 <span class="o">=</span> 0.5
+</code></pre></div></div>
+:ET

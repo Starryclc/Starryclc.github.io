@@ -1,0 +1,109 @@
+I"4<h2 id="heuristic-search启发式搜索">Heuristic search（启发式搜索）</h2>
+
+<ul>
+  <li>The idea is to develop a domain speciﬁc heuristic function h(n), guessing the cost of getting to the goal from node n</li>
+  <li>We require that h(n) = 0 for every node n whose state satisﬁes the goal</li>
+  <li>There are diﬀerent ways of guessing this cost in diﬀerent domains. i.e., heuristics are domain specfic.</li>
+</ul>
+
+<h3 id="motivation">Motivation</h3>
+
+<ul>
+  <li>In uninformed search, we don’t try to evaluate which of the nodes on the frontier are most promising.
+    <ul>
+      <li>e.g., in uniform cost search we always expand the cheapest path. We don’t consider the cost of getting to the goal from the end of the current path.</li>
+    </ul>
+  </li>
+  <li>However, often we have some other knowledge about the merit of nodes.
+    <ul>
+      <li>e.g., how costly it is to get to the goal from that node.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="greedy-best-ﬁrst-search-greedy-bfs">Greedy best-ﬁrst search (Greedy BFS)</h3>
+
+<ul>
+  <li>We use $h(n)$ to order the nodes on the frontier.</li>
+  <li>We are greedily trying to achieve a low cost solution.</li>
+  <li>However, this method ignores the cost of getting to $n$, so it can be lead astray exploring nodes that cost a lot to get to but seem to be close to the goal</li>
+  <li>Thus Greedy BFS is not optimal</li>
+</ul>
+
+<h3 id="a-search">A∗ search</h3>
+
+<ul>
+  <li>Deﬁne an evaluation function $f(n) = g(n) + h(n)$
+    <ul>
+      <li>$g(n)$ is the cost of the path to node n</li>
+      <li>$h(n)$ is the heuristic estimate of the cost of getting to a goal node from n</li>
+    </ul>
+  </li>
+  <li>So $f(n)$ is an estimate of the cost of getting to the goal via node n.</li>
+  <li>We use $f(n)$ to order the nodes on the frontier</li>
+</ul>
+
+<h4 id="conditions-on-hn-admissible">Conditions on h(n): Admissible</h4>
+
+<ul>
+  <li>We always assume that $c(n1 \to n2) ≥ \epsilon &gt; 0$.The cost of any transition is greater than zero and can’t be arbitrarily small.</li>
+  <li>Let $h∗(n)$ be the cost of an optimal path from n to a goal node ($\infty$ if there is no path).</li>
+  <li>h(n) is admissible if for all nodes n, $h(n) \le h∗(n)$</li>
+  <li>So an admissible heuristic underestimates the true cost to reach the goal from the current node</li>
+  <li>Hence $h(g) = 0$ for any goal node $g$</li>
+</ul>
+
+<h4 id="consistency-aka-monotonicity">Consistency (aka monotonicity)</h4>
+
+<ul>
+  <li>$h(n)$ is consistent/monotone if for any nodes $n_1$ and $n_2$, $h(n_1) \le c(n_1 \to n_2) + h(n_2)$</li>
+  <li>Note that consistency implies admissibility (proof)
+    <ol>
+      <li>no path from $n$ to the goal</li>
+      <li>Let $n = n_1 \to n_2 \to \ldots \to n_k$ be an optimal path from $n$ to a goal node. We prove by induction on i that for all i, $h(n_i) \le h∗(n_i)$.</li>
+    </ol>
+  </li>
+  <li>Most admissible heuristics are also monotone.</li>
+</ul>
+
+<h4 id="time-and-space-complexities">Time and space complexities</h4>
+
+<ul>
+  <li>When $h(n) = 0$, for all $n$, $h$ is monotone. A∗ becomes uniform-cost</li>
+  <li>Hence the same bounds as uniform-cost apply. (These are worst case bounds). Still exponential unless we have a very good $h$!</li>
+</ul>
+
+<h4 id="admissibility-implies-optimality">Admissibility implies optimality</h4>
+
+<ul>
+  <li>Suppose that an optimal solution has cost C∗</li>
+  <li>Any optimal solution will be expanded before any path with cost &gt; C∗ (to be proved later)</li>
+  <li>Note that in general, paths are not expanded in the order of their costs (see the example on Pg. 14)</li>
+  <li>So the paths expanded before an optimal solution must have cost $\le$ C∗</li>
+  <li>There are ﬁnitely many paths with cost $\le$ C∗</li>
+  <li>Eventually we must examine an optimal solution, and a sub-optimal solution will not be examined before an optimal solution</li>
+</ul>
+
+<blockquote>
+  <p>Any optimal path will be expanded before any path of cost &gt; C∗</p>
+  <blockquote>
+    <p>Proof:</p>
+
+    <ul>
+      <li>Let p∗ be an optimal solution</li>
+      <li>Assume that p is a path s.t. c(p) &gt; c(p∗) and p is expanded before p∗</li>
+      <li>Then there must be a node n on p∗ which is still in the frontier</li>
+      <li>So $c(p) \le f(p) \le f(n) = g(n) + h(n) \le g(n) + h∗(n) = c(p∗)$, contradicting $c(p) &gt; c(p∗)$</li>
+    </ul>
+  </blockquote>
+</blockquote>
+
+<h4 id="what-about-cycle-checking">What about cycle checking</h4>
+
+<ul>
+  <li>We will show that monotonicity guarantees we have found an optimal path to a node the ﬁrst time we visit it</li>
+  <li>Thus with monotonicity, cycle checking preserves optimality</li>
+  <li>However, with only admissibility, cycle checking might not preserve optimality.</li>
+  <li>To ﬁx this: for previously visited nodes, must remember cost of previous path. If new path is cheaper must explore again</li>
+</ul>
+:ET

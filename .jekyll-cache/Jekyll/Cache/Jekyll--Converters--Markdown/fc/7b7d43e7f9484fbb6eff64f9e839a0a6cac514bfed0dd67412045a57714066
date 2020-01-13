@@ -1,0 +1,238 @@
+I"i�<p><a href="https://github.com/wu-kan/ACM_Template/tree/master/计算几何/三维">三维几何模板</a>
+<a href="https://github.com/wu-kan/ACM_Template/tree/master/高精度/分数">分数类模板</a>
+<a href="https://vjudge.net/problem/UVALive-4973">题目链接</a>
+这一题太特殊了，所有运算都要在分数下进行，因此把完整代码贴出来。<br />
+原有的模板几乎无虚修改即可应用，分数类敲sqrt比较麻烦，因此所有距离计算的是是平方后的值（见注释中的原模板和修改之后的代码）。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;bits/stdc++.h&gt;
+</span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">Fraction</span>
+<span class="p">{</span>
+	<span class="n">ll</span> <span class="n">num</span><span class="p">,</span><span class="n">den</span><span class="p">;</span>
+	<span class="n">Fraction</span><span class="p">(</span><span class="n">ll</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">ll</span> <span class="n">d</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">:</span><span class="n">num</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="n">den</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">d</span><span class="o">=</span><span class="n">__gcd</span><span class="p">(</span><span class="n">num</span><span class="p">,</span><span class="n">den</span><span class="p">),</span><span class="n">num</span><span class="o">/=</span><span class="n">d</span><span class="p">,</span><span class="n">den</span><span class="o">/=</span><span class="n">d</span><span class="p">;</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">den</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span><span class="n">num</span><span class="o">=-</span><span class="n">num</span><span class="p">,</span><span class="n">den</span><span class="o">=-</span><span class="n">den</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="n">Fraction</span> <span class="k">operator</span><span class="o">+</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span><span class="o">&amp;</span> <span class="n">A</span><span class="p">,</span><span class="k">const</span> <span class="n">Fraction</span><span class="o">&amp;</span> <span class="n">B</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">ll</span> <span class="n">d</span><span class="o">=</span><span class="n">__gcd</span><span class="p">(</span><span class="n">A</span><span class="p">.</span><span class="n">den</span><span class="p">,</span><span class="n">B</span><span class="p">.</span><span class="n">den</span><span class="p">);</span>
+		<span class="k">return</span> <span class="n">Fraction</span><span class="p">(</span><span class="n">B</span><span class="p">.</span><span class="n">den</span><span class="o">/</span><span class="n">d</span><span class="o">*</span><span class="n">A</span><span class="p">.</span><span class="n">num</span><span class="o">+</span><span class="n">A</span><span class="p">.</span><span class="n">den</span><span class="o">/</span><span class="n">d</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">num</span><span class="p">,</span><span class="n">A</span><span class="p">.</span><span class="n">den</span><span class="o">/</span><span class="n">d</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">den</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="n">Fraction</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">+=</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="o">=*</span><span class="k">this</span><span class="o">+</span><span class="n">c</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">Fraction</span> <span class="k">operator</span><span class="o">-</span><span class="p">()</span><span class="k">const</span>
+	<span class="p">{</span>
+		<span class="n">Fraction</span> <span class="n">r</span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">);</span>
+		<span class="k">return</span> <span class="n">r</span><span class="p">.</span><span class="n">num</span><span class="o">=-</span><span class="n">r</span><span class="p">.</span><span class="n">num</span><span class="p">,</span><span class="n">r</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="n">Fraction</span> <span class="k">operator</span><span class="o">-</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="o">-</span><span class="n">c</span><span class="o">+</span><span class="n">a</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">Fraction</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">-=</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="o">=*</span><span class="k">this</span><span class="o">-</span><span class="n">c</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="n">Fraction</span> <span class="k">operator</span><span class="o">*</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span><span class="o">&amp;</span> <span class="n">A</span><span class="p">,</span><span class="k">const</span> <span class="n">Fraction</span><span class="o">&amp;</span> <span class="n">B</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">Fraction</span><span class="p">(</span><span class="n">A</span><span class="p">.</span><span class="n">num</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">num</span><span class="p">,</span><span class="n">A</span><span class="p">.</span><span class="n">den</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">den</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="n">Fraction</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">*=</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="o">=*</span><span class="k">this</span><span class="o">*</span><span class="n">c</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="n">Fraction</span> <span class="k">operator</span><span class="o">/</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span><span class="o">&amp;</span> <span class="n">A</span><span class="p">,</span><span class="k">const</span> <span class="n">Fraction</span><span class="o">&amp;</span> <span class="n">B</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">Fraction</span><span class="p">(</span><span class="n">A</span><span class="p">.</span><span class="n">num</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">den</span><span class="p">,</span><span class="n">A</span><span class="p">.</span><span class="n">den</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">num</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="n">Fraction</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">/=</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="o">=*</span><span class="k">this</span><span class="o">/</span><span class="n">c</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="n">Fraction</span> <span class="k">operator</span><span class="o">%</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">Fraction</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">num</span><span class="o">*</span><span class="n">c</span><span class="p">.</span><span class="n">den</span><span class="o">%</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">num</span><span class="o">*</span><span class="n">a</span><span class="p">.</span><span class="n">den</span><span class="p">),</span><span class="n">a</span><span class="p">.</span><span class="n">den</span><span class="o">*</span><span class="n">c</span><span class="p">.</span><span class="n">den</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="n">Fraction</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">%=</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="o">=*</span><span class="k">this</span><span class="o">%</span><span class="n">c</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">a</span><span class="p">.</span><span class="n">num</span><span class="o">*</span><span class="n">b</span><span class="p">.</span><span class="n">den</span><span class="o">==</span><span class="n">a</span><span class="p">.</span><span class="n">den</span><span class="o">*</span><span class="n">b</span><span class="p">.</span><span class="n">num</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="o">!</span><span class="p">(</span><span class="n">a</span><span class="o">==</span><span class="n">b</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">&lt;</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">a</span><span class="p">.</span><span class="n">num</span><span class="o">*</span><span class="n">b</span><span class="p">.</span><span class="n">den</span><span class="o">&lt;</span><span class="n">a</span><span class="p">.</span><span class="n">den</span><span class="o">*</span><span class="n">b</span><span class="p">.</span><span class="n">num</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">&gt;</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">b</span><span class="o">&lt;</span><span class="n">a</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">&lt;=</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="o">!</span><span class="p">(</span><span class="n">a</span><span class="o">&gt;</span><span class="n">b</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">&gt;=</span><span class="p">(</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="o">!</span><span class="p">(</span><span class="n">a</span><span class="o">&lt;</span><span class="n">b</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="n">Fraction</span> <span class="n">abs</span><span class="p">(</span><span class="n">Fraction</span> <span class="n">f</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">f</span><span class="p">.</span><span class="n">num</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span><span class="n">f</span><span class="p">.</span><span class="n">num</span><span class="o">=-</span><span class="n">f</span><span class="p">.</span><span class="n">num</span><span class="p">;</span>
+		<span class="k">return</span> <span class="n">f</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="n">ostream</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">os</span><span class="p">,</span><span class="k">const</span> <span class="n">Fraction</span> <span class="o">&amp;</span><span class="n">f</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="o">!</span><span class="n">f</span><span class="p">.</span><span class="n">num</span><span class="o">?</span><span class="n">os</span><span class="o">&lt;&lt;</span><span class="mi">0</span><span class="o">:</span>
+		       <span class="n">f</span><span class="p">.</span><span class="n">den</span><span class="o">==</span><span class="mi">1</span><span class="o">?</span><span class="n">os</span><span class="o">&lt;&lt;</span><span class="n">f</span><span class="p">.</span><span class="n">num</span><span class="o">:</span>
+		       <span class="n">os</span><span class="o">&lt;&lt;</span><span class="n">f</span><span class="p">.</span><span class="n">num</span><span class="o">&lt;&lt;</span><span class="sc">'/'</span><span class="o">&lt;&lt;</span><span class="n">f</span><span class="p">.</span><span class="n">den</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">};</span>
+<span class="k">typedef</span> <span class="n">Fraction</span> <span class="n">lf</span><span class="p">;</span>
+<span class="k">const</span> <span class="n">lf</span> <span class="n">EPS</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">,</span><span class="n">INF</span><span class="o">=</span><span class="mf">1e9</span><span class="p">;</span>
+<span class="kt">int</span> <span class="nf">sgn</span><span class="p">(</span><span class="n">lf</span> <span class="n">d</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">return</span> <span class="p">(</span><span class="n">d</span><span class="o">&gt;</span><span class="n">EPS</span><span class="p">)</span><span class="o">-</span><span class="p">(</span><span class="n">d</span><span class="o">&lt;-</span><span class="n">EPS</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">struct</span> <span class="n">Coord3</span>
+<span class="p">{</span>
+	<span class="n">lf</span> <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">;</span>
+	<span class="n">Coord3</span><span class="p">(</span><span class="n">lf</span> <span class="n">X</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">lf</span> <span class="n">Y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">lf</span> <span class="n">Z</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">:</span><span class="n">X</span><span class="p">(</span><span class="n">X</span><span class="p">),</span><span class="n">Y</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span><span class="n">Z</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> <span class="p">{}</span>
+	<span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">Coord3</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="k">const</span> <span class="n">Coord3</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">sgn</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">X</span><span class="o">-</span><span class="n">b</span><span class="p">.</span><span class="n">X</span><span class="p">)</span><span class="o">||</span><span class="n">sgn</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">Y</span><span class="o">-</span><span class="n">b</span><span class="p">.</span><span class="n">Y</span><span class="p">)</span><span class="o">||</span><span class="n">sgn</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">Z</span><span class="o">-</span><span class="n">b</span><span class="p">.</span><span class="n">Z</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">Coord3</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="k">const</span> <span class="n">Coord3</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="o">!</span><span class="p">(</span><span class="n">a</span><span class="o">!=</span><span class="n">b</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="n">Coord3</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">+=</span><span class="p">(</span><span class="k">const</span> <span class="n">Coord3</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">X</span><span class="o">+=</span><span class="n">b</span><span class="p">.</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="o">+=</span><span class="n">b</span><span class="p">.</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="o">+=</span><span class="n">b</span><span class="p">.</span><span class="n">Z</span><span class="p">,</span><span class="o">*</span><span class="k">this</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="n">Coord3</span> <span class="k">operator</span><span class="o">+</span><span class="p">(</span><span class="n">Coord3</span> <span class="n">a</span><span class="p">,</span><span class="k">const</span> <span class="n">Coord3</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">a</span><span class="o">+=</span><span class="n">b</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">Coord3</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">-=</span><span class="p">(</span><span class="k">const</span> <span class="n">Coord3</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">X</span><span class="o">-=</span><span class="n">b</span><span class="p">.</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="o">-=</span><span class="n">b</span><span class="p">.</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="o">-=</span><span class="n">b</span><span class="p">.</span><span class="n">Z</span><span class="p">,</span><span class="o">*</span><span class="k">this</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="n">Coord3</span> <span class="k">operator</span><span class="o">-</span><span class="p">(</span><span class="n">Coord3</span> <span class="n">a</span><span class="p">,</span><span class="k">const</span> <span class="n">Coord3</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">a</span><span class="o">-=</span><span class="n">b</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">Coord3</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">*=</span><span class="p">(</span><span class="n">lf</span> <span class="n">d</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">X</span><span class="o">*=</span><span class="n">d</span><span class="p">,</span><span class="n">Y</span><span class="o">*=</span><span class="n">d</span><span class="p">,</span><span class="n">Z</span><span class="o">*=</span><span class="n">d</span><span class="p">,</span><span class="o">*</span><span class="k">this</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="n">Coord3</span> <span class="k">operator</span><span class="o">*</span><span class="p">(</span><span class="n">Coord3</span> <span class="n">a</span><span class="p">,</span><span class="n">lf</span> <span class="n">d</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">a</span><span class="o">*=</span><span class="n">d</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="n">Coord3</span> <span class="k">operator</span><span class="o">*</span><span class="p">(</span><span class="n">lf</span> <span class="n">d</span><span class="p">,</span><span class="n">Coord3</span> <span class="n">a</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">a</span><span class="o">*=</span><span class="n">d</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">Coord3</span><span class="o">&amp;</span> <span class="k">operator</span><span class="o">/=</span><span class="p">(</span><span class="n">lf</span> <span class="n">d</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">X</span><span class="o">/=</span><span class="n">d</span><span class="p">,</span><span class="n">Y</span><span class="o">/=</span><span class="n">d</span><span class="p">,</span><span class="n">Z</span><span class="o">/=</span><span class="n">d</span><span class="p">,</span><span class="o">*</span><span class="k">this</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">friend</span> <span class="n">Coord3</span> <span class="k">operator</span><span class="o">/</span><span class="p">(</span><span class="n">Coord3</span> <span class="n">a</span><span class="p">,</span><span class="n">lf</span> <span class="n">d</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">a</span><span class="o">/=</span><span class="n">d</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">};</span>
+<span class="k">struct</span> <span class="n">Line3</span>
+<span class="p">{</span>
+	<span class="n">Coord3</span> <span class="n">p</span><span class="p">,</span><span class="n">v</span><span class="p">;</span>
+	<span class="n">Line3</span><span class="p">(</span><span class="n">Coord3</span> <span class="n">p</span><span class="o">=</span><span class="n">Coord3</span><span class="p">(),</span><span class="n">Coord3</span> <span class="n">v</span><span class="o">=</span><span class="n">Coord3</span><span class="p">())</span><span class="o">:</span><span class="n">p</span><span class="p">(</span><span class="n">p</span><span class="p">),</span><span class="n">v</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="p">{}</span>
+	<span class="n">Coord3</span> <span class="n">point</span><span class="p">(</span><span class="n">lf</span> <span class="n">t</span><span class="p">)</span><span class="k">const</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">p</span><span class="o">+</span><span class="n">v</span><span class="o">*</span><span class="n">t</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">};</span>
+<span class="n">lf</span> <span class="nf">Dot</span><span class="p">(</span><span class="k">const</span> <span class="n">Coord3</span><span class="o">&amp;</span> <span class="n">A</span><span class="p">,</span><span class="k">const</span> <span class="n">Coord3</span><span class="o">&amp;</span> <span class="n">B</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">return</span> <span class="n">A</span><span class="p">.</span><span class="n">X</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">X</span><span class="o">+</span><span class="n">A</span><span class="p">.</span><span class="n">Y</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">Y</span><span class="o">+</span><span class="n">A</span><span class="p">.</span><span class="n">Z</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">Z</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">Coord3</span> <span class="nf">Cross</span><span class="p">(</span><span class="k">const</span> <span class="n">Coord3</span><span class="o">&amp;</span> <span class="n">A</span><span class="p">,</span><span class="k">const</span> <span class="n">Coord3</span><span class="o">&amp;</span> <span class="n">B</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">return</span> <span class="n">Coord3</span><span class="p">(</span><span class="n">A</span><span class="p">.</span><span class="n">Y</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">Z</span><span class="o">-</span><span class="n">A</span><span class="p">.</span><span class="n">Z</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">Y</span><span class="p">,</span><span class="n">A</span><span class="p">.</span><span class="n">Z</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">X</span><span class="o">-</span><span class="n">A</span><span class="p">.</span><span class="n">X</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">Z</span><span class="p">,</span><span class="n">A</span><span class="p">.</span><span class="n">X</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">Y</span><span class="o">-</span><span class="n">A</span><span class="p">.</span><span class="n">Y</span><span class="o">*</span><span class="n">B</span><span class="p">.</span><span class="n">X</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">lf</span> <span class="nf">norm</span><span class="p">(</span><span class="k">const</span> <span class="n">Coord3</span><span class="o">&amp;</span> <span class="n">A</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">return</span> <span class="n">Dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">A</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cm">/*
+lf DistanceToLine(Coord3 P,Coord3 A,Coord3 B)//点P到直线AB的距离
+{
+	Coord3 v1=B-A,v2=P-A;
+	return abs(Cross(v1,v2))/abs(v1);
+}
+*/</span>
+<span class="n">lf</span> <span class="nf">Distance2ToLine</span><span class="p">(</span><span class="n">Coord3</span> <span class="n">P</span><span class="p">,</span><span class="n">Coord3</span> <span class="n">A</span><span class="p">,</span><span class="n">Coord3</span> <span class="n">B</span><span class="p">)</span><span class="c1">//点P到直线AB的距离</span>
+<span class="p">{</span>
+	<span class="n">Coord3</span> <span class="n">v1</span><span class="o">=</span><span class="n">B</span><span class="o">-</span><span class="n">A</span><span class="p">,</span><span class="n">v2</span><span class="o">=</span><span class="n">P</span><span class="o">-</span><span class="n">A</span><span class="p">;</span>
+	<span class="k">return</span> <span class="n">norm</span><span class="p">(</span><span class="n">Cross</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">v2</span><span class="p">))</span><span class="o">/</span><span class="n">norm</span><span class="p">(</span><span class="n">v1</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cm">/*
+lf DistanceToSeg(Coord3 P,Coord3 A,Coord3 B)//点到线段的距离
+{
+	if(A==B)return abs(P-A);
+	Coord3 v1=B-A,v2=P-A,v3=P-B;
+	if(sgn(Dot(v1,v2))&lt;0)return abs(v2);
+	if(sgn(Dot(v1,v3))&gt;0)return abs(v3);
+	return fabs(DistanceToLine(P,A,B));
+}
+*/</span>
+<span class="n">lf</span> <span class="nf">Distance2ToSeg</span><span class="p">(</span><span class="n">Coord3</span> <span class="n">P</span><span class="p">,</span><span class="n">Coord3</span> <span class="n">A</span><span class="p">,</span><span class="n">Coord3</span> <span class="n">B</span><span class="p">)</span><span class="c1">//点到线段的距离</span>
+<span class="p">{</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">A</span><span class="o">==</span><span class="n">B</span><span class="p">)</span><span class="k">return</span> <span class="n">norm</span><span class="p">(</span><span class="n">P</span><span class="o">-</span><span class="n">A</span><span class="p">);</span>
+	<span class="n">Coord3</span> <span class="n">v1</span><span class="o">=</span><span class="n">B</span><span class="o">-</span><span class="n">A</span><span class="p">,</span><span class="n">v2</span><span class="o">=</span><span class="n">P</span><span class="o">-</span><span class="n">A</span><span class="p">,</span><span class="n">v3</span><span class="o">=</span><span class="n">P</span><span class="o">-</span><span class="n">B</span><span class="p">;</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">sgn</span><span class="p">(</span><span class="n">Dot</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">v2</span><span class="p">))</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span><span class="k">return</span> <span class="n">norm</span><span class="p">(</span><span class="n">v2</span><span class="p">);</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">sgn</span><span class="p">(</span><span class="n">Dot</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">v3</span><span class="p">))</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="k">return</span> <span class="n">norm</span><span class="p">(</span><span class="n">v3</span><span class="p">);</span>
+	<span class="k">return</span> <span class="n">abs</span><span class="p">(</span><span class="n">Distance2ToLine</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">));</span>
+<span class="p">}</span>
+<span class="kt">bool</span> <span class="nf">LineDistance3D</span><span class="p">(</span><span class="n">Coord3</span> <span class="n">p1</span><span class="p">,</span><span class="n">Coord3</span> <span class="n">u</span><span class="p">,</span><span class="n">Coord3</span> <span class="n">p2</span><span class="p">,</span><span class="n">Coord3</span> <span class="n">v</span><span class="p">,</span><span class="n">lf</span><span class="o">&amp;</span> <span class="n">s</span><span class="p">)</span><span class="c1">//求异面直线 p1+s*u与p2+t*v的公垂线对应的s，如果平行|重合，返回0</span>
+<span class="p">{</span>
+	<span class="n">lf</span> <span class="n">b</span><span class="o">=</span><span class="n">Dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">u</span><span class="p">)</span><span class="o">*</span><span class="n">Dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">v</span><span class="p">)</span><span class="o">-</span><span class="n">Dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span><span class="o">*</span><span class="n">Dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">);</span>
+	<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">sgn</span><span class="p">(</span><span class="n">b</span><span class="p">))</span><span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="n">lf</span> <span class="n">a</span><span class="o">=</span><span class="n">Dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span><span class="o">*</span><span class="n">Dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">p1</span><span class="o">-</span><span class="n">p2</span><span class="p">)</span><span class="o">-</span><span class="n">Dot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">v</span><span class="p">)</span><span class="o">*</span><span class="n">Dot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">p1</span><span class="o">-</span><span class="n">p2</span><span class="p">);</span>
+	<span class="k">return</span> <span class="n">s</span><span class="o">=</span><span class="n">a</span><span class="o">/</span><span class="n">b</span><span class="p">,</span><span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">Coord3</span> <span class="nf">getCoord3</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="n">ll</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">;</span>
+	<span class="k">return</span> <span class="n">scanf</span><span class="p">(</span><span class="s">"%lld%lld%lld"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">x</span><span class="p">,</span><span class="o">&amp;</span><span class="n">y</span><span class="p">,</span><span class="o">&amp;</span><span class="n">z</span><span class="p">),</span><span class="n">Coord3</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">t</span><span class="p">;</span>
+	<span class="k">for</span><span class="p">(</span><span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">t</span><span class="p">);</span> <span class="n">t</span><span class="o">--</span><span class="p">;)</span>
+	<span class="p">{</span>
+		<span class="n">Coord3</span> <span class="n">A</span><span class="o">=</span><span class="n">getCoord3</span><span class="p">(),</span><span class="n">B</span><span class="o">=</span><span class="n">getCoord3</span><span class="p">(),</span><span class="n">C</span><span class="o">=</span><span class="n">getCoord3</span><span class="p">(),</span><span class="n">D</span><span class="o">=</span><span class="n">getCoord3</span><span class="p">();</span>
+		<span class="n">lf</span> <span class="n">s</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="n">ans</span><span class="o">=</span><span class="n">INF</span><span class="p">;</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">LineDistance3D</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="o">-</span><span class="n">A</span><span class="p">,</span><span class="n">C</span><span class="p">,</span><span class="n">D</span><span class="o">-</span><span class="n">C</span><span class="p">,</span><span class="n">s</span><span class="p">)</span><span class="o">&amp;&amp;</span><span class="mi">0</span><span class="o">&lt;</span><span class="n">s</span><span class="o">&amp;&amp;</span><span class="n">s</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&amp;&amp;</span>
+		        <span class="n">LineDistance3D</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="n">D</span><span class="o">-</span><span class="n">C</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="o">-</span><span class="n">A</span><span class="p">,</span><span class="n">t</span><span class="p">)</span><span class="o">&amp;&amp;</span><span class="mi">0</span><span class="o">&lt;</span><span class="n">t</span><span class="o">&amp;&amp;</span><span class="n">t</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">)</span>
+			<span class="n">ans</span><span class="o">=</span><span class="n">norm</span><span class="p">(</span><span class="n">Line3</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="o">-</span><span class="n">A</span><span class="p">).</span><span class="n">point</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">-</span><span class="n">Line3</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="n">D</span><span class="o">-</span><span class="n">C</span><span class="p">).</span><span class="n">point</span><span class="p">(</span><span class="n">t</span><span class="p">));</span>
+		<span class="k">else</span>
+		<span class="p">{</span>
+			<span class="n">ans</span><span class="o">=</span><span class="n">min</span><span class="p">(</span><span class="n">ans</span><span class="p">,</span><span class="n">Distance2ToSeg</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">C</span><span class="p">,</span><span class="n">D</span><span class="p">));</span>
+			<span class="n">ans</span><span class="o">=</span><span class="n">min</span><span class="p">(</span><span class="n">ans</span><span class="p">,</span><span class="n">Distance2ToSeg</span><span class="p">(</span><span class="n">B</span><span class="p">,</span><span class="n">C</span><span class="p">,</span><span class="n">D</span><span class="p">));</span>
+			<span class="n">ans</span><span class="o">=</span><span class="n">min</span><span class="p">(</span><span class="n">ans</span><span class="p">,</span><span class="n">Distance2ToSeg</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">));</span>
+			<span class="n">ans</span><span class="o">=</span><span class="n">min</span><span class="p">(</span><span class="n">ans</span><span class="p">,</span><span class="n">Distance2ToSeg</span><span class="p">(</span><span class="n">D</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">));</span>
+		<span class="p">}</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"%lld %lld</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="n">ans</span><span class="p">.</span><span class="n">num</span><span class="p">,</span><span class="n">ans</span><span class="p">.</span><span class="n">den</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+:ET

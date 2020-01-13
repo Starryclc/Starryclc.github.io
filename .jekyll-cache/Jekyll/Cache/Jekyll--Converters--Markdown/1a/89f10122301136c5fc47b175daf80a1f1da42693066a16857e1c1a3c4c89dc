@@ -1,0 +1,227 @@
+I"+�<p><a href="https://vjudge.net/contest/200979#overview">Overview</a></p>
+<h1 id="凑十个题"><a href="https://vjudge.net/problem/OpenJ_Bailian-1000">凑十个题</a></h1>
+<p>main()函数不写return默认返回0。下同。</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;stdio.h&gt;
+</span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">;</span>
+	<span class="n">scanf</span><span class="p">(</span><span class="s">"%d%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="o">&amp;</span><span class="n">b</span><span class="p">);</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h1 id="求一元二次方程的根"><a href="https://vjudge.net/problem/OpenJ_Bailian-2707">求一元二次方程的根</a></h1>
+<p>养成好习惯，浮点数进行比较的时候作差取绝对值。</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;stdio.h&gt;
+#include&lt;math.h&gt;
+</span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+	<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">double</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">i</span><span class="p">;</span> <span class="n">n</span><span class="o">--</span><span class="p">;)</span>
+	<span class="p">{</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%lf%lf%lf"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="o">&amp;</span><span class="n">b</span><span class="p">,</span><span class="o">&amp;</span><span class="n">c</span><span class="p">);</span>
+		<span class="n">d</span><span class="o">=</span><span class="n">b</span><span class="o">*</span><span class="n">b</span><span class="o">-</span><span class="mi">4</span><span class="o">*</span><span class="n">a</span><span class="o">*</span><span class="n">c</span><span class="p">;</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">fabs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">&lt;</span><span class="mf">1e-9</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"x1=x2=%.5f</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+				   <span class="o">-</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="o">/</span><span class="mi">2</span><span class="p">);</span>
+		<span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">d</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"x1=%.5f;x2=%.5f</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+				   <span class="p">(</span><span class="o">-</span><span class="n">b</span><span class="o">+</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="n">a</span><span class="p">,</span>
+				   <span class="p">(</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="n">a</span><span class="p">);</span>
+		<span class="k">else</span>
+		<span class="p">{</span>
+			<span class="n">r</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="n">a</span><span class="p">;</span><span class="c1">//直接写-b会导致实部打印负零</span>
+			<span class="n">i</span><span class="o">=</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">d</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="n">a</span><span class="p">;</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"x1=%.5f+%.5fi;x2=%.5f-%.5fi</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+				   <span class="n">r</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">i</span><span class="p">);</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="平衡饮食"><a href="https://vjudge.net/problem/OpenJ_Bailian-2708">平衡饮食</a></h1>
+<p>通过预处理降低代码量。</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;stdio.h&gt;
+</span><span class="kt">double</span> <span class="n">cont</span><span class="p">[</span><span class="mi">10</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span>
+<span class="p">{</span>
+	<span class="mi">7</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span><span class="mi">0</span><span class="p">.</span><span class="mi">75</span><span class="p">,</span><span class="mi">78</span><span class="p">,</span>
+	<span class="mi">10</span><span class="p">,</span><span class="mi">1</span><span class="p">.</span><span class="mi">25</span><span class="p">,</span><span class="mi">75</span><span class="p">,</span>
+	<span class="mi">1</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span><span class="mi">0</span><span class="p">.</span><span class="mi">19</span><span class="p">,</span><span class="mi">4</span><span class="p">.</span><span class="mi">28</span><span class="p">,</span>
+	<span class="mi">35</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="mi">42</span><span class="p">,</span>
+	<span class="mi">500</span><span class="p">,</span><span class="mi">500</span><span class="p">,</span><span class="mi">60</span><span class="p">,</span><span class="c1">//一百颗蛋</span>
+	<span class="mi">16</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span><span class="mi">28</span><span class="p">.</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="p">.</span><span class="mo">05</span><span class="p">,</span>
+	<span class="mi">17</span><span class="p">.</span><span class="mi">7</span><span class="p">,</span><span class="mi">20</span><span class="p">.</span><span class="mi">33</span><span class="p">,</span><span class="mi">4</span><span class="p">.</span><span class="mo">06</span><span class="p">,</span>
+	<span class="mi">14</span><span class="p">.</span><span class="mi">9</span><span class="p">,</span><span class="mi">0</span><span class="p">.</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">.</span><span class="mi">93</span><span class="p">,</span>
+	<span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span>
+	<span class="mi">0</span><span class="p">.</span><span class="mi">85</span><span class="p">,</span><span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span>
+<span class="p">},</span><span class="n">all</span><span class="p">,</span><span class="n">sum</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">},</span><span class="n">scal</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span><span class="mi">4</span><span class="p">.</span><span class="mi">1</span><span class="p">,</span><span class="mi">9</span><span class="p">.</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">.</span><span class="mi">1</span><span class="p">};</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">tmp</span><span class="p">;</span> <span class="n">i</span><span class="o">!=</span><span class="mi">10</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">tmp</span><span class="p">);</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">!=</span><span class="mi">3</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+			<span class="n">sum</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">+=</span><span class="n">tmp</span><span class="o">*</span><span class="n">scal</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="n">cont</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+	<span class="p">}</span>
+	<span class="n">all</span><span class="o">=</span><span class="n">sum</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">sum</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">sum</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">!=</span><span class="mi">3</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">sum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/=</span><span class="n">all</span><span class="p">;</span>
+	<span class="n">printf</span><span class="p">(</span><span class="n">sum</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">.</span><span class="mi">14</span><span class="o">&amp;&amp;</span><span class="n">sum</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">.</span><span class="mi">16</span><span class="o">&amp;&amp;</span>
+		   <span class="n">sum</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">.</span><span class="mi">3</span><span class="o">&amp;&amp;</span><span class="n">sum</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">.</span><span class="mi">35</span><span class="o">&amp;&amp;</span>
+		   <span class="n">sum</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">.</span><span class="mi">49</span><span class="o">&amp;&amp;</span><span class="n">sum</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">.</span><span class="mi">56</span><span class="o">?</span>
+		   <span class="s">"yes"</span><span class="o">:</span><span class="s">"no"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h1 id="求出e的值"><a href="https://vjudge.net/problem/OpenJ_Bailian-2709">求出e的值</a></h1>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;stdio.h&gt;
+</span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+	<span class="kt">double</span> <span class="n">s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">w</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+	<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">w</span><span class="o">*=</span><span class="n">i</span><span class="p">);</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"%.10lf"</span><span class="p">,</span><span class="n">s</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h1 id="数制转换"><a href="https://vjudge.net/problem/OpenJ_Bailian-2710">数制转换</a></h1>
+<p>偷个懒，直接用 <code class="highlighter-rouge">stdlib.h</code> 库里的strtol函数。 <br />
+n为0的情况不要漏掉了。</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;stdio.h&gt;
+#include&lt;stdlib.h&gt;
+#include&lt;string.h&gt;
+</span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">long</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+	<span class="kt">char</span> <span class="n">s</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+	<span class="n">scanf</span><span class="p">(</span><span class="s">"%d%s%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="o">&amp;</span><span class="n">b</span><span class="p">);</span>
+	<span class="n">n</span><span class="o">=</span><span class="n">strtol</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="nb">NULL</span><span class="p">,</span><span class="n">a</span><span class="p">);</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"0"</span><span class="p">);</span>
+		<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">for</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">n</span><span class="p">;</span> <span class="n">n</span><span class="o">/=</span><span class="n">b</span><span class="p">)</span>
+		<span class="n">s</span><span class="p">[</span><span class="n">a</span><span class="o">++</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="n">b</span><span class="o">&gt;</span><span class="mi">9</span><span class="o">?</span><span class="n">n</span><span class="o">%</span><span class="n">b</span><span class="o">+</span><span class="sc">'A'</span><span class="o">-</span><span class="mi">10</span><span class="o">:</span><span class="n">n</span><span class="o">%</span><span class="n">b</span><span class="o">+</span><span class="sc">'0'</span><span class="p">);</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"%c"</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="o">--</span><span class="n">a</span><span class="p">]);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h1 id="合唱队形"><a href="https://vjudge.net/problem/OpenJ_Bailian-2711">合唱队形</a></h1>
+<p>为了方便，给每名队员重新编号，新编号从0开始。 <br />
+记 <code class="highlighter-rouge">f[0][i]</code> 为第i名队员左边最多可站的人数，那么有这样的转移关系： <code class="highlighter-rouge">f[0][i]=max{0,f[0][j]+1}</code> ，其中j是满足 <code class="highlighter-rouge">0&lt;=j&lt;i&amp;&amp;t[i]&gt;t[j]</code> 的所有数；同理，记 <code class="highlighter-rouge">f[1][i]</code> 为第i名队员右边最多可站的人数，那么有这样的转移关系： <code class="highlighter-rouge">f[1][i]=max{0,f[1][j]+1}</code> ，其中j是满足 <code class="highlighter-rouge">i&lt;j&lt;n&amp;&amp;t[i]&gt;t[j]</code> 的所有数；其中，式中的1是第j名同学自身。 <br />
+于是，结果是 <code class="highlighter-rouge">n-max{f[0][i]+f[1][i]}-1</code> ，式中1是第i名队员本身。</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;stdio.h&gt;
+</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span><span class="n">tmp</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">t</span><span class="p">[</span><span class="mi">128</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">},</span><span class="n">f</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">128</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<span class="c1">//全局数组声明的时候如果没有给初值则初始化为0</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">!=</span><span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">!=</span><span class="n">i</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&gt;</span><span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">&amp;&amp;</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">&lt;</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+				<span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">!=-</span><span class="mi">1</span><span class="p">;</span> <span class="o">--</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="n">i</span><span class="p">;</span> <span class="n">j</span><span class="o">!=</span><span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&gt;</span><span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">&amp;&amp;</span><span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">&lt;</span><span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+				<span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">tmp</span><span class="o">&lt;</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+			<span class="n">tmp</span><span class="o">=</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">];</span>
+	<span class="p">}</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="n">n</span><span class="o">-</span><span class="n">tmp</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h1 id="细菌繁殖"><a href="https://vjudge.net/problem/OpenJ_Bailian-2712">细菌繁殖</a></h1>
+<p>直接按日模拟。</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;stdio.h&gt;
+</span><span class="kt">long</span> <span class="n">n</span><span class="p">,</span><span class="n">days</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">31</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">31</span><span class="p">};</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">long</span> <span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">,</span><span class="n">d1</span><span class="p">,</span><span class="n">d2</span><span class="p">,</span><span class="n">z</span><span class="p">;</span> <span class="n">n</span><span class="o">--</span><span class="p">;)</span>
+	<span class="p">{</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%d%d%d%d%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">m1</span><span class="p">,</span><span class="o">&amp;</span><span class="n">d1</span><span class="p">,</span><span class="o">&amp;</span><span class="n">z</span><span class="p">,</span><span class="o">&amp;</span><span class="n">m2</span><span class="p">,</span><span class="o">&amp;</span><span class="n">d2</span><span class="p">);</span>
+		<span class="k">for</span><span class="p">(;</span> <span class="n">m1</span><span class="o">!=</span><span class="n">m2</span><span class="o">||</span><span class="n">d1</span><span class="o">!=</span><span class="n">d2</span><span class="p">;</span> <span class="o">++</span><span class="n">d1</span><span class="p">,</span><span class="n">z</span><span class="o">*=</span><span class="mi">2</span><span class="p">)</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">d1</span><span class="o">==</span><span class="n">days</span><span class="p">[</span><span class="n">m1</span><span class="p">])</span>
+			<span class="p">{</span>
+				<span class="o">++</span><span class="n">m1</span><span class="p">;</span>
+				<span class="n">d1</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+			<span class="p">}</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="n">z</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h1 id="肿瘤面积"><a href="https://vjudge.net/problem/OpenJ_Bailian-2713">肿瘤面积</a></h1>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;stdio.h&gt;
+</span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">n</span><span class="p">,</span><span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1024</span><span class="p">},</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1024</span><span class="p">};</span>
+	<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">tmp</span><span class="p">;</span> <span class="n">i</span><span class="o">!=</span><span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">!=</span><span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">tmp</span><span class="p">);</span>
+			<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">tmp</span><span class="p">)</span>
+			<span class="p">{</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="n">i</span><span class="p">)</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">i</span><span class="p">;</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="n">i</span><span class="p">)</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">i</span><span class="p">;</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="n">j</span><span class="p">)</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">j</span><span class="p">;</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;</span><span class="n">j</span><span class="p">)</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">j</span><span class="p">;</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h1 id="求平均年龄"><a href="https://vjudge.net/problem/OpenJ_Bailian-2714">求平均年龄</a></h1>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;stdio.h&gt;
+</span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+	<span class="kt">double</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+	<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">t</span><span class="p">;</span> <span class="n">i</span><span class="o">!=</span><span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">t</span><span class="p">);</span>
+		<span class="n">s</span><span class="o">+=</span><span class="n">t</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"%.2lf"</span><span class="p">,</span><span class="n">s</span><span class="o">/</span><span class="n">n</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h1 id="谁拿了最多奖学金"><a href="https://vjudge.net/problem/OpenJ_Bailian-2715">谁拿了最多奖学金</a></h1>
+<p>用scanf输入时要占位符加空格。 <br />
+比cin不晓得高到哪里去了？！</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include&lt;stdio.h&gt;
+#include&lt;string.h&gt;
+</span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">n</span><span class="p">,</span><span class="n">sum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">ans_money</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+	<span class="kt">char</span> <span class="n">gb</span><span class="p">,</span><span class="n">xb</span><span class="p">,</span><span class="n">name</span><span class="p">[</span><span class="mi">32</span><span class="p">],</span><span class="n">ans_name</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+	<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">money</span><span class="p">,</span><span class="n">qm</span><span class="p">,</span><span class="n">py</span><span class="p">,</span><span class="n">lw</span><span class="p">;</span> <span class="n">n</span><span class="o">--</span><span class="p">;</span> <span class="n">sum</span><span class="o">+=</span><span class="n">money</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%s %d %d %c %c %d"</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="o">&amp;</span><span class="n">qm</span><span class="p">,</span><span class="o">&amp;</span><span class="n">py</span><span class="p">,</span><span class="o">&amp;</span><span class="n">gb</span><span class="p">,</span><span class="o">&amp;</span><span class="n">xb</span><span class="p">,</span><span class="o">&amp;</span><span class="n">lw</span><span class="p">);</span>
+		<span class="n">money</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">qm</span><span class="o">&gt;</span><span class="mi">80</span><span class="o">&amp;&amp;</span><span class="n">lw</span><span class="p">)</span>
+			<span class="n">money</span><span class="o">+=</span><span class="mi">8000</span><span class="p">;</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">qm</span><span class="o">&gt;</span><span class="mi">85</span><span class="o">&amp;&amp;</span><span class="n">py</span><span class="o">&gt;</span><span class="mi">80</span><span class="p">)</span>
+			<span class="n">money</span><span class="o">+=</span><span class="mi">4000</span><span class="p">;</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">qm</span><span class="o">&gt;</span><span class="mi">90</span><span class="p">)</span>
+			<span class="n">money</span><span class="o">+=</span><span class="mi">2000</span><span class="p">;</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">qm</span><span class="o">&gt;</span><span class="mi">85</span><span class="o">&amp;&amp;</span><span class="n">xb</span><span class="o">==</span><span class="sc">'Y'</span><span class="p">)</span>
+			<span class="n">money</span><span class="o">+=</span><span class="mi">1000</span><span class="p">;</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">py</span><span class="o">&gt;</span><span class="mi">80</span><span class="o">&amp;&amp;</span><span class="n">gb</span><span class="o">==</span><span class="sc">'Y'</span><span class="p">)</span>
+			<span class="n">money</span><span class="o">+=</span><span class="mi">850</span><span class="p">;</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">ans_money</span><span class="o">&lt;</span><span class="n">money</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">ans_money</span><span class="o">=</span><span class="n">money</span><span class="p">;</span>
+			<span class="n">strcpy</span><span class="p">(</span><span class="n">ans_name</span><span class="p">,</span><span class="n">name</span><span class="p">);</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"%s</span><span class="se">\n</span><span class="s">%d</span><span class="se">\n</span><span class="s">%d"</span><span class="p">,</span><span class="n">ans_name</span><span class="p">,</span><span class="n">ans_money</span><span class="p">,</span><span class="n">sum</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+:ET

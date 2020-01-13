@@ -1,0 +1,351 @@
+I">s<blockquote>
+  <p>参考了<a href="https://zh.cppreference.com/w/cpp/named_req">C++中文手册\具名要求</a>，感谢社区内的志愿者。</p>
+</blockquote>
+
+<p>STL的全称是Standard Template Library，即标准模板库。STL是C++标准程序库的核心，深刻影响了标准程序库的整体结构，STL内的所有组件都由模板（template）构成，旨在为问题提供最通用的容器和解决算法。</p>
+<h1 id="算法">算法</h1>
+<p>大部分算法都定义在算法库<code class="highlighter-rouge">algorithm</code>中，另外还在<code class="highlighter-rouge">&lt;numberic&gt;</code>中定义了一些数值泛型算法。标准库中提供了上百种算法，然而，死记硬背是不需要的，算法库有一致的结构。除了少数特例之外，标准库都对一个迭代器范围内的元素进行操作，我们将这个元素范围称为“输入范围”。接受输入范围的元素大部分都是用左闭合区间来表示这个范围，还有少部分是子串区间。</p>
+<h2 id="迭代器">迭代器</h2>
+<p>STL中大量使用迭代器（iterator）这一通用概念在一些数据结构内访问数据，下面先进行简要介绍。</p>
+<h3 id="表示一个元素序列的几种方法">表示一个元素序列的几种方法</h3>
+<p>例如，有如下十个数线性排列，下标地址从<code class="highlighter-rouge">0</code>开始：</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>40,41,42,43,44,45,46,47,48,49
+</code></pre></div></div>
+<h4 id="全闭合区间">全闭合区间</h4>
+<p>数学上的表示是$[left,right]$或$[first,last]$，用这个序列第一个和最后一个元素的地址表示一个区间内的所有元素，则$[2,9]$表示了序列</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>42,43,44,45,46,47,48,49
+</code></pre></div></div>
+<p>在全闭合区间中，$first&gt;last$时表示一个空区间。</p>
+<h4 id="左闭合区间">左闭合区间</h4>
+<p>数学上的表示是$[begin,end)$，用这个序列第一个和最后一个元素<strong>后一个</strong>的地址来表示一个区间内的左右元素，相当于全闭合区间里的$[begin,end-1]$。<code class="highlighter-rouge">end</code>可以指向一个不存在元素的地址，例如$[2,10)$同样表示了上面这个序列。</p>
+
+<p>在左闭合区间中，$begin=end$时表示一个空区间。</p>
+<h4 id="子串区间">子串区间</h4>
+<p>数学上的表示是$[position,position+length)$，表示了从给定元素开始的若干元素。例如，$[2,2+8)$同样表示了上面这个序列。</p>
+
+<p>C标准库的很多函数都是使用这一方法表示一个区间，例如<code class="highlighter-rouge">qsort</code>、<code class="highlighter-rouge">memset</code>等。</p>
+
+<p>在子串区间中，$length=0$表示一个空区间。</p>
+<h3 id="左闭合区间表示的优势">左闭合区间表示的优势</h3>
+<h4 id="访问方便且对迭代器的要求较低">访问方便，且对迭代器的要求较低</h4>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="p">(</span><span class="n">it</span><span class="o">=</span><span class="n">begin</span><span class="p">;</span> <span class="n">it</span><span class="o">!=</span><span class="n">end</span><span class="p">;</span> <span class="o">++</span><span class="n">it</span><span class="p">)</span> <span class="p">{}</span> <span class="c1">// 使用左闭合区间</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">it</span><span class="o">=</span><span class="n">left</span><span class="p">;</span> <span class="n">it</span><span class="o">&lt;=</span><span class="n">right</span><span class="p">;</span> <span class="o">++</span><span class="n">it</span><span class="p">)</span> <span class="p">{}</span> <span class="c1">// 使用全闭合区间</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">!=</span><span class="n">length</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{}</span> <span class="c1">// 使用子串区间</span>
+</code></pre></div></div>
+<p>在遍历一个元素序列时，三种表示法通常像上面这样遍历。这时，全闭合区间使用了<code class="highlighter-rouge">&lt;=</code>运算，要求高于<code class="highlighter-rouge">!=</code>（通常，一个元素可以比较大小时一定可以判断相等与否；但反之不然）；子串区间需要额外维护一个计数器，对于很多不能按下标访问的数据结构来说显得不够方便。</p>
+<h4 id="查找方便">查找方便</h4>
+<p>查找target，返回的位置==end，说明在范围内没有找到target。</p>
+<h4 id="便于二分">便于二分</h4>
+<p>当需要取中间元素的时候，<code class="highlighter-rouge">mid=begin+end/2</code>的定位问题。如果区间元素的个数是奇数个，那么mid永远是指向中间的元素；如果区间元素是偶数个，那么mid永远指向后半段区间的首元素。这样做在二分查找等一些算法的实现上特别有优势。</p>
+
+<p>mid的规范写法是<code class="highlighter-rouge">mid=begin+(end-begin)/2</code>。</p>
+<h4 id="快速统计区间内元素">快速统计区间内元素</h4>
+<p>$end-begin=length$。推论是，如果$begin==end$那么表示的是一个空区间。</p>
+<h3 id="五类迭代器">五类迭代器</h3>
+<blockquote>
+  <p>在C++17中，定义了第6类迭代器：相接迭代器（contiguous iterator），其所指向的逻辑相邻元素也在内存中物理上相邻。
+指向数组元素的指针满足相接迭代器的所有要求，但容器<code class="highlighter-rouge">deque</code>不满足。</p>
+</blockquote>
+
+<blockquote>
+  <p>在C++20中，定义了第7类迭代器：常表达式迭代器（constexpr iterator）是能在常量表达式求值中使用的迭代器。</p>
+</blockquote>
+
+<blockquote>
+  <p>C++20 引入基于概念的新迭代器系统，它异于 C++17 及之前的迭代器。虽然基础分配法保持类似，但单独的迭代器类别的要求有些区别。</p>
+</blockquote>
+
+<p>在C++中，一图解释五类迭代器之间的继承关系：</p>
+<pre><code class="language-mermaid">graph LR
+输入迭代器--&gt;前向迭代器
+输出迭代器--&gt;前向迭代器
+前向迭代器--&gt;双向迭代器
+双向迭代器--&gt;随机访问迭代器
+</code></pre>
+<h4 id="输入迭代器input-iterator">输入迭代器（input iterator）</h4>
+<p>只读，不写；单遍扫描，只能递增。</p>
+
+<p>输入迭代器只支持顺序访问，通常用于读取序列中的元素。对于一个输入迭代器<code class="highlighter-rouge">it</code>，<code class="highlighter-rouge">*it++</code>保证是有效的，但递增它可能导致所有其他指向流的迭代器失效。其结果就是，不保证其状态可以保存下来并用来访问元素。因此，输入迭代器只能用于单遍扫描的算法。支持如下操作：</p>
+<ul>
+  <li>相等（<code class="highlighter-rouge">==</code>）、不等（<code class="highlighter-rouge">!=</code>）比较。</li>
+  <li>用于推进迭代器的前置和后置递增（<code class="highlighter-rouge">++</code>）。</li>
+  <li>解引用（<code class="highlighter-rouge">*</code>），只能出现在赋值运算的右侧；箭头运算符（<code class="highlighter-rouge">-&gt;</code>），<code class="highlighter-rouge">it-&gt;member</code>等价于<code class="highlighter-rouge">(*it).member</code>。</li>
+</ul>
+
+<p>算法<code class="highlighter-rouge">find</code>要求输入迭代器；而类型<code class="highlighter-rouge">istream_iterator</code>是一种输入迭代器。</p>
+<h4 id="输出迭代器output-iterator">输出迭代器（output iterator）</h4>
+<p>只写，不读；单遍扫描，只能递增。可以看作输入迭代器功能上的补集。</p>
+
+<p>只能向解引用的输出迭代器赋值一次，类似输入迭代器，输出迭代器也只能用于单遍扫描的算法，通常用作算法的目标位置。支持如下操作：</p>
+<ul>
+  <li>用于推进迭代器的前置和后置递增（<code class="highlighter-rouge">++</code>）。</li>
+  <li>解引用（<code class="highlighter-rouge">*</code>），只能出现在赋值运算的左侧。</li>
+</ul>
+
+<p>算法<code class="highlighter-rouge">fill</code>要求输出迭代器；而类型<code class="highlighter-rouge">ostream_iterator</code>是一种输出迭代器。</p>
+<h4 id="前向迭代器forward-iterator">前向迭代器（forward iterator）</h4>
+<p>可读写；多遍扫描，只能递增。</p>
+
+<p>可以读写元素，只能在序列中沿着一个方向移动，支持所有输入迭代器和输出迭代器的操作，而且可以多次读写同一个元素。因此，可以保存前向迭代器的状态，使用前向迭代器的算法可以进行多遍扫描。</p>
+
+<p>算法<code class="highlighter-rouge">replace</code>要求前向迭代器；容器<code class="highlighter-rouge">forward_list</code>上的迭代器是前向迭代器。</p>
+<h4 id="双向迭代器bidrectional-iterator">双向迭代器（bidrectional iterator）</h4>
+<p>可读写；多遍扫描，能递增递减。</p>
+
+<p>可正向/反向读写序列中的元素。除支持所有前向迭代器的操作之外，双向迭代器还支持前置和后置递减（<code class="highlighter-rouge">--</code>）。</p>
+
+<p>算法<code class="highlighter-rouge">reverse</code>要求双向迭代器；除了<code class="highlighter-rouge">forward_list</code>之外，其他标准库容器上的迭代器都是双向迭代器。</p>
+<h4 id="随机访问迭代器random-access-iterator">随机访问迭代器（random-access iterator）</h4>
+<p>可读写；多遍扫描，支持全部迭代器运算。</p>
+
+<p>提供在常数时间内访问序列中任意元素的能力，除支持双向迭代器的所有操作外，还支持：</p>
+<ul>
+  <li>用于比较两个迭代器的相对位置（<code class="highlighter-rouge">&gt;</code>、<code class="highlighter-rouge">&lt;</code>、<code class="highlighter-rouge">&gt;=</code>、<code class="highlighter-rouge">&lt;=</code>）。</li>
+  <li>迭代器和一个整数值的加减运算（<code class="highlighter-rouge">+</code>、<code class="highlighter-rouge">+=</code>、<code class="highlighter-rouge">-</code>、<code class="highlighter-rouge">-=</code>），计算结果迭代器在序列中前进或后退给定整数后的迭代器。</li>
+  <li>迭代器之间的减法（<code class="highlighter-rouge">-</code>），得到两个迭代器之间的距离。</li>
+  <li>下标运算符（<code class="highlighter-rouge">[]</code>），<code class="highlighter-rouge">it[n]</code>与<code class="highlighter-rouge">*(it+n)</code>等价。</li>
+</ul>
+
+<p>算法<code class="highlighter-rouge">sort</code>要求随机访问迭代器；容器<code class="highlighter-rouge">vector</code>上的迭代器和用于访问内置数组的指针是随机访问迭代器。</p>
+<h2 id="算法概览"><a href="https://zh.cppreference.com/w/cpp/algorithm">算法概览</a></h2>
+<h2 id="定制算法">定制算法</h2>
+<blockquote>
+  <p>c++11中引入了lamda表达式，可以简化谓词的实现。</p>
+</blockquote>
+
+<h3 id="谓词"><a href="https://zh.cppreference.com/w/cpp/named_req/Predicate">谓词</a></h3>
+<p>有单参数，且不修改它，返回值可转换为 bool 的函数对象。</p>
+<h3 id="二元谓词"><a href="https://zh.cppreference.com/w/cpp/named_req/BinaryPredicate">二元谓词</a></h3>
+<p>有双参数，且不修改它，返回值可转换为 bool 的函数对象。</p>
+<h4 id="比较"><a href="https://zh.cppreference.com/w/cpp/named_req/Compare">比较</a></h4>
+<p>建立顺序关系的二元谓词 (BinaryPredicate) 。应用到满足比较 (Compare) 类型对象的函数调用运算的返回值，在按语境转换成 bool 时，若此类型所引入的严格弱序关系中调用的第一参数先出现于第二参数，则生成 true ，否则生成 false 。</p>
+<h1 id="容器"><a href="https://zh.cppreference.com/w/cpp/named_req/Container">容器</a></h1>
+<p>容器（Container）是用于存储其他对象，并管理<strong>其所容纳的对象所用的内存</strong>的对象。随着STL标准的不断发展，标准库内集成了越来越多的容器，这里举一些常用的容器作为例子。</p>
+<h2 id="前置知识">前置知识</h2>
+<h3 id="pair"><a href="https://zh.cppreference.com/w/cpp/utility/pair">pair</a></h3>
+<p>pair用于快速将两个元素“打包”，包含在任意一个标准库里。pair支持赋值操作和基于字典序的比较操作。</p>
+<h2 id="顺序容器">顺序容器</h2>
+<p>这里以<a href="https://zh.cppreference.com/w/cpp/container/vector"><code class="highlighter-rouge">vector</code></a>、<a href="https://zh.cppreference.com/w/cpp/container/deque"><code class="highlighter-rouge">deque</code></a>、<a href="https://zh.cppreference.com/w/cpp/container/list"><code class="highlighter-rouge">list</code></a>作为入门，其余在新的C++标准中实现的容器可以自行学习。</p>
+
+<h3 id="通用操作">通用操作</h3>
+<p>这里举一些常用的函数</p>
+<h4 id="构造函数">构造函数</h4>
+<p>设模板名为<code class="highlighter-rouge">C</code>。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">C</span>
+	<span class="n">c1</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">e</span><span class="p">),</span>		   <span class="c1">//用左闭合区间[b,e)区间内的元素构造容器，要求输入迭代器</span>
+	<span class="n">c2</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">cv</span><span class="p">),</span>		   <span class="c1">//c2是一个有n个元素的容器，每个元素的类型都是cv，这里cv可省略（代表使用默认初始化）</span>
+	<span class="n">c3</span><span class="p">(</span><span class="n">c1</span><span class="p">),</span>			   <span class="c1">//拷贝构造函数</span>
+	<span class="n">c</span><span class="p">{</span><span class="n">cv1</span><span class="p">,</span> <span class="n">cv2</span><span class="p">,</span> <span class="n">cv3</span><span class="p">};</span>  <span class="c1">//花括号构造，用左边这个集合去构造容器，C++11开始支持</span>
+</code></pre></div></div>
+<h4 id="访问元素">访问元素</h4>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">c</span><span class="p">.</span><span class="n">front</span><span class="p">();</span> <span class="c1">//c的首元素</span>
+<span class="n">c</span><span class="p">.</span><span class="n">back</span><span class="p">();</span>  <span class="c1">//c的尾元素</span>
+<span class="n">c</span><span class="p">[</span><span class="n">pos</span><span class="p">];</span>    <span class="c1">//c的第pos个元素，list不支持</span>
+</code></pre></div></div>
+<p>上面三个的函数均不进行合法检查，因此要注意是否有越界情况。</p>
+<h4 id="迭代器-1">迭代器</h4>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">c</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span><span class="c1">//返回首迭代器，重载了常量迭代器的版本</span>
+<span class="n">c</span><span class="p">.</span><span class="n">end</span><span class="p">();</span><span class="c1">//返回尾后迭代器，重载了常量迭代器的版本</span>
+<span class="n">c</span><span class="p">.</span><span class="n">rbegin</span><span class="p">();</span><span class="c1">//反向迭代器</span>
+<span class="n">c</span><span class="p">.</span><span class="n">rend</span><span class="p">();</span><span class="c1">//反向迭代器</span>
+</code></pre></div></div>
+<p>反向迭代器将在“再探迭代器”部分详细解释。</p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sort</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">c</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span> <span class="n">greater</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">());</span> <span class="c1">//将C内元素从大到小排序</span>
+<span class="n">sort</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">rbegin</span><span class="p">(),</span> <span class="n">c</span><span class="p">.</span><span class="n">rend</span><span class="p">());</span> <span class="c1">//和上面等价</span>
+</code></pre></div></div>
+<h4 id="大小及修改大小的操作">大小及修改大小的操作</h4>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">c</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="c1">//c的大小</span>
+<span class="n">c</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="c1">//c是否为空，等价于c.size()==0</span>
+<span class="n">c</span><span class="p">.</span><span class="n">assign</span><span class="p">(</span><span class="n">args</span><span class="p">...);</span> <span class="c1">//重新调用构造函数。在这里args等价于构造函数的参数，并且参数不可省略</span>
+<span class="n">c</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">cv</span><span class="p">);</span> <span class="c1">//将容器大小调整为n，删去多余的，如果容器大小小于n会用cv去填（可省，等价于默认初始化）</span>
+<span class="n">c</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span> <span class="c1">// 清空</span>
+<span class="n">c</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">args</span><span class="p">...);</span> <span class="c1">//插入元素，时间复杂度根据容器结构有不同</span>
+<span class="n">c</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">args</span><span class="p">...);</span> <span class="c1">//删除元素，时间复杂度根据容器结构有不同</span>
+</code></pre></div></div>
+<h3 id="个人经验如何选择合适的容器">个人经验：如何选择合适的容器</h3>
+
+<ol>
+  <li>不知道用什么的时候，选用<code class="highlighter-rouge">vector</code>。</li>
+  <li>如果你的程序需要频繁地在头部和尾部插入/删除元素，选用<code class="highlighter-rouge">deque</code>。</li>
+  <li>如果你的程序需要频繁地在容器的任意位置插入删除元素，但不需要随机访问元素，选用<code class="highlighter-rouge">list</code>。</li>
+  <li>如果你的程序既需要随机访问，又需要在中间插入，则应该取决于两种操作的数量和相对性能选择容器，或者考虑向下面这样在不同的阶段拷贝到不同的容器中。换言之，标准库为容器提供了相同的接口，我们可以方便的测试不同容器的实际表现以决定改选用哪一个。</li>
+  <li>如果你需要对一个链表排序，不应直接使用算法库中的<code class="highlighter-rouge">sort</code>。这是因为标准库内置的<code class="highlighter-rouge">sort</code>需要随机访问迭代器，而<code class="highlighter-rouge">list</code>提供的迭代器是双向迭代器。<code class="highlighter-rouge">list</code>自带了一个基于冒泡排序实现的排序算法，但是时间性能上最优秀的做法是：将其拷贝到一个<code class="highlighter-rouge">vector</code>中排序再拷贝回来。</li>
+  <li>警惕<a href="https://zh.cppreference.com/w/cpp/container/vector_bool"><code class="highlighter-rouge">vector&lt;bool&gt;</code></a>，标准库对其进行了负优化，相当于一个动态的<code class="highlighter-rouge">bitset</code>。使用<code class="highlighter-rouge">vector&lt;int&gt;</code>代替之。</li>
+</ol>
+
+<h2 id="关联容器">关联容器</h2>
+<p>关联容器实现能快速查找（ $O(\log n)$ 复杂度）的数据结构。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>容器名</th>
+      <th>特性</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>set</td>
+      <td>唯一键的集合，按照键排序</td>
+    </tr>
+    <tr>
+      <td>map</td>
+      <td>键值对的集合，按照键排序，键是唯一的</td>
+    </tr>
+    <tr>
+      <td>multiset</td>
+      <td>键的集合，按照键排序</td>
+    </tr>
+    <tr>
+      <td>multimap</td>
+      <td>键值对的集合，按照键排序</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>C++11中引入的无序关联容器是关联容器的时间优化版本，通过哈希桶取代平衡树实现，可以自行拓展学习（在上面模板名前加<code class="highlighter-rouge">unordered_</code>前缀）。</p>
+</blockquote>
+
+<h3 id="元素访问">元素访问</h3>
+<p><code class="highlighter-rouge">operator[]</code>，仅<code class="highlighter-rouge">map</code>和<code class="highlighter-rouge">unordered_map</code>支持。</p>
+<h3 id="迭代器-2">迭代器</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span><span class="c1">//返回首迭代器，重载了常量迭代器的版本</span>
+<span class="n">s</span><span class="p">.</span><span class="n">end</span><span class="p">();</span><span class="c1">//返回尾后迭代器，重载了常量迭代器的版本</span>
+<span class="n">s</span><span class="p">.</span><span class="n">rbegin</span><span class="p">();</span><span class="c1">//反向迭代器</span>
+<span class="n">s</span><span class="p">.</span><span class="n">rend</span><span class="p">();</span><span class="c1">//反向迭代器</span>
+</code></pre></div></div>
+<p>关联容器的迭代器遍历是从小到大（无序容器中是随机的），复杂度是$O(\log n)$级别的，其中$n$为容器大小。</p>
+<h3 id="查找操作">查找操作</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span><span class="p">.</span><span class="n">count</span><span class="p">(</span><span class="n">val</span><span class="p">);</span> <span class="c1">//返回集合中等于val元素的数量</span>
+<span class="n">s</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">val</span><span class="p">);</span> <span class="c1">//返回指定位置的迭代器</span>
+<span class="n">s</span><span class="p">.</span><span class="n">lower_bound</span><span class="p">(</span><span class="n">val</span><span class="p">);</span> <span class="c1">//返回指向首个不小于给定键的元素的迭代器</span>
+<span class="n">s</span><span class="p">.</span><span class="n">upper_bound</span><span class="p">(</span><span class="n">val</span><span class="p">);</span> <span class="c1">//返回指向首个大于给定键的元素的迭代器</span>
+</code></pre></div></div>
+<h3 id="大小及修改大小的操作-1">大小及修改大小的操作</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="c1">//c的大小</span>
+<span class="n">s</span><span class="p">.</span><span class="n">empty</span><span class="p">();</span> <span class="c1">//c是否为空，等价于c.size()==0</span>
+<span class="n">s</span><span class="p">.</span><span class="n">assign</span><span class="p">(</span><span class="n">args</span><span class="p">...);</span> <span class="c1">//重新调用构造函数。在这里args等价于构造函数的参数，并且参数不可省略</span>
+<span class="n">s</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span> <span class="c1">// 清空</span>
+<span class="n">s</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">args</span><span class="p">...);</span> <span class="c1">//插入元素，时间复杂度根据容器结构有不同</span>
+<span class="n">s</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">args</span><span class="p">...);</span> <span class="c1">//删除元素，时间复杂度根据容器结构有不同</span>
+</code></pre></div></div>
+<h2 id="适配器">适配器</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>模板名</th>
+      <th>功能</th>
+      <th>模板类型</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>stack</td>
+      <td>堆栈适配器（LIFO）</td>
+      <td>类模板</td>
+    </tr>
+    <tr>
+      <td>queue</td>
+      <td>改写容器来提供队列（FIFO数据结构）</td>
+      <td>类模板</td>
+    </tr>
+    <tr>
+      <td>priority_queue</td>
+      <td>改写容器来提供优先级队列</td>
+      <td>类模板</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>基于几种容器的封装。</p>
+<h3 id="priority_queue"><code class="highlighter-rouge">priority_queue</code></h3>
+<p>详细提一下<code class="highlighter-rouge">priority_queue</code>：基于堆实现的优先队列，性能比使用set要优秀。但是要注意，和一般思维不同，<code class="highlighter-rouge">priority_queue</code>中先取出的是最大的元素。</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>priority_queue&lt;T&gt; q1; //使用vector作为容器，小于运算符作为比较
+priority_queue&lt;T,Container&gt; q2; //使用Container作为容器，小于运算符作为比较
+priority_queue&lt;T,Container,Compare&gt; q3; //使用Container作为容器，Compare作为比较
+q.top(); //q中优先级最大的元素
+q.pop(); //删去q中最大的元素，容器空时未定义
+q.push(val); //把val加入队列
+</code></pre></div></div>
+<h2 id="再探迭代器"><a href="https://zh.cppreference.com/w/cpp/iterator">再探迭代器</a></h2>
+<h3 id="反向迭代器"><a href="https://zh.cppreference.com/w/cpp/iterator/reverse_iterator">反向迭代器</a></h3>
+<h3 id="插入迭代器">插入迭代器</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>模板名</th>
+      <th>功能</th>
+      <th>模板类型</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="highlighter-rouge">back_insert_iterator</code></td>
+      <td>用于在容器尾部插入的迭代器适配器</td>
+      <td>类模板</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">back_inserter</code></td>
+      <td>创建拥有从参数推出的类型的<code class="highlighter-rouge">std::back_insert_iterator</code></td>
+      <td>函数模板</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">front_insert_iterator</code></td>
+      <td>用于在容器头部插入的迭代器适配器</td>
+      <td>类模板)</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">front_inserter</code></td>
+      <td>创建拥有从参数推出的类型的 <code class="highlighter-rouge">std::front_insert_iterator</code></td>
+      <td>函数模板</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">insert_iterator</code></td>
+      <td>用于插入容器的迭代器适配器</td>
+      <td>类模板</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">inserter</code></td>
+      <td>创建拥有从参数推出的类型的 <code class="highlighter-rouge">std::insert_iterator</code></td>
+      <td>函数模板</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="流迭代器">流迭代器</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>模板名</th>
+      <th>功能</th>
+      <th>模板类型</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="highlighter-rouge">istream_iterator</code></td>
+      <td>从<code class="highlighter-rouge">std::basic_istream</code>读取的输入迭代器</td>
+      <td>类模板</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">ostream_iterator</code></td>
+      <td>写入<code class="highlighter-rouge">std::basic_ostream</code>的输出迭代器</td>
+      <td>类模板</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">istreambuf_iterator</code></td>
+      <td>从<code class="highlighter-rouge">std::basic_streambuf</code>读取的输入迭代器</td>
+      <td>类模板</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">ostreambuf_iterator</code></td>
+      <td>写入<code class="highlighter-rouge">std::basic_streambuf</code>的输出迭代器</td>
+      <td>类模板</td>
+    </tr>
+  </tbody>
+</table>
+:ET

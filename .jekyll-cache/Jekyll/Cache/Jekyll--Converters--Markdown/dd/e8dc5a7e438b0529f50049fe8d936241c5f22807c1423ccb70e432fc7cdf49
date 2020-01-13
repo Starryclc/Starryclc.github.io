@@ -1,0 +1,327 @@
+I"�7<h2 id="搜索search">搜索（Search）</h2>
+
+<h3 id="why-search">Why Search</h3>
+
+<p>很多人工智能的问题都可以用搜索来求解（例如博弈）</p>
+
+<h3 id="形式化方法">形式化方法</h3>
+
+<p>Once the problem has been formulated as a state space search, various algorithms can be utilized to solve the problem.</p>
+
+<p>A solution to the problem will be a sequence of actions/moves that can transform your current state into state where your desired condition holds.</p>
+
+<p>将一个问题形式化为搜索问题的组分如下：</p>
+
+<ul>
+  <li>搜索空间</li>
+  <li>动作：状态间的转移</li>
+  <li>初始状态</li>
+  <li>目标状态</li>
+  <li>形式化一些启发方法，使得更快到达目标状态</li>
+</ul>
+
+<h3 id="搜索算法">搜索算法</h3>
+
+<h4 id="inputs">Inputs</h4>
+
+<ul>
+  <li>a specified initial state (a specific world state or a set of world states representing the agent’s knowledge, etc.)</li>
+  <li>指定的初始状态(特定的世界状态或代表Agent知识的一组世界状态等)</li>
+  <li>a successor function S(x) = {set of states that can be reached from state x via a single action}.</li>
+  <li>后继函数S(X)={可通过单个动作从状态x到达的状态集}。</li>
+  <li>a goal test a function that can be applied to a state and returns true if the state is satisfies the goal condition.</li>
+  <li>目标测试可应用于状态的函数，如果状态满足目标条件，则返回TRUE。</li>
+  <li>A step cost function C(x,a,y) which determines the cost of moving from state x to state y using action a. ($C(x,a,y) = \infty$ if a does not yield y from x)</li>
+  <li>阶跃成本函数C(x，a，y)，它确定使用动作a从状态x移动到状态y的成本。($C(x，a，y)=\infty$，如果a没有从x产生y)</li>
+</ul>
+
+<h4 id="output">Output</h4>
+
+<ul>
+  <li>a sequence of states leading from the initial state to a state satisfying the goal test.</li>
+  <li>从初始状态到满足目标测试的状态序列。</li>
+  <li>The set of successors of a state x might arise from different actions, e.g.,</li>
+  <li>状态x的后继者集合可能产生于不同的动作，例如，
+    <ul>
+      <li>x → a → y</li>
+      <li>x → b → z</li>
+    </ul>
+  </li>
+  <li>Successor function S(x) yields a set of states that can be reached from x via a (any) single action.</li>
+  <li>后继函数S(X)产生可以通过(任何)单个动作从x到达的一组状态。
+    <ul>
+      <li>Rather than just return a set of states, we might annotate these states by the action used to obtain them:</li>
+      <li>不只是返回一组状态，我们可以通过用于获取这些状态的操作来注释这些状态：
+        <ul>
+          <li>S(x) = {&lt;y,a&gt;, &lt;z,b&gt;}  y via action a, z via action b.</li>
+          <li>S(x) = {&lt;y,a&gt;, &lt;y,b&gt;} y via action a, also y via alternative action b.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="树形搜索">树形搜索</h4>
+
+<ul>
+  <li>Frontier is the set of states we haven’t yet explored/expanded, and want to explore</li>
+  <li>Frontier（边界）是我们尚未探索/扩展并且想要探索的一组状态。</li>
+  <li>Initial call has Frontier = the set of initial state</li>
+  <li>Initial Call has Frontier=初始状态集</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>TreeSearch<span class="o">(</span>Frontier, Sucessors, Goal? <span class="o">)</span>
+  If Frontier is empty <span class="k">return </span>failure
+  Curr <span class="o">=</span> <span class="k">select </span>state from Frontier
+  If <span class="o">(</span>Goal?<span class="o">(</span>Curr<span class="o">))</span> <span class="k">return </span>Curr.
+  Frontier’ <span class="o">=</span> <span class="o">(</span>Frontier – <span class="o">{</span>Curr<span class="o">})</span> U Successors<span class="o">(</span>Curr<span class="o">)</span>
+  <span class="k">return </span>TreeSearch<span class="o">(</span>Frontier’, Successors, Goal?<span class="o">)</span>
+</code></pre></div></div>
+
+<p>无访问标记，可能导致搜索不会终止。</p>
+
+<h4 id="selection-rule选择方式">Selection rule（选择方式）</h4>
+
+<p>The example shows that the order states are selected from the frontier has a critical eﬀect on the operation of the search:</p>
+
+<ul>
+  <li>Whether or not a solution is found</li>
+  <li>The cost of the solution found</li>
+  <li>The time and space required by the search</li>
+</ul>
+
+<h4 id="critical-properties-of-search关键要素">Critical Properties of Search（关键要素）</h4>
+
+<h5 id="completeness完备性">Completeness（完备性）</h5>
+
+<p>will the search always ﬁnd a solution if a solution exists?</p>
+
+<h5 id="optimality最优性">Optimality（最优性）</h5>
+
+<p>will the search always ﬁnd the least cost solution? (when actions have costs)</p>
+
+<h5 id="time-complexity时间复杂度">Time complexity（时间复杂度）</h5>
+
+<p>what is the maximum number of nodes than can be expanded or generated?</p>
+
+<h5 id="space-complexity空间复杂度">Space complexity（空间复杂度）</h5>
+
+<p>what is the maximum number of nodes that have to be stored in memory?</p>
+
+<h3 id="无信息搜索uninformed-search">无信息搜索（uninformed search）</h3>
+
+<h4 id="selecting-vs-sorting">Selecting vs. Sorting</h4>
+
+<ul>
+  <li>A simple uniform method we will exploit
+    <ul>
+      <li>Order the elements on the frontier.</li>
+      <li>Always select the ﬁrst element.</li>
+    </ul>
+  </li>
+  <li>Any selection rule can be achieved by employing an appropriate ordering of the frontier set.</li>
+</ul>
+
+<h4 id="breadth-first">Breadth-First</h4>
+
+<p>Place the successors of the current state at the end of the frontier.</p>
+
+<p>将当前状态的后继者放置在边界的末尾。</p>
+
+<ul>
+  <li>Uniform-Cost</li>
+</ul>
+
+<h5 id="breadth-first-properties">Breadth First Properties</h5>
+
+<ul>
+  <li>Let b be the maximum number of successors of any state.</li>
+  <li>Let d be the number of actions in the shortest solution.</li>
+</ul>
+
+<h5 id="completeness-and-optimality">Completeness and optimality</h5>
+
+<ul>
+  <li>All shorter paths are expanded before any longer path</li>
+  <li>There are ﬁnitely many paths of a certain length</li>
+  <li>
+    <p>Eventually we must examine all paths of length d, and thus ﬁnd the shortest solution</p>
+  </li>
+  <li>Time complexity: $1 + b + b2 + … + bd + b(b^d −1) = O(b^{d+1})$</li>
+  <li>Space complexity: $b(b^d −1) = O(b^{d+1})$</li>
+</ul>
+
+<h4 id="depth-first">Depth-First</h4>
+
+<ul>
+  <li>Place the successors of the current state at the front of the frontier</li>
+  <li>Therefore always expands the deepest node in the frontier</li>
+</ul>
+
+<p>Applied to the example of Breadth First Search</p>
+
+<h5 id="depth-ﬁrst-properties">Depth ﬁrst properties</h5>
+
+<ul>
+  <li>Completeness: Inﬁnite state space: No
+    <ul>
+      <li>Finite state space with inﬁnite paths: No</li>
+      <li>Finite state space and prune paths with duplicate states ? Yes</li>
+    </ul>
+  </li>
+  <li>Optimality: No</li>
+</ul>
+
+<h5 id="time-complexity">Time complexity</h5>
+
+<ul>
+  <li>$O(b^m)$ where m is the length of the longest path in the state space (Could explore each branch of search tree)</li>
+  <li>Very bad if m is much larger than d</li>
+  <li>But if there are many solution paths it can be much faster than breadth ﬁrst (Can by good luck bump into a solution quickly).</li>
+</ul>
+
+<h5 id="space-complexity">Space complexity</h5>
+
+<ul>
+  <li>Depth-First Backtrack Points = unexplored siblings of nodes along current path</li>
+  <li>Only explore a single path at a time.</li>
+  <li>The Frontier only contains the deepest node on the current path along with the backtrack points.</li>
+  <li>O(bm), linear space!</li>
+  <li>A signiﬁcant advantage of DFS</li>
+</ul>
+
+<h4 id="uniform-cost一致代价">Uniform-cost(一致代价)</h4>
+
+<ul>
+  <li>Keep Frontier ordered by increasing cost of the path</li>
+  <li>Always expand the least cost path</li>
+  <li>Identical to breadth ﬁrst if each action has the same cost.</li>
+</ul>
+
+<h5 id="completeness-and-optimality-1">Completeness and optimality</h5>
+
+<ul>
+  <li>Suppose that each transition has $costs\ge\epsilon &gt;0$</li>
+  <li>All cheaper paths are expanded before any more expensive path</li>
+  <li>There are ﬁnitely many path costs less that the cost of the optimal solution</li>
+  <li>Eventually we must examine the optimal solution</li>
+</ul>
+
+<h5 id="time-and-space-complexities">Time and space complexities</h5>
+
+<ul>
+  <li>Recall the time and space complexity for breadth-ﬁrst search is $O(b^{d+1})$ where d is the length of the optimal solution</li>
+  <li>$O(bC^∗/\epsilon+1)$ where $C^∗$ is the cost of the optimal solution</li>
+</ul>
+
+<h4 id="depth-limited-search深度受限搜索">Depth-limited search（深度受限搜索）</h4>
+
+<ul>
+  <li>Breadth-ﬁrst has problems with space complexity</li>
+  <li>Depth-ﬁrst can run down a very long or inﬁnite path</li>
+  <li>Perform depth ﬁrst search but only to a pre-speciﬁed depth limit L</li>
+  <li>Now inﬁnite length paths are not a problem But will only ﬁnd a solution if a solution of length ≤ L exists</li>
+</ul>
+
+<h5 id="depth-limited-properties">Depth-limited properties</h5>
+
+<ul>
+  <li>Completeness: No</li>
+  <li>Optimality: No Time complexity: $O(b^L)$</li>
+  <li>Space complexity: $O(bL)$</li>
+</ul>
+
+<h4 id="iterative-deepening-search迭代加深搜索">Iterative deepening search（迭代加深搜索）</h4>
+
+<ul>
+  <li>Solve the problems of depth-ﬁrst and breadth-ﬁrst by extending depth limited search</li>
+  <li>Starting at depth limit L = 0, we iteratively increase the depth limit, performing a depth limited search for each depth limit</li>
+  <li>Stop if a solution is found, or if the depth limited search failed without cutting oﬀ any nodes because of the depth limit</li>
+  <li>If no nodes were cut oﬀ, the search examined all paths in the state space and found no solution, hence no solution exists.</li>
+</ul>
+
+<h5 id="completeness-and-optimality-2">Completeness and optimality</h5>
+
+<ul>
+  <li>Completeness: Yes</li>
+  <li>Optimality: Yes if costs are uniform</li>
+  <li>If costs are not uniform, we can use a cost bound instead
+    <ul>
+      <li>Only expand paths of cost less than the cost bound.</li>
+      <li>Keep track of the minimum cost unexpanded path in each depth ﬁrst iteration, increase the cost bound to this on the next iteration.</li>
+      <li>This can be very expensive. Need as many iterations of the search as there are distinct path costs.</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="time-and-space-complexities-1">Time and space complexities</h5>
+
+<ul>
+  <li>$(d + 1)b^0 + d^b + (d−1)b^2 + … + b^d = O(b^d)$</li>
+  <li>Recall the time complexity for breadth-ﬁrst: $1 + b + b^2 + … + b^d + b(b^d −1) = O(b^{d+1})$</li>
+  <li>IDS can be more eﬃcient than breadth ﬁrst search: nodes at limit are not expanded. BFS must expand all nodes until it expand a goal node</li>
+  <li>Space complexity: $O(b^d)$</li>
+</ul>
+
+<h4 id="bidirectional-search">Bidirectional search</h4>
+
+<ul>
+  <li>Simultaneously search both forward from the initial state and backward from the goal, and stop when the two searches meet in the middle</li>
+  <li>Suppose both directions use breadth-ﬁrst</li>
+  <li>Completeness: Yes</li>
+  <li>Optimality: if edges have uniform costs Time and space complexity: $O(b^{d/2})$</li>
+</ul>
+
+<h3 id="path-checking">Path checking</h3>
+
+<ul>
+  <li>Recall paths are stored on the frontier</li>
+  <li>If $&lt;n_1,\ldots,n_{k}&gt;$ is a path to node $n_k$, and we expand $n_k$ to obtain child $c$, we have $&lt;n_1,\ldots,n_{k},c&gt;$ as the path to $c$</li>
+  <li>Path checking ensures that the state $c$ is not equal to the state reached by any ancestor of $c$ along this path</li>
+  <li>That is, paths are checked in isolation!</li>
+</ul>
+
+<h4 id="cycle-checking--multiple-path-checking">Cycle checking / multiple path checking</h4>
+
+<ul>
+  <li>Keep track of all states previously expanded during the search</li>
+  <li>When we expand nk to obtain child c, ensure that c is not equal to any previously expanded state</li>
+  <li>Why can’t we utilize this technique with depth-ﬁrst search?</li>
+  <li>High space complexity, <strong>only useful with breadth ﬁrst search</strong></li>
+</ul>
+
+<h5 id="issue-with-optimality">Issue with optimality</h5>
+
+<ul>
+  <li>With uniform-cost search, we still ﬁnd an optimal solution</li>
+  <li>The ﬁrst time uniform-cost expands a state it has found the minimal cost path to it.</li>
+  <li>This means that the nodes rejected by cycle checking can’t have better paths.</li>
+  <li>We will see later that we don’t always have this property when we do heuristic search.</li>
+</ul>
+
+<h4 id="path--cycle-checking">Path / cycle checking</h4>
+
+<ul>
+  <li>Path checking: when we expand n to obtain child c, ensures that the state c is not equal to the state reached by any ancestor of c along this path</li>
+  <li>Cycle checking: keep track of all states previously expanded during the search; when we expand n to obtain child c, ensure that c is not equal to any previously expanded state</li>
+  <li>For uniform-cost search, cycle checking preserves optimality</li>
+</ul>
+
+<h5 id="the-missionaries-and-cannibals-problem">The missionaries and cannibals problem</h5>
+
+<ul>
+  <li>N missionaries and N cannibals are at the left bank of a river</li>
+  <li>There is a boat that can hold K people</li>
+  <li>Find a way to get everyone to the right bank</li>
+  <li>So that at any time, at any place (on either bank, or in the boat), #missionaries ≥ #cannibals or #missionaries =0</li>
+</ul>
+
+<h6 id="formulation-of-the-mc-problem">Formulation of the MC problem</h6>
+
+<ul>
+  <li>States (M,C,B) where M – #missionaries, C – #cannibals at the left bank, B = 1 indicates the boat is at the left bank</li>
+  <li>Actions (m,c) where m – #missionaries, c – #cannibals on the boat</li>
+  <li>Precondition: #missionaries and #cannibals satisfy the constraint</li>
+  <li>Effects: $(M,C,1)\to^{(m,c)}(M −m,C −c,0)$ and $(M,C,0)\to^{(m,c)}(M+m,C+c,1)$</li>
+</ul>
+:ET

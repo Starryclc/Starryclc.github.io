@@ -1,0 +1,48 @@
+I"�<p><a href="https://easyhpc.org/problems/program/363/">题目链接</a></p>
+
+<blockquote>
+  <p>随机生成一个m*n的整型矩阵，打印该矩阵，然后使用openmp并行寻找其最大值及坐标(x,y)，最小值及坐标(p,q)。要求可并行化的循环都要并行化。</p>
+</blockquote>
+
+<p>一开始是使用<code class="highlighter-rouge">rand</code>函数生成随机数，结果发现每个线程生成的随机数序列都是一样的，这才发现<code class="highlighter-rouge">rand</code>是线程不安全的。因此，使用线程安全的随机数函数<code class="highlighter-rouge">rand_r</code>（Windows下是<code class="highlighter-rouge">rand_s</code>）。</p>
+
+<p>这里做了一个小trick，用一维数组去模拟矩阵。</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;omp.h&gt;
+</span><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">;</span>
+	<span class="n">scanf</span><span class="p">(</span><span class="s">"%d%d"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">m</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+	<span class="kt">int</span> <span class="o">*</span><span class="n">mat</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="n">n</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)),</span> <span class="n">ma</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mi</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pre</span> <span class="o">=</span> <span class="n">time</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="cp">#pragma omp parallel for
+</span>	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">m</span> <span class="o">*</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">rand_r</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pre</span><span class="p">),</span> <span class="n">mat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pre</span><span class="p">;</span>
+<span class="cp">#pragma omp parallel for
+</span>	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">m</span> <span class="o">*</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">{</span>
+<span class="cp">#pragma omp critical
+</span>		<span class="k">if</span> <span class="p">(</span><span class="n">mat</span><span class="p">[</span><span class="n">ma</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">mat</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+			<span class="n">ma</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+<span class="cp">#pragma omp critical
+</span>		<span class="k">if</span> <span class="p">(</span><span class="n">mat</span><span class="p">[</span><span class="n">mi</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">mat</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+			<span class="n">mi</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">m</span> <span class="o">*</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"%d%c"</span><span class="p">,</span> <span class="n">mat</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">i</span> <span class="o">%</span> <span class="n">n</span> <span class="o">==</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">?</span> <span class="sc">'\n'</span> <span class="o">:</span> <span class="sc">' '</span><span class="p">);</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"max: %d(%d,%d)</span><span class="se">\n</span><span class="s">min: %d(%d,%d)"</span><span class="p">,</span> <span class="n">mat</span><span class="p">[</span><span class="n">ma</span><span class="p">],</span> <span class="n">ma</span> <span class="o">/</span> <span class="n">n</span><span class="p">,</span> <span class="n">ma</span> <span class="o">%</span> <span class="n">n</span><span class="p">,</span> <span class="n">mat</span><span class="p">[</span><span class="n">mi</span><span class="p">],</span> <span class="n">mi</span> <span class="o">/</span> <span class="n">n</span><span class="p">,</span> <span class="n">mi</span> <span class="o">%</span> <span class="n">n</span><span class="p">);</span>
+	<span class="n">free</span><span class="p">(</span><span class="n">mat</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>运行结果如下</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-925438579 -1126332182 -534488686 -1767211810
+956745691 -2014164158 1868749196 173473471
+-8830651 1176503991 1066009373 -1406904493
+-1899449319 159599030 -609169565 1729478076
+-880143610 -130409017 1504147669 -2027289992
+-217405600 1943131529 -2112678481 -79255408
+1178127908 -1166815919 -189038604 811456910
+max: 1943131529(5,1)
+min: -2112678481(5,2)
+</code></pre></div></div>
+:ET

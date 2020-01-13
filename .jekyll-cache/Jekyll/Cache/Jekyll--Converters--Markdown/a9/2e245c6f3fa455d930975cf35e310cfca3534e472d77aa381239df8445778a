@@ -1,0 +1,140 @@
+I"�Q<p><a href="https://vjudge.net/problem/HDU-4992">题目链接</a></p>
+
+<p>把一个数的所有比它小的原根求出来。这里有一篇博客（<a href="https://www.cnblogs.com/fenghaoran/p/7110296.html">Fenghr</a>）说的挺好，先转过来：</p>
+
+<blockquote>
+  <p>所谓原根就是说，对于一个数$n$，$x^k\equiv 1\pmod n$的最小正整数k是$\phi (n)$，即n的欧拉函数，那么就称$x$是$n$的原根。原根有很多美丽的性质。比如说：</p>
+
+  <ol>
+    <li>有原根的数只有$2,4,p^n,2p^n$（$p$为质数，$n$为正整数）。</li>
+    <li>一个数的最小原根的大小是$O(n^{\frac{1}{4}})$的。</li>
+    <li>如果$g$为$n$的原根，则$g^d$为$n$的原根的充要条件是$\gcd (d,\phi (n))=1$；</li>
+    <li>如果$n$有原根，它的原根个数为$\phi (\phi (n))$。</li>
+  </ol>
+
+  <p>那么来看一下这道题：</p>
+
+  <p>首先根据性质1，我们可以通过预处理质数，把不存在的情况判掉。</p>
+
+  <p>然后根据性质3，找到一个原根后枚举次方判$\gcd$就可以了。</p>
+
+  <p>怎么找到一个原根呢？按照性质2傻傻去跑在这种多组数据的题目里是肯定不行的。</p>
+
+  <p>那么有一个喜大普奔的结论来帮助我们：</p>
+
+  <p>因为$g^{\phi (n)}\equiv 1\pmod n$，而对于比φ(n)小的数都不成立。</p>
+
+  <p>枚举$\phi (n)$的质因子p，看$g^{\phi (n)/p}$在模意义下是否是1。</p>
+
+  <p>是1的话$g$就不是原根。</p>
+
+  <p>证明起来有点麻烦，这里就不写了。</p>
+
+  <p>所以找原根大概是$O(n^{\frac{1}{8}})$的。</p>
+
+  <p>找到之后枚举次方就可以了，因为是充分条件。</p>
+</blockquote>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;bits/stdc++.h&gt;
+</span><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">1000009</span><span class="p">;</span>
+<span class="k">struct</span> <span class="n">EulerSieve</span>
+<span class="p">{</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">phi</span><span class="p">;</span>
+	<span class="n">EulerSieve</span><span class="p">(</span><span class="kt">int</span> <span class="n">N</span><span class="p">)</span> <span class="o">:</span> <span class="n">m</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">phi</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">phi</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">k</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+				<span class="n">p</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">),</span> <span class="n">phi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+			<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">p</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">k</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+			<span class="p">{</span>
+				<span class="n">phi</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">phi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+				<span class="k">if</span> <span class="p">((</span><span class="n">m</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">==</span> <span class="n">m</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+					<span class="k">break</span><span class="p">;</span>
+				<span class="n">phi</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">-=</span> <span class="n">phi</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">fac</span><span class="p">(</span><span class="kt">int</span> <span class="n">nPhi</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">pt</span><span class="p">;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">nPhi</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">nPhi</span> <span class="o">%</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+				<span class="k">for</span> <span class="p">(</span><span class="n">pt</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span> <span class="n">nPhi</span> <span class="o">%</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">;)</span>
+					<span class="n">nPhi</span> <span class="o">/=</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">nPhi</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+			<span class="n">pt</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">nPhi</span><span class="p">);</span>
+		<span class="k">return</span> <span class="n">pt</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">}</span> <span class="n">e</span><span class="p">(</span><span class="n">N</span><span class="p">);</span>
+<span class="k">struct</span> <span class="n">Mod</span>
+<span class="p">{</span>
+	<span class="k">const</span> <span class="n">ll</span> <span class="n">M</span><span class="p">;</span>
+	<span class="n">Mod</span><span class="p">(</span><span class="n">ll</span> <span class="n">M</span><span class="p">)</span> <span class="o">:</span> <span class="n">M</span><span class="p">(</span><span class="n">M</span><span class="p">)</span> <span class="p">{}</span>
+	<span class="n">ll</span> <span class="n">mul</span><span class="p">(</span><span class="n">ll</span> <span class="n">a</span><span class="p">,</span> <span class="n">ll</span> <span class="n">b</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span> <span class="o">%</span> <span class="n">M</span><span class="p">;</span> <span class="p">}</span>
+	<span class="n">ll</span> <span class="n">pow</span><span class="p">(</span><span class="n">ll</span> <span class="n">a</span><span class="p">,</span> <span class="n">ll</span> <span class="n">b</span><span class="p">)</span> <span class="k">const</span>
+	<span class="p">{</span>
+		<span class="n">ll</span> <span class="n">r</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="n">a</span> <span class="o">%=</span> <span class="n">M</span><span class="p">;</span> <span class="n">b</span><span class="p">;</span> <span class="n">b</span> <span class="o">&gt;&gt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">mul</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">))</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">b</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span>
+				<span class="n">r</span> <span class="o">=</span> <span class="n">mul</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">a</span><span class="p">);</span>
+		<span class="k">return</span> <span class="n">r</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">};</span>
+<span class="k">struct</span> <span class="n">PrimitiveRoots</span> <span class="o">:</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Mod</span>
+<span class="p">{</span>
+	<span class="n">PrimitiveRoots</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nPhi</span><span class="p">)</span> <span class="o">:</span> <span class="n">Mod</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">check</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+			<span class="k">return</span><span class="p">;</span>
+		<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">pt</span><span class="p">(</span><span class="n">e</span><span class="p">.</span><span class="n">fac</span><span class="p">(</span><span class="n">nPhi</span><span class="p">));</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">flag</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">pow</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">nPhi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+			<span class="p">{</span>
+				<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">flag</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="o">!</span><span class="n">flag</span> <span class="o">&amp;&amp;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">pt</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+					<span class="k">if</span> <span class="p">(</span><span class="n">pow</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">nPhi</span> <span class="o">/</span> <span class="n">pt</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+						<span class="n">flag</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+				<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">flag</span><span class="p">)</span>
+				<span class="p">{</span>
+					<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">nPhi</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">mul</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+						<span class="k">if</span> <span class="p">(</span><span class="n">__gcd</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">nPhi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+							<span class="n">push_back</span><span class="p">(</span><span class="n">k</span><span class="p">);</span>
+					<span class="k">break</span><span class="p">;</span>
+				<span class="p">}</span>
+			<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="kt">bool</span> <span class="n">check</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="c1">//模m有原根的充要条件是m=2,4,p^n,2(p^n),(p为奇质数，n为任意数）</span>
+	<span class="p">{</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">push_back</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+			<span class="n">x</span> <span class="o">&gt;&gt;=</span> <span class="mi">1</span><span class="p">;</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+			<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">e</span><span class="p">.</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">e</span><span class="p">.</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">%</span> <span class="n">e</span><span class="p">.</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+			<span class="p">{</span>
+				<span class="k">while</span> <span class="p">(</span><span class="n">x</span> <span class="o">%</span> <span class="n">e</span><span class="p">.</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+					<span class="n">x</span> <span class="o">/=</span> <span class="n">e</span><span class="p">.</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+				<span class="k">return</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1</span><span class="p">;</span>
+			<span class="p">}</span>
+		<span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">};</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">;</span> <span class="o">~</span><span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">n</span><span class="p">);)</span>
+	<span class="p">{</span>
+		<span class="n">PrimitiveRoots</span> <span class="n">ans</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="n">phi</span><span class="p">[</span><span class="n">n</span><span class="p">]);</span>
+		<span class="n">sort</span><span class="p">(</span><span class="n">ans</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">ans</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ans</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"%d%c"</span><span class="p">,</span> <span class="n">ans</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">ans</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">?</span> <span class="sc">'\n'</span> <span class="o">:</span> <span class="sc">' '</span><span class="p">);</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">ans</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"-1</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+:ET

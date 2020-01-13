@@ -1,0 +1,147 @@
+I"�?<h2 id="功能要求">功能要求</h2>
+
+<ol>
+  <li>显示默认的 Teapot 模型</li>
+  <li>为 Teapot 模型建立 Smooth Shading 效果。</li>
+</ol>
+
+<h2 id="实现提示">实现提示</h2>
+
+<ol>
+  <li>利用 OpenGL 的 API 初始化 material property, light source, lighting model, depth buffer 等信息。</li>
+  <li>使用 OpenGL Shader 实现。</li>
+</ol>
+
+<h2 id="开发环境">开发环境</h2>
+
+<h3 id="硬件">硬件</h3>
+
+<p>所用机器型号为VAIO Z Flip 2016</p>
+
+<ul>
+  <li>Intel(R) Core(TM) i7-6567U CPU @3.30GHZ 3.31GHz</li>
+  <li>8.00GB RAM</li>
+</ul>
+
+<h3 id="软件">软件</h3>
+
+<ul>
+  <li>Windows 10, 64-bit (Build 17763) 10.0.17763</li>
+  <li>Visual Studio Code 1.39.2
+    <ul>
+      <li>Remote - WSL 0.39.9：配合WSL，在Windows上获得Linux接近原生环境的体验。</li>
+    </ul>
+  </li>
+  <li>Windows Subsystem for Linux [Ubuntu 18.04.2 LTS]：WSL是以软件的形式运行在Windows下的 Linux子系统，是近些年微软推出来的新工具，可以在Windows系统上原生运行Linux。
+    <ul>
+      <li>gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1)</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="实验原理">实验原理</h2>
+
+<p>为在场景中增加光照，需要执行以下步骤：</p>
+
+<h3 id="设置光源">设置光源</h3>
+
+<h4 id="光源种类">光源种类</h4>
+
+<ol>
+  <li>环境光：环境光是一种无处不在的光。环境光源放出的光线被认为来自任何方向。因此，当你仅为场景指定环境光时，所有的物体无论法向量如何，都将表现为同样的明暗程度。</li>
+  <li>点光源：由这种光源放出的光线来自同一点，且方向辐射自四面八方。</li>
+  <li>平行光：平行光又称镜面光，这种光线是互相平行的。从手电筒、太阳等物体射出的光线都属于平行光。</li>
+  <li>聚光灯：这种光源的光线从一个锥体中射出，在被照射的物体上产生聚光的效果。使用这种光源需要指定光的射出方向以及锥体的顶角$\alpha$。</li>
+</ol>
+
+<h4 id="光源成分">光源成分</h4>
+
+<p>对于每一种光源，都有漫射光和平行光两种成分。在OpenGL中，环境光也被作为一种特殊的光源的成分来看待。漫射光是指在光源中能够被漫反射的光的颜色成分(白色则包含所有颜色)，而平行光是指光源中所有能够被镜面反射的光的颜色成分。通过指定这两种成分的颜色，就能决定光源是平行光源还是点光源。</p>
+
+<p>OpenGL可以同时为我们提供8个有效的光源。也就是说，我们最多可以同时启用8个光源。它们分别是<code class="highlighter-rouge">GL_LIGHT0</code>，<code class="highlighter-rouge">GL_LIGHT1</code>，<code class="highlighter-rouge">GL_LIGHT2</code>……其中，<code class="highlighter-rouge">GL_LIGHT0</code>是最特殊的一个光源。我们可以为<code class="highlighter-rouge">GL_LIGHT0</code>指定环境光成分。</p>
+
+<h4 id="光源位置">光源位置</h4>
+
+<p>对于点光源和平行光源，我们常常需要指定光源的位置来产生需要的效果。方法是调用<code class="highlighter-rouge">glLightfv</code>函数。</p>
+
+<h3 id="光照模型">光照模型</h3>
+
+<p>OpenGL的光照模型是用来模拟现实生活中的光照的。</p>
+
+<h3 id="材质设定">材质设定</h3>
+
+<h4 id="材质颜色">材质颜色</h4>
+
+<p>OpenGL用材料对光的红、绿、蓝三原色的反射率来近似定义材料的颜色。象光源一样，材料颜色也分成环境、漫反射和镜面反射成分，它们决定了材料对环境光、漫反射光和镜面反射光的反射程度。在进行光照计算时，材料对环境光的反射率与每个进入光源的环境光结合，对漫反射光的反射率与每个进入光源的漫反射光结合，对镜面光的反射率与每个进入光源的镜面反射光结合。对环境光与漫反射光的反射程度决定了材料的颜色，并且它们很相似。对镜面反射光的反射率通常是白色或灰色（即对镜面反射光中红、绿、蓝的反射率相同）。镜面反射高光最亮的地方将变成具有光源镜面光强度的颜色。例如一个光亮的红色塑料球，球的大部分表现为红色，光亮的高光将是白色的。</p>
+
+<h4 id="材质定义">材质定义</h4>
+
+<p>材质的定义与光源的定义类似。</p>
+
+<h5 id="材质rgb值和光源rgb值的关系">材质RGB值和光源RGB值的关系</h5>
+
+<p>材质的颜色与光源的颜色有些不同。对于材质，R、G、B值为材质对光的R、G、B成分的反射率。比如，一种材质的<code class="highlighter-rouge">R＝1.0, G＝0.5, B＝0.0</code>，则材质反射全部的红色成分，一半的绿色成分，不反射蓝色成分。也就是说，若OpenGL的光源颜色为<code class="highlighter-rouge">(LR,LG,LB)</code>，材质颜色为<code class="highlighter-rouge">(MR,MG,MB)</code>，那么，在忽略所有其他反射效果的情况下，最终到达眼睛的光的颜色为<code class="highlighter-rouge">(LR*MR,LG*MG,LB*MB)</code>。同样，如果有两束光，相应的值分别为<code class="highlighter-rouge">(R1,G1,B1)</code>和<code class="highlighter-rouge">(R2,G2,B2)</code>，则OpenGL将各个颜色成分相加，得到<code class="highlighter-rouge">(R1+R2,G1+G2,B1+B2)</code>，若任一成分的和值大于1（超出了设备所能显示的亮度）则约简到<code class="highlighter-rouge">1.0</code>。</p>
+
+<h2 id="实现效果">实现效果</h2>
+
+<p>Windows下运行<code class="highlighter-rouge">teapot.exe</code>，或Linux下运行<code class="highlighter-rouge">teapot.out</code>，得到如下结果。</p>
+
+<p><img src="/public/image/2019-12-09-1.jpg" alt="1" /></p>
+
+<h2 id="源代码teapotc">源代码<code class="highlighter-rouge">teapot.c</code></h2>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;GL/glut.h&gt;
+</span><span class="kt">void</span> <span class="nf">display</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="n">glClear</span><span class="p">(</span><span class="n">GL_COLOR_BUFFER_BIT</span> <span class="o">|</span> <span class="n">GL_DEPTH_BUFFER_BIT</span><span class="p">);</span>
+	<span class="n">glutSolidTeapot</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+	<span class="n">glFlush</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="kt">void</span> <span class="nf">reshape</span><span class="p">(</span><span class="n">GLsizei</span> <span class="n">w</span><span class="p">,</span> <span class="n">GLsizei</span> <span class="n">h</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">glViewport</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">);</span>
+	<span class="n">glMatrixMode</span><span class="p">(</span><span class="n">GL_PROJECTION</span><span class="p">);</span>
+	<span class="n">glLoadIdentity</span><span class="p">();</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">w</span> <span class="o">&lt;=</span> <span class="n">h</span><span class="p">)</span>
+		<span class="n">glOrtho</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">GLfloat</span><span class="p">)</span><span class="n">h</span> <span class="o">/</span> <span class="p">(</span><span class="n">GLfloat</span><span class="p">)</span><span class="n">w</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">GLfloat</span><span class="p">)</span><span class="n">h</span> <span class="o">/</span> <span class="p">(</span><span class="n">GLfloat</span><span class="p">)</span><span class="n">w</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+	<span class="k">else</span>
+		<span class="n">glOrtho</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">GLfloat</span><span class="p">)</span><span class="n">w</span> <span class="o">/</span> <span class="p">(</span><span class="n">GLfloat</span><span class="p">)</span><span class="n">h</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">GLfloat</span><span class="p">)</span><span class="n">w</span> <span class="o">/</span> <span class="p">(</span><span class="n">GLfloat</span><span class="p">)</span><span class="n">h</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+	<span class="n">glMatrixMode</span><span class="p">(</span><span class="n">GL_MODELVIEW</span><span class="p">);</span>
+	<span class="n">glLoadIdentity</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">glutInit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">);</span>
+	<span class="n">glutInitDisplayMode</span><span class="p">(</span><span class="n">GLUT_SINGLE</span> <span class="o">|</span> <span class="n">GLUT_RGB</span> <span class="o">|</span> <span class="n">GLUT_DEPTH</span><span class="p">);</span>
+	<span class="n">glutInitWindowSize</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span> <span class="mi">600</span><span class="p">);</span>
+	<span class="n">glutInitWindowPosition</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+	<span class="n">glutCreateWindow</span><span class="p">(</span><span class="s">"17341163_WuK_CG_HW6"</span><span class="p">);</span>
+	<span class="n">glClearColor</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+	<span class="n">glShadeModel</span><span class="p">(</span><span class="n">GL_SMOOTH</span><span class="p">);</span>
+	<span class="n">GLfloat</span>
+		<span class="n">mat_specular</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">},</span>
+		<span class="n">mat_shininess</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">50</span><span class="p">.</span><span class="mi">0</span><span class="p">},</span>
+		<span class="n">light_position</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">},</span>
+		<span class="n">white_light</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">},</span>
+		<span class="n">Light_Model_Ambient</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">.</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">.</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">};</span>
+	<span class="n">glMaterialfv</span><span class="p">(</span><span class="n">GL_FRONT</span><span class="p">,</span> <span class="n">GL_SPECULAR</span><span class="p">,</span> <span class="n">mat_specular</span><span class="p">);</span>
+	<span class="n">glMaterialfv</span><span class="p">(</span><span class="n">GL_FRONT</span><span class="p">,</span> <span class="n">GL_SHININESS</span><span class="p">,</span> <span class="n">mat_shininess</span><span class="p">);</span>
+	<span class="n">glLightfv</span><span class="p">(</span><span class="n">GL_LIGHT0</span><span class="p">,</span> <span class="n">GL_POSITION</span><span class="p">,</span> <span class="n">light_position</span><span class="p">);</span>
+	<span class="n">glLightfv</span><span class="p">(</span><span class="n">GL_LIGHT0</span><span class="p">,</span> <span class="n">GL_DIFFUSE</span><span class="p">,</span> <span class="n">white_light</span><span class="p">);</span>
+	<span class="n">glLightfv</span><span class="p">(</span><span class="n">GL_LIGHT0</span><span class="p">,</span> <span class="n">GL_SPECULAR</span><span class="p">,</span> <span class="n">white_light</span><span class="p">);</span>
+	<span class="n">glLightModelfv</span><span class="p">(</span><span class="n">GL_LIGHT_MODEL_AMBIENT</span><span class="p">,</span> <span class="n">Light_Model_Ambient</span><span class="p">);</span>
+	<span class="n">glEnable</span><span class="p">(</span><span class="n">GL_LIGHTING</span><span class="p">);</span>
+	<span class="n">glEnable</span><span class="p">(</span><span class="n">GL_LIGHT0</span><span class="p">);</span>
+	<span class="n">glEnable</span><span class="p">(</span><span class="n">GL_DEPTH_TEST</span><span class="p">);</span>
+	<span class="n">glutDisplayFunc</span><span class="p">(</span><span class="n">display</span><span class="p">);</span>
+	<span class="n">glutReshapeFunc</span><span class="p">(</span><span class="n">reshape</span><span class="p">);</span>
+	<span class="n">glutMainLoop</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="编译指令">编译指令</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gcc teapot.c <span class="nt">-o</span> teapot.out <span class="nt">-lGL</span> <span class="nt">-lGLU</span> <span class="nt">-lglut</span>
+./teapot.out
+</code></pre></div></div>
+:ET

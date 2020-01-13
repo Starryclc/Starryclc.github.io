@@ -1,0 +1,166 @@
+I"�X<h2 id="about-cousin-and-removed">About Cousin and Removed</h2>
+
+<h3 id="what-is-a-first-cousin-twice-removed">What Is a First Cousin, Twice Removed</h3>
+
+<p>If someone walked up to you and said, “Howdy, I’m your third cousin, twice removed,” would you have any idea what they meant? Most people have a good understanding of basic relationship words such as “mother,” “father,” “aunt,” “uncle,” “brother,” and “sister.” But what about the relationship terms that we don’t use in everyday speech? Terms like “second cousin” and “first cousin, once removed”? We don’t tend to speak about our relationships in such exact terms (“cousin” seems good enough when you are introducing one person to another), so most of us aren’t familiar with what these words mean.</p>
+
+<h3 id="relationship-terms">Relationship Terms</h3>
+
+<p>Sometimes, especially when working on your family history, it’s handy to know how to describe your family relationships more exactly. The definitions below should help you out.</p>
+
+<h3 id="cousin-aka-first-cousin">Cousin (a.k.a “first cousin”)</h3>
+
+<p>Your first cousins are the people in your family who have two of the same grandparents as you. In other words, they are the children of your aunts and uncles.</p>
+
+<h3 id="second-cousin">Second Cousin</h3>
+
+<p>Your second cousins are the people in your family who have the same great-grandparents as you., but not the same grandparents.</p>
+
+<h3 id="third-fourth-and-fifth-cousins">Third, Fourth, and Fifth Cousins</h3>
+
+<p>Your third cousins have the same great great grandparents, fourth cousins have the same great-great-great-grandparents, and so on.</p>
+
+<h3 id="removed">Removed</h3>
+
+<p>When the word “removed” is used to describe a relationship, it indicates that the two people are from different generations. You and your first cousins are in the same generation (two generations younger than your grandparents), so the word “removed” is not used to describe your relationship.</p>
+
+<p>The words “<strong>once removed</strong>” mean that there is a difference of one generation. For example, your mother’s first cousin is your first cousin, once removed. This is because your mother’s first cousin is one generation younger than your grandparents and you are two generations younger than your grandparents. This one-generation difference equals “once removed.”</p>
+
+<p><strong>Twice removed</strong> means that there is a two-generation difference. You are two generations younger than a first cousin of your grandmother, so you and your grandmother’s first cousin are first cousins, twice removed.</p>
+
+<h2 id="problem-description">Problem Description</h2>
+
+<p>Please fulfill the following tasks by using <code class="highlighter-rouge">Prolog</code>:</p>
+
+<ol>
+  <li>Write sentences describing the predicates <strong>Grandchild</strong>, <strong>Greatgrandparent</strong>, <strong>Ancestor</strong>, <strong>Brother</strong>, <strong>Sister</strong>, <strong>Daughter</strong>, <strong>Son</strong>, <strong>FirstCousin</strong>, <strong>BrotherInLaw</strong>, <strong>SisterInLaw</strong>, <strong>Aunt</strong>, and <strong>Uncle</strong>. <strong>Hint: you can define these predicates by choosing child, sibling, male, female, father, mother, and so on.</strong></li>
+  <li>Find out the proper definition of $m$ th cousin $n$ times removed<strong>, in other words, define the predicate <code class="highlighter-rouge">mthCousinNremoved(X,Y,M,N)</code>. **Hint: You’d better define the predicate <code class="highlighter-rouge">distance(X,Y,N)</code> by recursion.</strong></li>
+  <li>Write down the basic facts depicted in the family tree in Figure \ref{fig:family**.</li>
+  <li>Ask it who are <strong>Elizabeth’s grandchildren</strong>, <strong>Diana’s brothers-in-law</strong>, <strong>Zara’s great-grandparents</strong>, and <strong>Eugenie’s ancestors</strong>.</li>
+</ol>
+
+<h2 id="codes">Codes</h2>
+
+<div class="language-prolog highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="ss">male</span><span class="p">(</span><span class="ss">george</span><span class="p">).</span>
+<span class="ss">male</span><span class="p">(</span><span class="ss">kydd</span><span class="p">).</span>
+<span class="ss">male</span><span class="p">(</span><span class="ss">charles</span><span class="p">).</span>
+<span class="ss">male</span><span class="p">(</span><span class="ss">mark</span><span class="p">).</span>
+<span class="ss">male</span><span class="p">(</span><span class="ss">philip</span><span class="p">).</span>
+<span class="ss">male</span><span class="p">(</span><span class="ss">andrew</span><span class="p">).</span>
+<span class="ss">male</span><span class="p">(</span><span class="ss">edward</span><span class="p">).</span>
+<span class="ss">male</span><span class="p">(</span><span class="ss">william</span><span class="p">).</span>
+<span class="ss">male</span><span class="p">(</span><span class="ss">peter</span><span class="p">).</span>
+<span class="ss">male</span><span class="p">(</span><span class="ss">james</span><span class="p">).</span>
+
+<span class="ss">female</span><span class="p">(</span><span class="ss">mum</span><span class="p">).</span>
+<span class="ss">female</span><span class="p">(</span><span class="ss">elizabeth</span><span class="p">).</span>
+<span class="ss">female</span><span class="p">(</span><span class="ss">spencer</span><span class="p">).</span>
+<span class="ss">female</span><span class="p">(</span><span class="ss">margaret</span><span class="p">).</span>
+<span class="ss">female</span><span class="p">(</span><span class="ss">diana</span><span class="p">).</span>
+<span class="ss">female</span><span class="p">(</span><span class="ss">anne</span><span class="p">).</span>
+<span class="ss">female</span><span class="p">(</span><span class="ss">sarah</span><span class="p">).</span>
+<span class="ss">female</span><span class="p">(</span><span class="ss">sophie</span><span class="p">).</span>
+<span class="ss">female</span><span class="p">(</span><span class="ss">zara</span><span class="p">).</span>
+<span class="ss">female</span><span class="p">(</span><span class="ss">beatrice</span><span class="p">).</span>
+<span class="ss">female</span><span class="p">(</span><span class="ss">eugenie</span><span class="p">).</span>
+<span class="ss">female</span><span class="p">(</span><span class="ss">louise</span><span class="p">).</span>
+
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">george</span><span class="p">,</span><span class="ss">mum</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">mum</span><span class="p">,</span><span class="ss">george</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">elizabeth</span><span class="p">,</span><span class="ss">philip</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">philip</span><span class="p">,</span><span class="ss">elizabeth</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">spencer</span><span class="p">,</span><span class="ss">kydd</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">kydd</span><span class="p">,</span><span class="ss">spencer</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">diana</span><span class="p">,</span><span class="ss">charles</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">charles</span><span class="p">,</span><span class="ss">diana</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">anne</span><span class="p">,</span><span class="ss">mark</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">mark</span><span class="p">,</span><span class="ss">anne</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">andrew</span><span class="p">,</span><span class="ss">sarah</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">sarah</span><span class="p">,</span><span class="ss">andrew</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">edward</span><span class="p">,</span><span class="ss">sophie</span><span class="p">).</span>
+<span class="ss">spouse</span><span class="p">(</span><span class="ss">sophie</span><span class="p">,</span><span class="ss">edward</span><span class="p">).</span>
+
+<span class="ss">child</span><span class="p">(</span><span class="ss">charles</span><span class="p">,</span><span class="ss">elizabeth</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">charles</span><span class="p">,</span><span class="ss">philip</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">andrew</span><span class="p">,</span><span class="ss">elizabeth</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">andrew</span><span class="p">,</span><span class="ss">philip</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">edward</span><span class="p">,</span><span class="ss">elizabeth</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">edward</span><span class="p">,</span><span class="ss">philip</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">william</span><span class="p">,</span><span class="ss">charles</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">william</span><span class="p">,</span><span class="ss">diana</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">harry</span><span class="p">,</span><span class="ss">charles</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">harry</span><span class="p">,</span><span class="ss">diana</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">peter</span><span class="p">,</span><span class="ss">anne</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">peter</span><span class="p">,</span><span class="ss">mark</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">james</span><span class="p">,</span><span class="ss">edward</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">james</span><span class="p">,</span><span class="ss">sophie</span><span class="p">).</span>
+
+<span class="ss">child</span><span class="p">(</span><span class="ss">margaret</span><span class="p">,</span><span class="ss">george</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">margaret</span><span class="p">,</span><span class="ss">mum</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">diana</span><span class="p">,</span><span class="ss">kydd</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">diana</span><span class="p">,</span><span class="ss">spencer</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">elizabeth</span><span class="p">,</span><span class="ss">george</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">elizabeth</span><span class="p">,</span><span class="ss">mum</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">anne</span><span class="p">,</span><span class="ss">elizabeth</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">anne</span><span class="p">,</span><span class="ss">philip</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">zara</span><span class="p">,</span><span class="ss">anne</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">zara</span><span class="p">,</span><span class="ss">mark</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">beatrice</span><span class="p">,</span><span class="ss">andrew</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">beatrice</span><span class="p">,</span><span class="ss">sarah</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">eugenie</span><span class="p">,</span><span class="ss">andrew</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">eugenie</span><span class="p">,</span><span class="ss">sarah</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">louise</span><span class="p">,</span><span class="ss">edward</span><span class="p">).</span>
+<span class="ss">child</span><span class="p">(</span><span class="ss">louise</span><span class="p">,</span><span class="ss">sophie</span><span class="p">).</span>
+
+<span class="ss">grandchild</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">):-</span><span class="ss">child</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Z</span><span class="p">),</span><span class="ss">child</span><span class="p">(</span><span class="nv">Z</span><span class="p">,</span><span class="nv">Y</span><span class="p">).</span>
+<span class="ss">greatgrandparent</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">):-</span><span class="ss">grandchild</span><span class="p">(</span><span class="nv">Y</span><span class="p">,</span><span class="nv">Z</span><span class="p">),</span><span class="ss">child</span><span class="p">(</span><span class="nv">Z</span><span class="p">,</span><span class="nv">X</span><span class="p">).</span>
+<span class="ss">ancestor</span><span class="p">(</span><span class="nv">A</span><span class="p">,</span><span class="nv">B</span><span class="p">):-</span><span class="ss">child</span><span class="p">(</span><span class="nv">B</span><span class="p">,</span><span class="nv">A</span><span class="p">);(</span><span class="ss">child</span><span class="p">(</span><span class="nv">C</span><span class="p">,</span><span class="nv">A</span><span class="p">),</span><span class="ss">ancestor</span><span class="p">(</span><span class="nv">C</span><span class="p">,</span><span class="nv">B</span><span class="p">)).</span>
+<span class="ss">mthcousinnremoved</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">,</span><span class="m">0</span><span class="p">,</span><span class="m">0</span><span class="p">):-</span> <span class="nv">X</span><span class="err">\</span><span class="o">=</span><span class="nv">Y</span><span class="p">,</span><span class="ss">male</span><span class="p">(</span><span class="nv">Z</span><span class="p">),</span><span class="ss">child</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Z</span><span class="p">),</span><span class="ss">child</span><span class="p">(</span><span class="nv">Y</span><span class="p">,</span><span class="nv">Z</span><span class="p">).</span>
+<span class="ss">mthcousinnremoved</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">,</span><span class="nv">M</span><span class="p">,</span><span class="m">0</span><span class="p">):-</span><span class="ss">child</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">XX</span><span class="p">),</span><span class="ss">child</span><span class="p">(</span><span class="nv">Y</span><span class="p">,</span><span class="nv">YY</span><span class="p">),</span><span class="ss">mthcousinnremoved</span><span class="p">(</span><span class="nv">XX</span><span class="p">,</span><span class="nv">YY</span><span class="p">,</span><span class="nv">M</span><span class="o">-</span><span class="m">1</span><span class="p">,</span><span class="m">0</span><span class="p">).</span>
+<span class="ss">mthcousinnremoved</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">,</span><span class="nv">M</span><span class="p">,</span><span class="nv">N</span><span class="p">):-</span><span class="ss">child</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Z</span><span class="p">),</span><span class="ss">mthcousinnremoved</span><span class="p">(</span><span class="nv">Z</span><span class="p">,</span><span class="nv">Y</span><span class="p">,</span><span class="nv">M</span><span class="p">,</span><span class="nv">N</span><span class="o">-</span><span class="m">1</span><span class="p">).</span>
+<span class="ss">brother</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">):-</span><span class="ss">male</span><span class="p">(</span><span class="nv">X</span><span class="p">),</span><span class="ss">mthcousinnremoved</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">,</span><span class="m">0</span><span class="p">,</span><span class="m">0</span><span class="p">).</span>
+<span class="ss">sister</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">):-</span><span class="ss">female</span><span class="p">(</span><span class="nv">X</span><span class="p">),</span><span class="ss">mthcousinnremoved</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">,</span><span class="m">0</span><span class="p">,</span><span class="m">0</span><span class="p">).</span>
+<span class="ss">daughter</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">):-</span><span class="ss">child</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">),</span><span class="ss">female</span><span class="p">(</span><span class="nv">X</span><span class="p">).</span>
+<span class="ss">son</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">):-</span><span class="ss">child</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">),</span><span class="ss">male</span><span class="p">(</span><span class="nv">X</span><span class="p">).</span>
+<span class="ss">firstcousin</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">):-</span><span class="ss">mthcousinnremoved</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">,</span><span class="m">1</span><span class="p">,</span><span class="m">0</span><span class="p">).</span>
+<span class="ss">brotherinlaw</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">):-</span><span class="ss">spouse</span><span class="p">(</span><span class="nv">Y</span><span class="p">,</span><span class="nv">Z</span><span class="p">),</span><span class="ss">brother</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Z</span><span class="p">).</span>
+<span class="ss">sisterinlaw</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">):-</span><span class="ss">spouse</span><span class="p">(</span><span class="nv">Y</span><span class="p">,</span><span class="nv">Z</span><span class="p">),</span><span class="ss">sister</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Z</span><span class="p">).</span>
+<span class="ss">aunt</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">):-</span><span class="ss">female</span><span class="p">(</span><span class="nv">X</span><span class="p">),</span><span class="ss">mthcousinnremoved</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">,</span><span class="m">0</span><span class="p">,</span><span class="m">1</span><span class="p">).</span>
+<span class="ss">uncle</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">):-</span><span class="ss">male</span><span class="p">(</span><span class="nv">X</span><span class="p">),</span><span class="ss">mthcousinnremoved</span><span class="p">(</span><span class="nv">X</span><span class="p">,</span><span class="nv">Y</span><span class="p">,</span><span class="m">0</span><span class="p">,</span><span class="m">1</span><span class="p">).</span>
+</code></pre></div></div>
+
+<h2 id="results">Results</h2>
+
+<p>下为运行结果的消息内容。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>?- grandchild<span class="o">(</span>X,elizabeth<span class="o">)</span>,write<span class="o">(</span>X<span class="o">)</span>,nl,fail.
+william
+harry
+peter
+james
+zara
+beatrice
+eugenie
+louise
+false.
+
+?- brotherinlaw<span class="o">(</span>X,diana<span class="o">)</span>,write<span class="o">(</span>X<span class="o">)</span>,nl,fail.
+andrew
+edward
+false.
+
+?- greatgrandparent<span class="o">(</span>X,zara<span class="o">)</span>,write<span class="o">(</span>X<span class="o">)</span>,nl,fail.
+george
+mum
+false.
+
+?- ancestor<span class="o">(</span>X,eugenie<span class="o">)</span>,write<span class="o">(</span>X<span class="o">)</span>,nl,fail.
+andrew
+sarah
+elizabeth
+philip
+george
+mum
+false.
+</code></pre></div></div>
+:ET

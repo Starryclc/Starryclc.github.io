@@ -1,0 +1,169 @@
+I"�S<h2 id="problem-description">Problem Description</h2>
+
+<p>Futoshiki is a board-based puzzle game, also known under the name Unequal. It is playable on a square board having a given fixed size (4×4 for example).</p>
+
+<p>The purpose of the game is to discover the digits hidden inside the board’s cells; each cell is filled with a digit between 1 and the board’s size. On each row and column each digit appears exactly once; therefore, when revealed, the digits of the board form a so-called Latin square.</p>
+
+<p>At the beginning of the game some digits might be revealed. The board might also contain some inequalities between the board cells; these inequalities must be respected and can be used as clues in order to discover the remaining hidden digits.</p>
+
+<p>Each puzzle is guaranteed to have a solution and only one. You can play this game online: <a href="http://www.futoshiki.org/">http://www.futoshiki.org/</a>.</p>
+
+<p>Please solve the above Futoshiki puzzle ( Figure 1 ) with forward checking algorithm.</p>
+
+<h2 id="codes">Codes</h2>
+
+<h3 id="futoshikicpp">futoshiki.cpp</h3>
+
+<p>下为运行代码。值得一提的是，这里表示可行域使用了位集<code class="highlighter-rouge">bitset</code>，从而把剪枝操作等都转化成了位运算，极大地提升了运行效率，最终运行时间仅有 0.019s。</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;bits/stdc++.h&gt;
+</span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">9</span><span class="p">;</span>
+<span class="n">array</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">N</span> <span class="o">*</span> <span class="n">N</span><span class="o">&gt;</span> <span class="n">notEqual</span><span class="p">,</span> <span class="n">greaterThan</span><span class="p">,</span> <span class="n">lessThan</span><span class="p">;</span>
+<span class="n">array</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">N</span> <span class="o">*</span> <span class="n">N</span><span class="o">&gt;</span> <span class="n">ans</span><span class="p">;</span>
+<span class="kt">bool</span> <span class="nf">fc</span><span class="p">(</span><span class="n">array</span><span class="o">&lt;</span><span class="n">bitset</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">N</span> <span class="o">*</span> <span class="n">N</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">v</span><span class="p">,</span> <span class="kt">int</span> <span class="n">pos</span><span class="p">)</span> <span class="c1">//对状态v进行前向检测剪枝</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">mi</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">pos</span><span class="p">].</span><span class="n">_Find_first</span><span class="p">(),</span> <span class="n">ma</span> <span class="o">=</span> <span class="n">mi</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">mi</span><span class="p">,</span> <span class="n">jnex</span><span class="p">,</span> <span class="n">je</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">pos</span><span class="p">].</span><span class="n">size</span><span class="p">();</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">je</span><span class="p">;</span> <span class="n">j</span> <span class="o">=</span> <span class="n">jnex</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">((</span><span class="n">jnex</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">pos</span><span class="p">].</span><span class="n">_Find_next</span><span class="p">(</span><span class="n">j</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="n">je</span><span class="p">)</span>
+			<span class="n">ma</span> <span class="o">=</span> <span class="n">j</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">mi</span> <span class="o">==</span> <span class="n">ma</span><span class="p">)</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">:</span> <span class="n">notEqual</span><span class="p">[</span><span class="n">pos</span><span class="p">])</span>
+		<span class="p">{</span>
+			<span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">reset</span><span class="p">(</span><span class="n">mi</span><span class="p">);</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">none</span><span class="p">())</span>
+				<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="p">}</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">:</span> <span class="n">lessThan</span><span class="p">[</span><span class="n">pos</span><span class="p">])</span>
+	<span class="p">{</span>
+		<span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&amp;=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">ma</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">none</span><span class="p">())</span>
+			<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">:</span> <span class="n">greaterThan</span><span class="p">[</span><span class="n">pos</span><span class="p">])</span>
+	<span class="p">{</span>
+		<span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&amp;=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">mi</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">none</span><span class="p">())</span>
+			<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">bool</span> <span class="nf">dfs</span><span class="p">(</span><span class="k">const</span> <span class="n">array</span><span class="o">&lt;</span><span class="n">bitset</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">N</span> <span class="o">*</span> <span class="n">N</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">v</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">pick</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">now</span><span class="p">,</span> <span class="n">save</span> <span class="o">=</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ans</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">save</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">now</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">count</span><span class="p">()))</span> <span class="c1">//MRV</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">pick</span> <span class="o">=</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">save</span> <span class="o">=</span> <span class="n">now</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>		<span class="c1">//这里可以提前退出</span>
+				<span class="k">break</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">pick</span> <span class="o">==</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="c1">//没有选出点，说明找到答案</span>
+		<span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">pick</span><span class="p">].</span><span class="n">_Find_first</span><span class="p">();</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">v</span><span class="p">[</span><span class="n">pick</span><span class="p">].</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="n">pick</span><span class="p">].</span><span class="n">_Find_next</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="c1">//遍历当前考虑的下标pick，他的可行值域{i}</span>
+	<span class="p">{</span>
+		<span class="k">auto</span> <span class="n">tv</span> <span class="o">=</span> <span class="n">v</span><span class="p">;</span>
+		<span class="n">tv</span><span class="p">[</span><span class="n">pick</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="p">;</span>
+		<span class="n">ans</span><span class="p">[</span><span class="n">pick</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">fc</span><span class="p">(</span><span class="n">tv</span><span class="p">,</span> <span class="n">pick</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">dfs</span><span class="p">(</span><span class="n">tv</span><span class="p">))</span>
+			<span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">ans</span><span class="p">[</span><span class="n">pick</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="n">array</span><span class="o">&lt;</span><span class="n">bitset</span><span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">N</span> <span class="o">*</span> <span class="n">N</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">;</span> <span class="c1">//使用bitset记录状态，方便判重</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">);</span>
+			<span class="n">v</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">N</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">t</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">:</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">N</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">//0代表所有状态都可行，因此将原值翻转</span>
+			<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="o">++</span><span class="n">k</span><span class="p">)</span>
+			<span class="p">{</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">!=</span> <span class="n">i</span><span class="p">)</span>
+					<span class="n">notEqual</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">N</span> <span class="o">+</span> <span class="n">j</span><span class="p">].</span><span class="n">push_back</span><span class="p">(</span><span class="n">k</span> <span class="o">*</span> <span class="n">N</span> <span class="o">+</span> <span class="n">j</span><span class="p">);</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">!=</span> <span class="n">j</span><span class="p">)</span>
+					<span class="n">notEqual</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">N</span> <span class="o">+</span> <span class="n">j</span><span class="p">].</span><span class="n">push_back</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">N</span> <span class="o">+</span> <span class="n">k</span><span class="p">);</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">;</span> <span class="n">scanf</span><span class="p">(</span><span class="s">"%d%d%d%d"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">x1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">y1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">x2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">y2</span><span class="p">)</span> <span class="o">!=</span> <span class="n">EOF</span><span class="p">;)</span>
+	<span class="p">{</span>
+		<span class="n">greaterThan</span><span class="p">[</span><span class="n">y1</span> <span class="o">+=</span> <span class="n">N</span> <span class="o">*</span> <span class="n">x1</span><span class="p">].</span><span class="n">push_back</span><span class="p">(</span><span class="n">y2</span> <span class="o">+=</span> <span class="n">N</span> <span class="o">*</span> <span class="n">x2</span><span class="p">);</span>
+		<span class="n">lessThan</span><span class="p">[</span><span class="n">y2</span><span class="p">].</span><span class="n">push_back</span><span class="p">(</span><span class="n">y1</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">k</span><span class="p">)</span> <span class="c1">//进行多次预剪枝，大幅减小搜索空间</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="n">fc</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">dfs</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ans</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"%d%c"</span><span class="p">,</span> <span class="n">ans</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">i</span> <span class="o">%</span> <span class="n">N</span> <span class="o">&lt;</span> <span class="n">N</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">?</span> <span class="sc">' '</span> <span class="o">:</span> <span class="sc">'\n'</span><span class="p">);</span>
+	<span class="k">else</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"No solution exists."</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="futoshikitxt">futoshiki.txt</h3>
+
+<p>下为输入数据。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0 0 0 7 3 8 0 5 0
+0 0 7 0 0 2 0 0 0
+0 0 0 0 0 9 0 0 0
+0 0 0 4 0 0 0 0 0
+0 0 1 0 0 0 6 4 0
+0 0 0 0 0 0 2 0 0
+0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 6
+0 0 0 1
+0 3 0 2
+1 3 1 4
+1 6 1 7
+2 6 1 6
+2 1 2 0
+2 2 2 3
+2 3 3 3
+4 1 3 1
+3 3 3 2
+3 5 3 4
+3 5 3 6
+4 5 3 5
+3 8 3 7
+4 0 4 1
+5 4 4 4
+5 8 4 8
+5 1 5 2
+5 1 6 1
+5 4 5 5
+5 7 5 6
+6 6 5 6
+6 8 5 8
+6 3 6 4
+7 7 6 7
+7 1 8 1
+8 2 7 2
+7 5 8 5
+8 8 7 8
+8 5 8 6
+</code></pre></div></div>
+
+<h3 id="运行结果">运行结果</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>g++ futoshiki.cpp <span class="nt">-o</span> futoshiki.out <span class="nt">-O3</span>
+futoshiki.cpp: In <span class="k">function</span> ‘int main<span class="o">()</span>’:
+futoshiki.cpp:58:9: warning: ignoring <span class="k">return </span>value of ‘int scanf<span class="o">(</span>const char<span class="k">*</span>, ...<span class="o">)</span>’, declared with attribute warn_unused_result <span class="o">[</span><span class="nt">-Wunused-result</span><span class="o">]</span>
+    scanf<span class="o">(</span><span class="s2">"%d"</span>, &amp;t<span class="o">)</span><span class="p">;</span>
+    ~~~~~^~~~~~~~~~
+<span class="nv">$ </span><span class="nb">time</span> ./futoshiki.out &lt; futoshiki.txt
+1 6 9 7 3 8 4 5 2
+4 1 7 5 6 2 8 9 3
+8 7 2 3 1 9 5 6 4
+3 9 6 4 8 5 7 2 1
+2 5 1 9 7 3 6 4 8
+9 3 4 8 5 6 2 1 7
+6 4 3 2 9 7 1 8 5
+5 2 8 6 4 1 3 7 9
+7 8 5 1 2 4 9 3 6
+
+real    0m0.019s
+user    0m0.016s
+sys     0m0.000s
+</code></pre></div></div>
+:ET

@@ -1,0 +1,526 @@
+I"��<h2 id="实验题目">实验题目</h2>
+
+<p>用汇编与C语言开发独立内核</p>
+
+<h2 id="实验目的">实验目的</h2>
+
+<ul>
+  <li>掌握TASM汇编语言与TURBO C语言汇合编程的方法。</li>
+  <li>实现内核与引导程序分离，掌握软盘上引导操作系统方法。</li>
+  <li>设计并实现一种简单的作业控制语言，建立具有较友好的控制命令的批处理原型操作系统，掌握操作系统提供用户界面和内部功能的实现方法。</li>
+</ul>
+
+<h2 id="实验要求">实验要求</h2>
+
+<ul>
+  <li>将实验二的原型操作系统分离为引导程序和MYOS内核，由引导程序加载内核，用C和汇编实现操作系统内核</li>
+  <li>扩展内核汇编代码，增加一些有用的输入输出函数，供C模块中调用</li>
+  <li>提供用户程序返回内核的一种解决方案</li>
+  <li>在内核的C模块中实现增加批处理能力
+    <ul>
+      <li>在磁盘上建立一个表，记录用户程序的存储安排</li>
+      <li>可以在控制台命令查到用户程序的信息，如程序名、字节数、在磁盘映像文件中的位置等</li>
+      <li>设计一种命令，命令中可加载多个用户程序，依次执行，并能在控制台发出命令</li>
+      <li>在引导系统前，将一组命令存放在磁盘映像中，系统可以解释执行</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="实验方案">实验方案</h2>
+
+<h3 id="实验环境">实验环境</h3>
+
+<h4 id="软件">软件</h4>
+
+<ul>
+  <li>Windows 10, 64-bit  (Build 17763) 10.0.17763</li>
+  <li>Windows Subsystem for Linux [Ubuntu 18.04.2 LTS]：WSL是以软件的形式运行在Windows下的Linux子系统，是近些年微软推出来的新工具，可以在Windows系统上原生运行Linux。</li>
+  <li>gcc version 7.3.0 (Ubuntu 7.3.0-27ubuntu1~18.04)：C语言程序编译器，Ubuntu自带。</li>
+  <li>NASM version 2.13.02：汇编程序编译器，通过<code class="highlighter-rouge">sudo apt install nasm</code>安装在WSL上。</li>
+  <li>Oracle VM VirtualBox 6.0.4 r128413 (Qt5.6.2)：轻量开源的虚拟机软件。</li>
+  <li>VSCode - Insiders v1.33.0：好用的文本编辑器，有丰富的插件。</li>
+  <li>hexdump for VSCode 1.7.2: VSCode中一个好用的十六进制显示插件。</li>
+  <li>GNU Make 4.1：安装在Ubuntu下，一键编译并连接代码，生成最终的文件。</li>
+</ul>
+
+<p>大部分开发环境安装在WSL上，较之于双系统、虚拟机等其他开发方案，更加方便，也方便直接使用Linux下的一些指令。</p>
+
+<h4 id="硬件">硬件</h4>
+
+<h5 id="开发环境配置">开发环境配置</h5>
+
+<p>所用机器型号为VAIO Z Flip 2016</p>
+
+<ul>
+  <li>Intel(R) Core(TM) i7-6567U CPU @3.30GHZ 3.31GHz</li>
+  <li>8.00GB RAM</li>
+</ul>
+
+<h5 id="虚拟机配置">虚拟机配置</h5>
+
+<ul>
+  <li>处理器内核总数：1</li>
+  <li>RAM：4MB</li>
+</ul>
+
+<h3 id="实验原理">实验原理</h3>
+
+<p>这次实验完成内容的结构大致如下：</p>
+
+<pre><code class="language-mermaid">graph TB
+引导程序--&gt;main
+用户==交互==&gt;C语言函数
+subgraph 汇编与C语言混合编译的内核
+main-.外部调用.-&gt; 汇编函数
+main.-&gt; C语言函数
+C语言函数-.内嵌.-&gt;汇编函数
+end
+subgraph 用户程序
+汇编函数--&gt; prg1
+汇编函数--&gt; prg2
+汇编函数--&gt; prg3
+汇编函数--&gt; prg4
+end
+</code></pre>
+
+<h4 id="引导程序">引导程序</h4>
+
+<p>在<a href="https://wu-kan.github.io/posts/操作系统/加载用户程序的监控程序">上一个实验</a>里已经说得很清楚了，这里就不再提了，可以直接看代码。</p>
+
+<h4 id="汇编与c语言混合编译的内核">汇编与C语言混合编译的内核</h4>
+
+<p>这里的内核指的是汇编代码<code class="highlighter-rouge">kernel.asm</code>和C语言代码<code class="highlighter-rouge">kernel.c</code>混合编译而成的内核文件<code class="highlighter-rouge">kernel.bin</code>。</p>
+
+<h5 id="汇编部分kernelasm">汇编部分<code class="highlighter-rouge">kernel.asm</code></h5>
+
+<p>内核的第一部分是汇编程序，设置软件中断，声明一个全局的<code class="highlighter-rouge">_loadProgram</code>函数用于加载用户程序，然后直接调用C程序中的<code class="highlighter-rouge">main</code>函数链接到C程序入口点。</p>
+
+<p>在汇编程序中调用C函数比较简单，在程序段头部添加<code class="highlighter-rouge">extern</code>标识符，然后在程序中直接<code class="highlighter-rouge">call</code>即可。</p>
+
+<p>这里由于不太想学古董级的<code class="highlighter-rouge">tasm</code>，使用<code class="highlighter-rouge">nasm</code>替代之。</p>
+
+<h5 id="c语言部分kernelc">C语言部分<code class="highlighter-rouge">kernel.c</code></h5>
+
+<p>内核的主要部分，提供了shell命令行功能，用于实现用户和系统的交互。</p>
+
+<p>C语言也可以声明外部函数<code class="highlighter-rouge">extern _loadProgram</code>调用汇编函数。此外，C
+语言还支持内嵌汇编代码，通过<code class="highlighter-rouge">asm volatile</code>声明，其中<code class="highlighter-rouge">volatile</code>标识符的作用是禁止编译器自动优化，具体的例子可以看我下面的代码。由于我用的编译器<code class="highlighter-rouge">gcc</code>默认的内嵌汇编语法是<code class="highlighter-rouge">AT&amp;T</code>，在编译时要添加<code class="highlighter-rouge">-masm=intel</code>换成 <code class="highlighter-rouge">nasm</code>的语法。</p>
+
+<p>虽然支持内嵌汇编，但是我还是不想整个C语言内核部分的代码都是这种鬼东西。因此，我只在<code class="highlighter-rouge">putchar</code>（向当前位置写一个字符，并移动光标到下一有效位置）、<code class="highlighter-rouge">getch</code>（无回显地读取一个字符）中使用了内嵌汇编，其余的屏幕IO操作都通过调用这两个函数实现。</p>
+
+<h5 id="混合编译linkld">混合编译<code class="highlighter-rouge">link.ld</code></h5>
+
+<p>第一次搞这种东西着实想了很久…下面直接结合Makefile代码来解释。</p>
+
+<div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">kernel.bin</span><span class="o">:</span> <span class="nf">kernel.o kernel.obj</span>
+	ld <span class="nt">-m</span> elf_i386 <span class="nt">-N</span> <span class="nt">--oformat</span> binary <span class="nt">-Ttext</span> 0x7e00 <span class="nv">$^</span> <span class="nt">-o</span> <span class="nv">$@</span>
+</code></pre></div></div>
+
+<p>用ld结合链接文件link.ld，将上述两个.o文件链接生成内核二进制文件kernel.bin。</p>
+
+<div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">kernel.o</span><span class="o">:</span> <span class="nf">kernel.c</span>
+	gcc <span class="nt">-march</span><span class="o">=</span>i386 <span class="nt">-m16</span> <span class="nt">-mpreferred-stack-boundary</span><span class="o">=</span>2 <span class="nt">-ffreestanding</span> <span class="nt">-fno-PIE</span> <span class="nt">-masm</span><span class="o">=</span>intel <span class="nt">-c</span> <span class="nv">$&lt;</span> <span class="nt">-o</span> <span class="nv">$@</span>
+</code></pre></div></div>
+
+<p>把内核C语言部分编译。<code class="highlighter-rouge">-march=i386</code>使用i386指令集；<code class="highlighter-rouge">-m16</code>生成16位代码；<code class="highlighter-rouge">-mpreferred-stack-boundary=2</code>栈指针按照$2\times 2=4$字节对齐；<code class="highlighter-rouge">-ffreestanding</code>使输出程序能够独立运行；PIE能使程序像共享库一样在主存任何位置装载，这需要将程序编译成位置无关，并链接为ELF共享对象，这里用<code class="highlighter-rouge">-fno-PIE</code>关掉；<code class="highlighter-rouge">-masm=intel</code>使用<code class="highlighter-rouge">nasm</code>格式的内联汇编语法。</p>
+
+<div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">kernel.obj </span><span class="o">:</span> <span class="nf">kernel.asm</span>
+	nasm <span class="nt">-felf</span> <span class="nv">$&lt;</span> <span class="nt">-o</span> <span class="nv">$@</span>
+</code></pre></div></div>
+
+<p>把内核汇编部分编译成ELF文件。</p>
+
+<h4 id="用户程序">用户程序</h4>
+
+<p>在C语言的内核代码中，用户程序的表这样建的，用一个结构体保存用户程序名、大小、运行指令、调用地址。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define PROGRAM_NUM 4
+</span><span class="k">const</span> <span class="k">struct</span> <span class="n">Program</span>
+<span class="p">{</span>
+	<span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">command</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="n">address</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">prg</span><span class="p">[</span><span class="n">PROGRAM_NUM</span><span class="p">]</span> <span class="o">=</span>
+	<span class="p">{{</span><span class="s">"prg1"</span><span class="p">,</span> <span class="s">"    137 bytes"</span><span class="p">,</span> <span class="s">"exec 1"</span><span class="p">,</span> <span class="mi">1</span><span class="p">},</span>
+	 <span class="p">{</span><span class="s">"prg2"</span><span class="p">,</span> <span class="s">"    139 bytes"</span><span class="p">,</span> <span class="s">"exec 2"</span><span class="p">,</span> <span class="mi">2</span><span class="p">},</span>
+	 <span class="p">{</span><span class="s">"prg3"</span><span class="p">,</span> <span class="s">"    149 bytes"</span><span class="p">,</span> <span class="s">"exec 3"</span><span class="p">,</span> <span class="mi">3</span><span class="p">},</span>
+	 <span class="p">{</span><span class="s">"prg4"</span><span class="p">,</span> <span class="s">"    155 bytes"</span><span class="p">,</span> <span class="s">"exec 4"</span><span class="p">,</span> <span class="mi">4</span><span class="p">}};</span>
+</code></pre></div></div>
+
+<p>这里实现了一个任务栈用于批量加载用户程序。当单独执行某一程序时，main函数并不会直接执行任务，而是将待做任务压入一个栈中；每次循环调用main函数时会先检查任务栈有没有清空，如果未清空则优先弹栈并执行栈中的任务。这样做的优点是批处理无需单独拉出来考虑，接受任务序列时按照反顺序压栈即可。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">int</span> <span class="n">task</span><span class="p">[</span><span class="n">MAX_BUF_LEN</span><span class="p">],</span> <span class="n">task_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">task_size</span><span class="p">)</span>
+	<span class="k">return</span> <span class="nf">_loadProgram</span><span class="p">(</span><span class="n">prg</span><span class="p">[</span><span class="n">task</span><span class="p">[</span><span class="o">--</span><span class="n">task_size</span><span class="p">]].</span><span class="n">address</span> <span class="o">+</span> <span class="n">PrgSectorOffset</span><span class="p">),</span> <span class="n">main</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>和<a href="https://wu-kan.github.io/posts/操作系统/加载用户程序的监控程序">上一个实验</a>一样，用户程序调用<code class="highlighter-rouge">int20</code>中断用于检测是否有<code class="highlighter-rouge">Ctrl + C</code>并退出。不一样的是，这次是退回操作系统内核而非引导程序。</p>
+
+<h2 id="实验过程">实验过程</h2>
+
+<h3 id="实验代码">实验代码</h3>
+
+<h4 id="bootloaderasm">bootloader.asm</h4>
+
+<p>从键盘读取任意按键后进入操作系统内核。</p>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">%macro</span> <span class="n">print</span> <span class="mi">5</span>	<span class="c">; string, length, x, y, color</span>
+	<span class="k">pusha</span>
+	<span class="k">push</span> <span class="n">ax</span>
+	<span class="k">push</span> <span class="n">bx</span>
+	<span class="k">push</span> <span class="n">cx</span>
+	<span class="k">push</span> <span class="n">dx</span>
+	<span class="k">push</span> <span class="n">bp</span>
+	<span class="k">push</span> <span class="n">ds</span>
+	<span class="k">push</span> <span class="n">es</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">0</span><span class="n">b800H</span>
+	<span class="k">mov</span> <span class="n">gs</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="n">cs</span>
+	<span class="k">mov</span> <span class="n">ds</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">bp</span><span class="p">,</span> <span class="kr">%1</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ds</span>
+	<span class="k">mov</span> <span class="n">es</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">cx</span><span class="p">,</span> <span class="kr">%2</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">1301</span><span class="n">H</span>
+	<span class="k">mov</span> <span class="n">dh</span><span class="p">,</span> <span class="kr">%3</span>
+	<span class="k">mov</span> <span class="n">dl</span><span class="p">,</span> <span class="kr">%4</span>
+	<span class="k">mov</span> <span class="n">bx</span><span class="p">,</span> <span class="kr">%5</span>
+	<span class="k">int</span> <span class="mi">10</span><span class="n">H</span>
+	<span class="k">pop</span> <span class="n">es</span>
+	<span class="k">pop</span> <span class="n">ds</span>
+	<span class="k">pop</span> <span class="n">bp</span>
+	<span class="k">pop</span> <span class="n">dx</span>
+	<span class="k">pop</span> <span class="n">cx</span>
+	<span class="k">pop</span> <span class="n">bx</span>
+	<span class="k">pop</span> <span class="n">ax</span>
+	<span class="k">popa</span>
+<span class="cp">%endmacro</span>
+	<span class="n">bits</span> <span class="mi">16</span>
+	<span class="n">UserPrgOffset</span> <span class="k">equ</span> <span class="mi">7</span><span class="n">e00H</span>
+	<span class="n">PrgSectorOffset</span> <span class="k">equ</span> <span class="mi">2</span>
+	<span class="n">org</span> <span class="mi">7</span><span class="n">c00H</span>
+<span class="n">start</span><span class="o">:</span>
+	<span class="n">print</span> <span class="n">msg</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">07</span><span class="n">H</span>
+	<span class="k">mov</span> <span class="n">ah</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">int</span> <span class="mi">16</span><span class="n">H</span>
+<span class="n">loadOS</span><span class="o">:</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">mov</span> <span class="n">es</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">bx</span><span class="p">,</span> <span class="n">UserPrgOffset</span>
+	<span class="k">mov</span> <span class="n">ah</span><span class="p">,</span> <span class="mi">2</span>
+	<span class="k">mov</span> <span class="n">al</span><span class="p">,</span> <span class="mi">17</span>
+	<span class="k">mov</span> <span class="n">dl</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">mov</span> <span class="n">dh</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">mov</span> <span class="n">ch</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">mov</span> <span class="n">cl</span><span class="p">,</span> <span class="n">PrgSectorOffset</span>
+	<span class="k">int</span> <span class="mi">13</span><span class="n">H</span>
+	<span class="k">call</span> <span class="n">UserPrgOffset</span>
+	<span class="k">jmp</span> <span class="n">start</span>
+<span class="n">datadef</span><span class="o">:</span>
+	<span class="n">msg</span> <span class="kt">db</span> <span class="err">'</span><span class="n">Press</span> <span class="n">any</span> <span class="n">key</span> <span class="n">to</span> <span class="k">enter</span> <span class="n">WuK</span><span class="o">-</span><span class="n">OS</span><span class="p">.</span><span class="err">'</span>
+</code></pre></div></div>
+
+<h4 id="kernelasm">kernel.asm</h4>
+
+<p>操作系统内核的汇编部分代码，提供<code class="highlighter-rouge">int 20h</code>中断用于从用户程序中检测<code class="highlighter-rouge">Ctrl + C</code>并返回<code class="highlighter-rouge">main</code>函数，并提供<code class="highlighter-rouge">_loadProgram</code>函数用于加载用户程序。</p>
+
+<div class="language-nasm highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="n">bits</span> <span class="mi">16</span>
+	<span class="kr">extern</span> <span class="n">main</span>
+	<span class="kr">global</span> <span class="n">_loadProgram</span>
+	<span class="n">UserPrgOffset</span> <span class="k">equ</span> <span class="mi">0</span><span class="n">A100h</span>
+<span class="n">_start</span><span class="o">:</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">0000</span><span class="n">h</span>
+	<span class="k">mov</span> <span class="n">es</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">20</span><span class="n">h</span>
+	<span class="k">mov</span> <span class="n">bx</span><span class="p">,</span> <span class="mi">4</span>
+	<span class="k">mul</span> <span class="n">bx</span>
+	<span class="k">mov</span> <span class="n">si</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="n">_int20h</span>
+	<span class="k">mov</span> <span class="err">[</span><span class="n">es</span><span class="o">:</span><span class="n">si</span><span class="err">]</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">add</span> <span class="n">si</span><span class="p">,</span> <span class="mi">2</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="n">cs</span>
+	<span class="k">mov</span> <span class="err">[</span><span class="n">es</span><span class="o">:</span><span class="n">si</span><span class="err">]</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">call</span> <span class="n">main</span>
+<span class="n">_end</span><span class="o">:</span>
+	<span class="k">jmp</span> <span class="err">$</span>
+<span class="n">_loadProgram</span><span class="o">:</span>
+	<span class="k">push</span> <span class="n">ebp</span>
+	<span class="k">mov</span> <span class="n">ebp</span><span class="p">,</span> <span class="n">esp</span>
+	<span class="k">mov</span> <span class="n">ecx</span><span class="p">,</span> <span class="err">[</span><span class="n">ebp</span><span class="o">+</span><span class="mi">8</span><span class="err">]</span>
+	<span class="k">mov</span> <span class="n">ax</span><span class="p">,</span> <span class="n">cs</span>
+	<span class="k">mov</span> <span class="n">es</span><span class="p">,</span> <span class="n">ax</span>
+	<span class="k">mov</span> <span class="n">bx</span><span class="p">,</span> <span class="n">UserPrgOffset</span>
+	<span class="k">mov</span> <span class="n">ah</span><span class="p">,</span> <span class="mi">2</span>
+	<span class="k">mov</span> <span class="n">al</span><span class="p">,</span> <span class="mi">1</span>
+	<span class="k">mov</span> <span class="n">dl</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">mov</span> <span class="n">dh</span><span class="p">,</span> <span class="mi">1</span>
+	<span class="k">mov</span> <span class="n">ch</span><span class="p">,</span> <span class="mi">0</span>
+	<span class="k">int</span> <span class="mi">13</span><span class="n">H</span>
+	<span class="k">jmp</span> <span class="n">UserPrgOffset</span>
+	<span class="k">mov</span> <span class="n">esp</span><span class="p">,</span> <span class="n">ebp</span>
+	<span class="k">pop</span> <span class="n">ebp</span>
+	<span class="k">ret</span>
+<span class="n">_int20h</span><span class="o">:</span>
+	<span class="k">mov</span> <span class="n">ah</span><span class="p">,</span> <span class="mi">01</span><span class="n">h</span>
+	<span class="k">int</span> <span class="mi">16</span><span class="n">h</span>
+	<span class="k">jz</span> <span class="n">_noclick</span>
+	<span class="k">mov</span> <span class="n">ah</span><span class="p">,</span> <span class="mi">00</span><span class="n">h</span>
+	<span class="k">int</span> <span class="mi">16</span><span class="n">h</span>
+	<span class="k">cmp</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">2</span><span class="n">e03h</span> <span class="c">; 检测 Ctrl + C</span>
+	<span class="k">jne</span> <span class="n">_noclick</span>
+	<span class="k">jmp</span> <span class="n">main</span>
+<span class="n">_noclick</span><span class="o">:</span>
+	<span class="k">iret</span>
+</code></pre></div></div>
+
+<h4 id="kernerc">kerner.c</h4>
+
+<p>操作系统内核C语言部分的代码。</p>
+
+<p>这里遇到一个问题，所有的字符串常量都不能直接传进函数里去…在课程群里问了之后也有别的同学遇到了这个情况。调了快一天心力交猝之后选择向现实低头，把所有的字符串先存进一个变量里去。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define PrgSectorOffset 0
+#define SCREEN_WIDTH 80
+#define SCREEN_HEIGHT 25
+#define MAX_BUF_LEN (SCREEN_WIDTH * SCREEN_HEIGHT)
+#define PROGRAM_NUM 4
+</span><span class="k">extern</span> <span class="kt">void</span> <span class="nf">_loadProgram</span><span class="p">(</span><span class="kt">int</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">putchar</span><span class="p">(</span><span class="kt">char</span> <span class="n">c</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">static</span> <span class="kt">int</span> <span class="n">curX</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">curY</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">c</span> <span class="o">!=</span> <span class="sc">'\r'</span> <span class="o">&amp;&amp;</span> <span class="n">c</span> <span class="o">!=</span> <span class="sc">'\n'</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">asm</span> <span class="k">volatile</span><span class="p">(</span>
+			<span class="s">"push es</span><span class="se">\n</span><span class="s">"</span>
+			<span class="s">"mov es, ax</span><span class="se">\n</span><span class="s">"</span>
+			<span class="s">"mov es:[bx],cx</span><span class="se">\n</span><span class="s">"</span>
+			<span class="s">"pop es</span><span class="se">\n</span><span class="s">"</span>
+			<span class="o">:</span>
+			<span class="o">:</span> <span class="s">"a"</span><span class="p">(</span><span class="mh">0xB800</span><span class="p">),</span> <span class="s">"b"</span><span class="p">((</span><span class="n">curX</span> <span class="o">*</span> <span class="mi">80</span> <span class="o">+</span> <span class="n">curY</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="s">"c"</span><span class="p">((</span><span class="mh">0x07</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="n">c</span><span class="p">)</span>
+			<span class="o">:</span><span class="p">);</span>
+		<span class="k">if</span> <span class="p">(</span><span class="o">++</span><span class="n">curY</span> <span class="o">&gt;=</span> <span class="n">SCREEN_WIDTH</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="k">if</span> <span class="p">(</span><span class="o">++</span><span class="n">curX</span> <span class="o">&gt;=</span> <span class="n">SCREEN_HEIGHT</span><span class="p">)</span>
+				<span class="n">curX</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+			<span class="n">curY</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="p">}</span>
+		<span class="n">asm</span> <span class="k">volatile</span><span class="p">(</span>
+			<span class="s">"int 0x10</span><span class="se">\n</span><span class="s">"</span>
+			<span class="o">:</span>
+			<span class="o">:</span> <span class="s">"a"</span><span class="p">(</span><span class="mh">0x0200</span><span class="p">),</span> <span class="s">"b"</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="s">"d"</span><span class="p">((</span><span class="n">curX</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="n">curY</span><span class="p">));</span>
+		<span class="k">return</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">do</span>
+		<span class="n">putchar</span><span class="p">(</span><span class="sc">' '</span><span class="p">);</span>
+	<span class="k">while</span> <span class="p">(</span><span class="n">curY</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kt">char</span> <span class="nf">getch</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">char</span> <span class="n">ch</span><span class="p">;</span>
+	<span class="n">asm</span> <span class="k">volatile</span><span class="p">(</span><span class="s">"int 0x16</span><span class="se">\n</span><span class="s">"</span>
+				 <span class="o">:</span> <span class="s">"=a"</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+				 <span class="o">:</span> <span class="s">"a"</span><span class="p">(</span><span class="mh">0x1000</span><span class="p">));</span>
+	<span class="k">return</span> <span class="n">ch</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">void</span> <span class="nf">gets</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">s</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">for</span> <span class="p">(;;</span> <span class="o">++</span><span class="n">s</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">putchar</span><span class="p">(</span><span class="o">*</span><span class="n">s</span> <span class="o">=</span> <span class="n">getch</span><span class="p">());</span>
+		<span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">s</span> <span class="o">==</span> <span class="sc">'\r'</span> <span class="o">||</span> <span class="o">*</span><span class="n">s</span> <span class="o">==</span> <span class="sc">'\n'</span><span class="p">)</span>
+			<span class="k">break</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="o">*</span><span class="n">s</span> <span class="o">=</span> <span class="sc">'\0'</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">void</span> <span class="nf">printf</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">s</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">for</span> <span class="p">(;</span> <span class="o">*</span><span class="n">s</span><span class="p">;</span> <span class="o">++</span><span class="n">s</span><span class="p">)</span>
+		<span class="n">putchar</span><span class="p">(</span><span class="o">*</span><span class="n">s</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">strcmp</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">s1</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">s2</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">while</span> <span class="p">(</span><span class="o">*</span><span class="n">s1</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="o">*</span><span class="n">s1</span> <span class="o">==</span> <span class="o">*</span><span class="n">s2</span><span class="p">))</span>
+		<span class="o">++</span><span class="n">s1</span><span class="p">,</span> <span class="o">++</span><span class="n">s2</span><span class="p">;</span>
+	<span class="k">return</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="o">*</span><span class="n">s1</span> <span class="o">-</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="o">*</span><span class="n">s2</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">void</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="k">const</span> <span class="k">struct</span> <span class="n">Program</span>
+	<span class="p">{</span>
+		<span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">command</span><span class="p">;</span>
+		<span class="kt">int</span> <span class="n">address</span><span class="p">;</span>
+	<span class="p">}</span> <span class="n">prg</span><span class="p">[</span><span class="n">PROGRAM_NUM</span><span class="p">]</span> <span class="o">=</span>
+		<span class="p">{{</span><span class="s">"prg1"</span><span class="p">,</span> <span class="s">"    137 bytes"</span><span class="p">,</span> <span class="s">"exec 1"</span><span class="p">,</span> <span class="mi">1</span><span class="p">},</span>
+		 <span class="p">{</span><span class="s">"prg2"</span><span class="p">,</span> <span class="s">"    139 bytes"</span><span class="p">,</span> <span class="s">"exec 2"</span><span class="p">,</span> <span class="mi">2</span><span class="p">},</span>
+		 <span class="p">{</span><span class="s">"prg3"</span><span class="p">,</span> <span class="s">"    149 bytes"</span><span class="p">,</span> <span class="s">"exec 3"</span><span class="p">,</span> <span class="mi">3</span><span class="p">},</span>
+		 <span class="p">{</span><span class="s">"prg4"</span><span class="p">,</span> <span class="s">"    155 bytes"</span><span class="p">,</span> <span class="s">"exec 4"</span><span class="p">,</span> <span class="mi">4</span><span class="p">}};</span>
+	<span class="k">static</span> <span class="kt">int</span> <span class="n">task</span><span class="p">[</span><span class="n">MAX_BUF_LEN</span><span class="p">],</span> <span class="n">task_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">task_size</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">_loadProgram</span><span class="p">(</span><span class="n">prg</span><span class="p">[</span><span class="n">task</span><span class="p">[</span><span class="o">--</span><span class="n">task_size</span><span class="p">]].</span><span class="n">address</span> <span class="o">+</span> <span class="n">PrgSectorOffset</span><span class="p">),</span> <span class="n">main</span><span class="p">();</span>
+	<span class="kt">char</span> <span class="n">str</span><span class="p">[</span><span class="n">MAX_BUF_LEN</span><span class="p">];</span>
+	<span class="n">putchar</span><span class="p">(</span><span class="sc">'$'</span><span class="p">),</span> <span class="n">putchar</span><span class="p">(</span><span class="sc">' '</span><span class="p">),</span> <span class="n">gets</span><span class="p">(</span><span class="n">str</span><span class="p">);</span>
+	<span class="k">const</span> <span class="kt">char</span>
+		<span class="n">CLEAR_COM</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"clear"</span><span class="p">,</span>
+		<span class="n">HELP_COM</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"help"</span><span class="p">,</span>
+		<span class="n">EXEC_COM</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"exec"</span><span class="p">,</span>
+		<span class="n">EXIT_COM</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"exit"</span><span class="p">,</span>
+		<span class="n">LS_COM</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"ls"</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">strcmp</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">CLEAR_COM</span><span class="p">))</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">SCREEN_HEIGHT</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="n">putchar</span><span class="p">(</span><span class="sc">'\n'</span><span class="p">);</span>
+	<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">strcmp</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">HELP_COM</span><span class="p">))</span>
+	<span class="p">{</span>
+		<span class="k">const</span> <span class="kt">char</span>
+			<span class="n">HELP_INFO</span><span class="p">[]</span> <span class="o">=</span>
+				<span class="s">"WuK-shell v0.0.1</span><span class="se">\n</span><span class="s">"</span>
+				<span class="s">"These shell commands are defined internally.</span><span class="se">\n</span><span class="s">"</span>
+				<span class="s">"</span><span class="se">\n</span><span class="s">"</span>
+				<span class="s">"Command         Description</span><span class="se">\n</span><span class="s">"</span>
+				<span class="s">"clear        -- Clean the screen</span><span class="se">\n</span><span class="s">"</span>
+				<span class="s">"help         -- Show this list</span><span class="se">\n</span><span class="s">"</span>
+				<span class="s">"exec         -- Execute all the user programs</span><span class="se">\n</span><span class="s">"</span>
+				<span class="s">"exec [num]   -- Execute the num-th program</span><span class="se">\n</span><span class="s">"</span>
+				<span class="s">"exit         -- Exit OS</span><span class="se">\n</span><span class="s">"</span>
+				<span class="s">"ls           -- Show existing programs</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+		<span class="n">printf</span><span class="p">(</span><span class="n">HELP_INFO</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">strcmp</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">EXEC_COM</span><span class="p">))</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">PROGRAM_NUM</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="o">~</span><span class="n">i</span><span class="p">;</span> <span class="o">--</span><span class="n">i</span><span class="p">)</span>
+			<span class="n">task</span><span class="p">[</span><span class="n">task_size</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+	<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">strcmp</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">EXIT_COM</span><span class="p">))</span>
+		<span class="k">return</span><span class="p">;</span>
+	<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">strcmp</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">LS_COM</span><span class="p">))</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">PROGRAM_NUM</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="n">prg</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">name</span><span class="p">),</span> <span class="n">printf</span><span class="p">(</span><span class="n">prg</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">size</span><span class="p">),</span> <span class="n">putchar</span><span class="p">(</span><span class="sc">'\n'</span><span class="p">);</span>
+	<span class="k">else</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">PROGRAM_NUM</span><span class="p">)</span>
+			<span class="p">{</span>
+				<span class="n">printf</span><span class="p">(</span><span class="n">str</span><span class="p">);</span>
+				<span class="k">const</span> <span class="kt">char</span>
+					<span class="n">COMM_NOT_FOUND</span><span class="p">[]</span> <span class="o">=</span>
+						<span class="s">" : command not found, type </span><span class="se">\'</span><span class="s">help</span><span class="se">\'</span><span class="s"> for available commands list.</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+				<span class="n">printf</span><span class="p">(</span><span class="n">COMM_NOT_FOUND</span><span class="p">);</span>
+				<span class="k">break</span><span class="p">;</span>
+			<span class="p">}</span>
+			<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">strcmp</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">prg</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">command</span><span class="p">))</span>
+				<span class="n">task</span><span class="p">[</span><span class="n">task_size</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+		<span class="p">}</span>
+	<span class="k">return</span> <span class="n">main</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="linkld">link.ld</h4>
+
+<p>将<code class="highlighter-rouge">wukos.asm</code>和<code class="highlighter-rouge">kernel.c</code>两个文件编译出来的内容连接起来。</p>
+
+<pre><code class="language-link">OUTPUT_FORMAT("elf32-i386")
+ENTRY(_start)
+SECTIONS
+{
+	. = 0x7E00;
+	.text ALIGN (0x00) : {
+		*(.text);
+	}
+	.rodata ALIGN (4) : {
+		*(.rodata*);
+	}
+	.data ALIGN (4) : {
+		*(.data*);
+	}
+	.bss ALIGN (4) : {
+		*(COMMON);
+		*(.bss*);
+	}
+}
+</code></pre>
+
+<h4 id="prg1asmprg4asm">prg1.asm~prg4.asm</h4>
+
+<p>和<a href="https://wu-kan.github.io/posts/操作系统/加载用户程序的监控程序">上一个实验</a>中的<code class="highlighter-rouge">a.asm</code>~<code class="highlighter-rouge">d.asm</code>完全相同，这里不再放出。</p>
+
+<h4 id="makefile">Makefile</h4>
+
+<p>这次文件太多，只好手动写Makefile了…</p>
+
+<div class="language-makefile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">BIN</span> <span class="o">=</span> bootloader.bin kernel.bin prg1.bin prg2.bin prg3.bin prg4.bin
+<span class="nv">IMG</span> <span class="o">=</span> wukos.img
+<span class="nl">all</span><span class="o">:</span> <span class="nf">clear $(BIN) $(IMG)</span>
+<span class="nl">clear</span><span class="o">:</span>
+	<span class="nb">rm</span> <span class="nt">-f</span> <span class="nv">$(BIN)</span> <span class="nv">$(IMG)</span>
+<span class="nl">kernel.bin</span><span class="o">:</span> <span class="nf">kernel.obj kernel.o</span>
+	ld <span class="nt">-m</span> elf_i386 <span class="nt">-N</span> <span class="nt">--oformat</span> binary <span class="nt">-Ttext</span> 0x7e00 <span class="nv">$^</span> <span class="nt">-o</span> <span class="nv">$@</span>
+<span class="nl">kernel.o</span><span class="o">:</span> <span class="nf">kernel.c</span>
+	gcc <span class="nt">-march</span><span class="o">=</span>i386 <span class="nt">-m16</span> <span class="nt">-mpreferred-stack-boundary</span><span class="o">=</span>2 <span class="nt">-ffreestanding</span> <span class="nt">-fno-PIE</span> <span class="nt">-masm</span><span class="o">=</span>intel <span class="nt">-c</span> <span class="nv">$&lt;</span> <span class="nt">-o</span> <span class="nv">$@</span>
+<span class="nl">kernel.obj </span><span class="o">:</span> <span class="nf">kernel.asm</span>
+	nasm <span class="nt">-felf</span> <span class="nv">$&lt;</span> <span class="nt">-o</span> <span class="nv">$@</span>
+<span class="nl">%.bin</span><span class="o">:</span> <span class="nf">%.asm</span>
+	nasm <span class="nt">-fbin</span> <span class="nv">$&lt;</span> <span class="nt">-o</span> <span class="nv">$@</span>
+<span class="nl">%.img</span><span class="o">:</span>
+	/sbin/mkfs.msdos <span class="nt">-C</span> <span class="nv">$@</span> 1440
+	<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>bootloader.bin <span class="nv">of</span><span class="o">=</span><span class="nv">$@</span> <span class="nv">conv</span><span class="o">=</span>notrunc
+	<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>kernel.bin <span class="nv">of</span><span class="o">=</span><span class="nv">$@</span> <span class="nv">seek</span><span class="o">=</span>1 <span class="nv">conv</span><span class="o">=</span>notrunc
+	<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>prg1.bin <span class="nv">of</span><span class="o">=</span><span class="nv">$@</span> <span class="nv">seek</span><span class="o">=</span>18 <span class="nv">conv</span><span class="o">=</span>notrunc
+	<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>prg2.bin <span class="nv">of</span><span class="o">=</span><span class="nv">$@</span> <span class="nv">seek</span><span class="o">=</span>19 <span class="nv">conv</span><span class="o">=</span>notrunc
+	<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>prg3.bin <span class="nv">of</span><span class="o">=</span><span class="nv">$@</span> <span class="nv">seek</span><span class="o">=</span>20 <span class="nv">conv</span><span class="o">=</span>notrunc
+	<span class="nb">dd </span><span class="k">if</span><span class="o">=</span>prg4.bin <span class="nv">of</span><span class="o">=</span><span class="nv">$@</span> <span class="nv">seek</span><span class="o">=</span>21 <span class="nv">conv</span><span class="o">=</span>notrunc
+</code></pre></div></div>
+
+<h3 id="运行结果">运行结果</h3>
+
+<h4 id="引导程序-1">引导程序</h4>
+
+<p>如图，启动后进入引导程序。</p>
+
+<p><img src="/public/image/2019-03-28-0.jpg" alt="图片描述" /></p>
+
+<p>按下键盘任意按键后进入下一步。</p>
+
+<h4 id="操作系统">操作系统</h4>
+
+<p><img src="/public/image/2019-03-28-1.jpg" alt="图片描述" /></p>
+
+<p>第一次进入系统时并没有完全清除屏幕上的提示信息，原因是我不希望自己写的内核过多地控制屏幕显示内容；取而代之的是，用户可以手动输入<code class="highlighter-rouge">clear</code>指令用于清除屏幕上的内容。</p>
+
+<h4 id="测试一些指令">测试一些指令</h4>
+
+<p><img src="/public/image/2019-03-28-2.jpg" alt="图片描述" /></p>
+
+<p>这是依次键入一个空指令、一个<code class="highlighter-rouge">show</code>（不支持的指令）、一个<code class="highlighter-rouge">help</code>指令（用于提示所有可执行的命令）、一个<code class="highlighter-rouge">ls</code>指令（用于显示所用户程序和对应信息）后的运行界面。</p>
+
+<p>可以看到，我的内核完美的识别出了支持的指令并正确运行，对于空指令和不支持的指令也会有相应的提示。</p>
+
+<h4 id="批处理">批处理</h4>
+
+<p>由于运行单个程序和批处理的原理和实际效果是完全相同的，这里只放出运行批处理的过程了。</p>
+
+<p><img src="/public/image/2019-03-28-3.jpg" alt="图片描述" />
+如图，这是运行<code class="highlighter-rouge">exec</code>指令后打开的第一个程序。做<a href="https://wu-kan.github.io/posts/操作系统/加载用户程序的监控程序">上一个实验</a>时并没有在运行时清空屏幕，因此可以看到我的姓名是直接叠加在输出界面上的。</p>
+
+<p><img src="/public/image/2019-03-28-4.jpg" alt="图片描述" /></p>
+
+<p>依次按Ctrl+C退出这个程序并进入下一个程序。运行完所有四个用户程序后效果如图所示。</p>
+
+<h4 id="清屏">清屏</h4>
+
+<p>前面说了，我不希望自己写的内核过多地自己控制屏幕显示，而是给用户提供一条指令用于清屏。输入<code class="highlighter-rouge">clear</code>指令后如图，瞬间舒服了。
+<img src="/public/image/2019-03-28-5.jpg" alt="图片描述" /></p>
+
+<h4 id="退出">退出</h4>
+
+<p><img src="/public/image/2019-03-28-6.jpg" alt="图片描述" />
+如图，输入<code class="highlighter-rouge">exit</code>指令后退出系统内核，不再响应用户的输入。</p>
+
+<h2 id="实验总结">实验总结</h2>
+
+<p>这次实验出来后，朋友圈一片对这个实验的吐槽。究其原因，可能有以下几点：</p>
+
+<ul>
+  <li>老师给的<code class="highlighter-rouge">tcc</code>+<code class="highlighter-rouge">tasm</code>方案过于老旧，很难有参考价值</li>
+  <li><code class="highlighter-rouge">gcc</code>的编译参数很多，只好慢慢摸索出一个“看起来能用”的编译选项，内在机理还是没有完全搞懂（这也可能是没办法传字符串的原因之一）</li>
+  <li>各种玄学错误，一下能运行一下又运行不了，莫名其妙的卡死，莫名其妙的执行用户程序</li>
+  <li>单步调试时发现C编译出来的汇编和自己想的有时候完全不同，尝试关闭编译器优化<code class="highlighter-rouge">-O0</code>但是没有效果</li>
+</ul>
+
+<p>并且，虽然勉强做完了，但是还遗留下C内核程序没有办法直接向函数传递字符串常量的问题，希望可以在日后的学习过程中解决。</p>
+:ET

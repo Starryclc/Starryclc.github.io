@@ -1,0 +1,300 @@
+I"T�<h2 id="实验题目">实验题目</h2>
+
+<p>Echo实验</p>
+
+<h2 id="实验目的">实验目的</h2>
+
+<p>掌握套节字的基本使用方法</p>
+
+<h2 id="参考资料">参考资料</h2>
+
+<ul>
+  <li>https://www.cnblogs.com/hgwang/p/6074038.html  （套接字）</li>
+  <li>https://www.jb51.net/article/37410.htm  （字符串）</li>
+  <li>https://docs.microsoft.com/en-us/c/c-runtime-library/stream-i-o?view=vs-2017  （字符串）</li>
+  <li>https://docs.microsoft.com/en-us/c/c-runtime-library/reference/crt-alphabetical-function-reference?view=vs-2017#s   （字符串）</li>
+  <li>http://www.runoob.com/cprogramming/  （字符串）</li>
+</ul>
+
+<h2 id="实验环境">实验环境</h2>
+
+<ul>
+  <li>Windows + VS 2012  http://172.18.187.9/netdisk/default.aspx?vm=17net</li>
+  <li>对于VS2015和VS2017默认使用安全周期检查，如果不关闭VS的安全周期检查，很多字符串函数都不能用。</li>
+  <li>Linux + gcc</li>
+</ul>
+
+<p>这里我使用的环境是Windows 10 + VSCode + gcc version 8.1.0 (x86_64-posix-sjlj-rev0, Built by MinGW-W64 project)</p>
+<h2 id="实验内容">实验内容</h2>
+
+<h3 id="编写tcp-echo增强程序">编写TCP Echo增强程序</h3>
+
+<h4 id="实验要求">实验要求：</h4>
+
+<p>服务器把客户端发送来的任何消息都返回给客户端，返回的消息前面要加上服务器的当前时间。客户端把返回的消息显示出来。客户端每输入一条消息就建立TCP连接，并把消息发送给服务器，在收到服务器回应后关闭连接。在这一基础上，服务器在收到客户端的消息时显示服务器的当前时间、客户端的IP地址、客户端的端口号和客户端发来的信息，并把它们一并返回给客户端。客户端在发送消息后把服务器发回给它的消息显示出来。要求服务器直接从accept()的参数fsin中得到客户端的IP地址和端口号。服务器获取IP地址后要求直接使用s_un_b的四个分量得到IP地址，不能使用函数inet_ntoa()转换IP地址。</p>
+
+<h4 id="只运行客户端程序而不运行服务器程序会出现什么错误截屏并说明原因">只运行客户端程序而不运行服务器程序会出现什么错误，截屏并说明原因。</h4>
+
+<p><img src="/public/image/2019-03-11-1.jpg" alt="图片描述" />
+如图，退出了服务器程序后再运行客户端程序，得到了10057的报错。</p>
+
+<h4 id="服务器如何可以退出循环">服务器如何可以退出循环？</h4>
+
+<p>kbhit()在执行时,检测是否有按键按下,有按下返回非0值，没有按下则返回0，是非阻塞函数；因此，预期在监听的过程中将服务器程序从后台激活并按下键盘按键即可退出循环。</p>
+
+<p>然而，在实际运行中这样是失效的，正是因为他是非阻塞函数，而下面收发信息却是阻塞的。因此退出循环只有我们在命令行中手动按Ctrl+C了。</p>
+
+<h4 id="截屏ctrlaltprintscreen服务器和客户端的运行结果注明客户端和服务器">截屏（ctrl+alt+PrintScreen）服务器和客户端的运行结果（注明客户端和服务器）</h4>
+
+<p>客户端：
+<img src="/public/image/2019-03-11-2.jpg" alt="图片描述" />
+服务器：
+<img src="/public/image/2019-03-11-3.jpg" alt="图片描述" /></p>
+
+<h4 id="服务器的全部源代码或自选主要代码">服务器的全部源代码（或自选主要代码）</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+#include &lt;time.h&gt;
+#include &lt;winsock2.h&gt;
+#include &lt;conio.h&gt;
+#define BUFLEN 2000
+#define WSVERS MAKEWORD(2, 0)
+#pragma comment(lib, "ws2_32.lib") //使用winsock 2.2 library
+</span><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>   <span class="c1">// argc: 命令行参数个数，例如：C:\&gt; TCPServer 8080 argc=2 argv[0]=“TCPServer", argv[1]="8080"</span>
+<span class="p">{</span>
+	<span class="k">struct</span> <span class="n">sockaddr_in</span> <span class="n">fsin</span><span class="p">;</span> <span class="c1">// the from address of a client</span>
+	<span class="n">SOCKET</span> <span class="n">msock</span><span class="p">,</span> <span class="n">ssock</span><span class="p">;</span>	 <span class="c1">// master &amp; slave sockets</span>
+	<span class="n">WSADATA</span> <span class="n">wsadata</span><span class="p">;</span>
+	<span class="kt">char</span> <span class="n">service</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"50500"</span><span class="p">;</span>
+	<span class="k">struct</span> <span class="n">sockaddr_in</span> <span class="n">sin</span><span class="p">;</span>							   <span class="c1">// an Internet endpoint address</span>
+	<span class="kt">int</span> <span class="n">alen</span><span class="p">;</span>										   <span class="c1">// from-address length</span>
+	<span class="kt">char</span> <span class="n">pts</span><span class="p">[</span><span class="n">BUFLEN</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span>							   <span class="c1">// pointer to time string</span>
+	<span class="kt">time_t</span> <span class="n">now</span><span class="p">;</span>										   <span class="c1">// current time</span>
+	<span class="n">WSAStartup</span><span class="p">(</span><span class="n">WSVERS</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wsadata</span><span class="p">);</span>					   <span class="c1">// 加载winsock library，WSVERS为请求版本，wsadata返回系统实际支持的最高版本</span>
+	<span class="n">msock</span> <span class="o">=</span> <span class="n">socket</span><span class="p">(</span><span class="n">PF_INET</span><span class="p">,</span> <span class="n">SOCK_STREAM</span><span class="p">,</span> <span class="n">IPPROTO_TCP</span><span class="p">);</span> <span class="c1">// 创建套接字。 参数：因特网协议簇(family)，字节流，TCP协议号。 返回：要监听套接字的描述符或INVALID_SOCKET</span>
+	<span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sin</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">sin</span><span class="p">));</span>					   <span class="c1">//从&amp;sin开始的长度为sizeof(sin)的内存清0 , sin为一个地址结构</span>
+	<span class="n">sin</span><span class="p">.</span><span class="n">sin_family</span> <span class="o">=</span> <span class="n">AF_INET</span><span class="p">;</span>						   <span class="c1">//因特网地址簇(INET-Internet)</span>
+	<span class="n">sin</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">s_addr</span> <span class="o">=</span> <span class="n">INADDR_ANY</span><span class="p">;</span>				   <span class="c1">//监听所有(接口的)IP地址(32位)，// 0.0.0.0</span>
+	<span class="n">sin</span><span class="p">.</span><span class="n">sin_port</span> <span class="o">=</span> <span class="n">htons</span><span class="p">((</span><span class="n">u_short</span><span class="p">)</span><span class="n">atoi</span><span class="p">(</span><span class="n">service</span><span class="p">));</span>	  <span class="c1">//监听的端口号(16位) 。atoi--把ascii转化为int，htons—主机序到网络序</span>
+	<span class="n">bind</span><span class="p">(</span><span class="n">msock</span><span class="p">,</span> <span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">sin</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">sin</span><span class="p">));</span> <span class="c1">// 通过sin把要监听的IP地址和端口号绑定到套接字上</span>
+	<span class="n">listen</span><span class="p">(</span><span class="n">msock</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>								   <span class="c1">// 建立长度为5的连接请求队列，并开始监听是否有连接请求到来，来了则放入队列</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"Server Start to listen.</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+	<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">_kbhit</span><span class="p">())</span> <span class="c1">// 检测是否有按键 (什么时候执行？)</span>
+	<span class="p">{</span>
+		<span class="n">alen</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span><span class="p">);</span>
+		<span class="n">ssock</span> <span class="o">=</span> <span class="n">accept</span><span class="p">(</span><span class="n">msock</span><span class="p">,</span> <span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">fsin</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">alen</span><span class="p">);</span> <span class="c1">// accept：如果有新的连接请求，返回连接套接字，否则，被阻塞，fsin包含客户端IP地址和端口号</span>
+		<span class="n">time</span><span class="p">(</span><span class="o">&amp;</span><span class="n">now</span><span class="p">);</span>												<span class="c1">// 取得系统时间</span>
+		<span class="kt">int</span> <span class="n">cnt</span> <span class="o">=</span> <span class="n">sprintf</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="s">"Accept Time:</span><span class="se">\n</span><span class="s">"</span>
+							   <span class="s">"%s"</span>
+							   <span class="s">"sin_port:</span><span class="se">\n</span><span class="s">"</span>
+							   <span class="s">"%u</span><span class="se">\n</span><span class="s">"</span>
+							   <span class="s">"sin_addr:</span><span class="se">\n</span><span class="s">"</span>
+							   <span class="s">"%d.%d.%d.%d</span><span class="se">\n</span><span class="s">"</span>
+							   <span class="s">"Receive Message:</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+						  <span class="n">ctime</span><span class="p">(</span><span class="o">&amp;</span><span class="n">now</span><span class="p">),</span>
+						  <span class="n">fsin</span><span class="p">.</span><span class="n">sin_port</span><span class="p">,</span>
+						  <span class="n">fsin</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">S_un</span><span class="p">.</span><span class="n">S_un_b</span><span class="p">.</span><span class="n">s_b1</span><span class="p">,</span>
+						  <span class="n">fsin</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">S_un</span><span class="p">.</span><span class="n">S_un_b</span><span class="p">.</span><span class="n">s_b2</span><span class="p">,</span>
+						  <span class="n">fsin</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">S_un</span><span class="p">.</span><span class="n">S_un_b</span><span class="p">.</span><span class="n">s_b3</span><span class="p">,</span>
+						  <span class="n">fsin</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">S_un</span><span class="p">.</span><span class="n">S_un_b</span><span class="p">.</span><span class="n">s_b4</span><span class="p">);</span> <span class="c1">// 把时间转换为字符串</span>
+		<span class="kt">int</span> <span class="n">cc</span> <span class="o">=</span> <span class="n">recv</span><span class="p">(</span><span class="n">ssock</span><span class="p">,</span> <span class="n">pts</span> <span class="o">+</span> <span class="n">cnt</span><span class="p">,</span> <span class="n">BUFLEN</span> <span class="o">-</span> <span class="n">cnt</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+		<span class="n">pts</span><span class="p">[</span><span class="n">cnt</span> <span class="o">+</span> <span class="n">cc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">%s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">pts</span><span class="p">);</span>
+		<span class="n">send</span><span class="p">(</span><span class="n">ssock</span><span class="p">,</span> <span class="n">pts</span><span class="p">,</span> <span class="n">cnt</span> <span class="o">+</span> <span class="n">cc</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+		<span class="n">closesocket</span><span class="p">(</span><span class="n">ssock</span><span class="p">);</span> <span class="c1">//  关闭连接套接字</span>
+	<span class="p">}</span>
+	<span class="n">closesocket</span><span class="p">(</span><span class="n">msock</span><span class="p">);</span>
+	<span class="n">WSACleanup</span><span class="p">();</span>
+	<span class="n">system</span><span class="p">(</span><span class="s">"pause"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="客户端的全部源代码或自选主要代码">客户端的全部源代码（或自选主要代码）</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;winsock2.h&gt;
+#define BUFLEN 2000
+#define WSVERS MAKEWORD(2, 0)
+#pragma comment(lib, "ws2_32.lib")
+</span><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+	<span class="kt">char</span> <span class="n">host</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"127.0.0.1"</span><span class="p">;</span>			   <span class="c1">// server IP to connect，127.0.0.1指本机</span>
+	<span class="kt">char</span> <span class="n">service</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"50500"</span><span class="p">;</span>			   <span class="c1">// server port to connect</span>
+	<span class="k">struct</span> <span class="n">sockaddr_in</span> <span class="n">sin</span><span class="p">;</span>				   <span class="c1">// an Internet endpoint address</span>
+	<span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="n">BUFLEN</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">msg</span><span class="p">[</span><span class="n">BUFLEN</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span> <span class="c1">// buffer for one line of text</span>
+	<span class="n">SOCKET</span> <span class="n">sock</span><span class="p">;</span>						   <span class="c1">// socket descriptor</span>
+	<span class="kt">int</span> <span class="n">cc</span><span class="p">;</span>								   <span class="c1">// recv character count</span>
+	<span class="n">WSADATA</span> <span class="n">wsadata</span><span class="p">;</span>
+	<span class="n">WSAStartup</span><span class="p">(</span><span class="n">WSVERS</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wsadata</span><span class="p">);</span>
+	<span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="p">(</span><span class="n">PF_INET</span><span class="p">,</span> <span class="n">SOCK_STREAM</span><span class="p">,</span> <span class="n">IPPROTO_TCP</span><span class="p">);</span>
+	<span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sin</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">sin</span><span class="p">));</span>				  <span class="c1">// sin的内存清0</span>
+	<span class="n">sin</span><span class="p">.</span><span class="n">sin_family</span> <span class="o">=</span> <span class="n">AF_INET</span><span class="p">;</span>					  <span class="c1">// 因特网地址簇</span>
+	<span class="n">sin</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">s_addr</span> <span class="o">=</span> <span class="n">inet_addr</span><span class="p">(</span><span class="n">host</span><span class="p">);</span>		  <span class="c1">// 服务器IP地址(32位)</span>
+	<span class="n">sin</span><span class="p">.</span><span class="n">sin_port</span> <span class="o">=</span> <span class="n">htons</span><span class="p">((</span><span class="n">u_short</span><span class="p">)</span><span class="n">atoi</span><span class="p">(</span><span class="n">service</span><span class="p">));</span> <span class="c1">// 服务器端口号(16位)</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"Send the Message:</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+	<span class="n">gets</span><span class="p">(</span><span class="n">msg</span><span class="p">);</span>
+	<span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">connect</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">sin</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">sin</span><span class="p">));</span> <span class="c1">// 连接到服务器.无错时，返回0， // 否则，返回SOCKET_ERROR ，可以调用 //    函数WSAGetLastError取得错误代码</span>
+	<span class="n">cc</span> <span class="o">=</span> <span class="n">send</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="n">msg</span><span class="p">),</span> <span class="mi">0</span><span class="p">);</span>						   <span class="c1">//把缓冲区pts的数据发送出去，len为要发送的字节数， // 返回值：(&gt;0) 实际发送的字节数(≤len), (=0) 对方正常关闭， //    （=SOCKET_ERROR) 出错，用函数WSAGetLastError取错误码。</span>
+	<span class="n">cc</span> <span class="o">=</span> <span class="n">recv</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">BUFLEN</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>							   <span class="c1">// BUFLEN为缓冲区buf的长度。 // 返回值：接收的字符数(&gt;0)、对方已关闭(=0) 或连接出错(&lt;0)</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="n">SOCKET_ERROR</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Error:</span><span class="se">\n</span><span class="s">%d.</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">GetLastError</span><span class="p">());</span>
+	<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Server closed.</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+	<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">buf</span><span class="p">[</span><span class="n">cc</span><span class="p">]</span> <span class="o">=</span> <span class="sc">'\0'</span><span class="p">;</span>		   <span class="c1">//  ensure null-termination</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">%s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span> <span class="c1">// 显示所接收的字符串</span>
+	<span class="p">}</span>
+	<span class="n">closesocket</span><span class="p">(</span><span class="n">sock</span><span class="p">);</span> <span class="c1">// 关闭套接字</span>
+	<span class="n">WSACleanup</span><span class="p">();</span>	  <span class="c1">//  卸载winsock library</span>
+	<span class="n">system</span><span class="p">(</span><span class="s">"pause"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="编写udp-echo增强程序">编写UDP Echo增强程序</h3>
+
+<h4 id="实验要求-1">实验要求</h4>
+
+<p>修改UDP例程，完成Echo功能，即当客户端发来消息时，服务器显示出服务器的当前时间、客户端的IP、客户端的端口号和客户发来的信息，并把它们一并发回给客户端，客户端然后把它们显示出来。
+服务器可以直接从recvfrom()的参数from中得到客户端的IP地址和端口号，并且服务器用sendto()发回给客户端消息时可以直接用该参数from作为参数toAddr。可以使用inet_ntoa()转换客户端IP地址。
+客户端程序的recvfrom()可以直接使用原来sendto使用的sock。该sock已经绑定了客户端的IP地址和端口号，客户端可以直接用来接收数据。</p>
+
+<h4 id="只运行客户端程序而不运行服务器程序会出现什么错误截屏并说明原因-1">只运行客户端程序而不运行服务器程序会出现什么错误，截屏并说明原因</h4>
+
+<p><img src="/public/image/2019-03-11-4.jpg" alt="图片描述" />
+如图，在发送时没有报错，但是试图从服务器获得信息时获得了10054的报错。</p>
+
+<h4 id="截屏服务器和客户端的运行结果注明客户端和服务器">截屏服务器和客户端的运行结果（注明客户端和服务器）</h4>
+
+<p><img src="/public/image/2019-03-11-5.jpg" alt="图片描述" />
+服务器：
+<img src="/public/image/2019-03-11-6.jpg" alt="图片描述" /></p>
+
+<h4 id="服务器的全部源代码或自选主要代码-1">服务器的全部源代码（或自选主要代码）</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;time.h&gt;
+#include &lt;conio.h&gt;
+#include &lt;winsock2.h&gt;
+#define BUFLEN 2000				   // 缓冲区大小
+#define WSVERS MAKEWORD(2, 2)	  // 指明版本2.2
+#pragma comment(lib, "ws2_32.lib") // 加载winsock 2.2 Llibrary
+</span><span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+	<span class="kt">char</span> <span class="n">host</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"127.0.0.1"</span><span class="p">;</span> <span class="c1">// server IP Address to connect</span>
+	<span class="kt">char</span> <span class="n">service</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"50500"</span><span class="p">;</span>  <span class="c1">// server port to connect</span>
+	<span class="k">struct</span> <span class="n">sockaddr_in</span> <span class="n">sin</span><span class="p">;</span>	<span class="c1">// an Internet endpoint address</span>
+	<span class="k">struct</span> <span class="n">sockaddr_in</span> <span class="n">from</span><span class="p">;</span>   <span class="c1">// sender address</span>
+	<span class="kt">int</span> <span class="n">fromsize</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">from</span><span class="p">);</span>
+	<span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="n">BUFLEN</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">pts</span><span class="p">[</span><span class="n">BUFLEN</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span> <span class="c1">// buffer for one line of text</span>
+	<span class="n">SOCKET</span> <span class="n">sock</span><span class="p">;</span>						   <span class="c1">// socket descriptor</span>
+	<span class="kt">int</span> <span class="n">cc</span><span class="p">;</span>								   <span class="c1">// recv character count</span>
+	<span class="n">WSADATA</span> <span class="n">wsadata</span><span class="p">;</span>
+	<span class="n">WSAStartup</span><span class="p">(</span><span class="n">WSVERS</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wsadata</span><span class="p">);</span>					 <span class="c1">// 加载winsock library，WSVERS为请求版本,wsadata返回系统实际支持的最高版本。</span>
+	<span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="p">(</span><span class="n">PF_INET</span><span class="p">,</span> <span class="n">SOCK_DGRAM</span><span class="p">,</span> <span class="n">IPPROTO_UDP</span><span class="p">);</span> <span class="c1">// 创建UDP套接字, 参数：因特网协议簇(family)，数据报套接字，UDP协议号， 返回：要监听套接字的描述符或INVALID_SOCKET</span>
+	<span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sin</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">sin</span><span class="p">));</span>
+	<span class="n">sin</span><span class="p">.</span><span class="n">sin_family</span> <span class="o">=</span> <span class="n">AF_INET</span><span class="p">;</span>
+	<span class="n">sin</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">s_addr</span> <span class="o">=</span> <span class="n">INADDR_ANY</span><span class="p">;</span>				  <span class="c1">// 绑定(监听)所有的接口。</span>
+	<span class="n">sin</span><span class="p">.</span><span class="n">sin_port</span> <span class="o">=</span> <span class="n">htons</span><span class="p">((</span><span class="n">u_short</span><span class="p">)</span><span class="n">atoi</span><span class="p">(</span><span class="n">service</span><span class="p">));</span>	 <span class="c1">// 绑定指定接口。atoi--把ascii转化为int，htons -- 主机序(host)转化为网络序(network), 为short类型。</span>
+	<span class="n">bind</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">sin</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">sin</span><span class="p">));</span> <span class="c1">// 绑定本地端口号（和本地IP地址)</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"UDPServer Start.</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+	<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">_kbhit</span><span class="p">())</span>
+	<span class="p">{</span>																	   <span class="c1">//检测是否有按键</span>
+		<span class="n">cc</span> <span class="o">=</span> <span class="n">recvfrom</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">BUFLEN</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">SOCKADDR</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">from</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">fromsize</span><span class="p">);</span> <span class="c1">//接收客户数据。返回结果：cc为接收的字符数，from中将包含客户IP地址和端口号。</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="n">SOCKET_ERROR</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"recvfrom() failed; %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">WSAGetLastError</span><span class="p">());</span>
+			<span class="k">break</span><span class="p">;</span>
+		<span class="p">}</span>
+		<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+			<span class="k">break</span><span class="p">;</span>
+		<span class="k">else</span>
+		<span class="p">{</span>
+			<span class="n">buf</span><span class="p">[</span><span class="n">cc</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+			<span class="kt">time_t</span> <span class="n">now</span><span class="p">;</span>
+			<span class="n">time</span><span class="p">(</span><span class="o">&amp;</span><span class="n">now</span><span class="p">);</span> <span class="c1">// 取得系统时间</span>
+			<span class="n">sprintf</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span>
+					<span class="s">"Accept Time:</span><span class="se">\n</span><span class="s">"</span>
+					<span class="s">"%s"</span>
+					<span class="s">"sin_port:</span><span class="se">\n</span><span class="s">"</span>
+					<span class="s">"%u</span><span class="se">\n</span><span class="s">"</span>
+					<span class="s">"sin_addr:</span><span class="se">\n</span><span class="s">"</span>
+					<span class="s">"%d.%d.%d.%d</span><span class="se">\n</span><span class="s">"</span>
+					<span class="s">"Receive Message:</span><span class="se">\n</span><span class="s">"</span>
+					<span class="s">"%s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+					<span class="n">ctime</span><span class="p">(</span><span class="o">&amp;</span><span class="n">now</span><span class="p">),</span>
+					<span class="n">from</span><span class="p">.</span><span class="n">sin_port</span><span class="p">,</span>
+					<span class="n">from</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">S_un</span><span class="p">.</span><span class="n">S_un_b</span><span class="p">.</span><span class="n">s_b1</span><span class="p">,</span>
+					<span class="n">from</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">S_un</span><span class="p">.</span><span class="n">S_un_b</span><span class="p">.</span><span class="n">s_b2</span><span class="p">,</span>
+					<span class="n">from</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">S_un</span><span class="p">.</span><span class="n">S_un_b</span><span class="p">.</span><span class="n">s_b3</span><span class="p">,</span>
+					<span class="n">from</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">S_un</span><span class="p">.</span><span class="n">S_un_b</span><span class="p">.</span><span class="n">s_b4</span><span class="p">,</span>
+					<span class="n">buf</span><span class="p">);</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"%s"</span><span class="p">,</span> <span class="n">pts</span><span class="p">);</span>
+			<span class="n">cc</span> <span class="o">=</span> <span class="n">sendto</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">pts</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="n">pts</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">SOCKADDR</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">from</span><span class="p">,</span> <span class="n">fromsize</span><span class="p">);</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="n">closesocket</span><span class="p">(</span><span class="n">sock</span><span class="p">);</span>
+	<span class="n">WSACleanup</span><span class="p">();</span> <span class="c1">// 卸载某版本的DLL</span>
+	<span class="n">system</span><span class="p">(</span><span class="s">"pause"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="客户端的全部源代码或自选主要代码-1">客户端的全部源代码（或自选主要代码）</h4>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;winsock2.h&gt;
+#define BUFLEN 2000				   // 缓冲区大小
+#define WSVERS MAKEWORD(2, 2)	  // 指明版本2.2
+#pragma comment(lib, "ws2_32.lib") // 加载winsock 2.2 Llibrary
+</span><span class="kt">void</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+	<span class="kt">char</span> <span class="n">host</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"127.0.0.1"</span><span class="p">;</span>		 <span class="c1">// server IP to connect</span>
+	<span class="kt">char</span> <span class="n">service</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"50500"</span><span class="p">;</span>		 <span class="c1">// server port to connect</span>
+	<span class="k">struct</span> <span class="n">sockaddr_in</span> <span class="n">toAddr</span><span class="p">,</span> <span class="n">from</span><span class="p">;</span> <span class="c1">// an Internet endpoint address</span>
+	<span class="kt">int</span> <span class="n">fromsize</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">from</span><span class="p">);</span>
+	<span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="n">BUFLEN</span> <span class="o">+</span> <span class="mi">1</span><span class="p">];</span> <span class="c1">// buffer for one line of text</span>
+	<span class="n">SOCKET</span> <span class="n">sock</span><span class="p">;</span>		  <span class="c1">// socket descriptor</span>
+	<span class="kt">int</span> <span class="n">cc</span><span class="p">;</span>				  <span class="c1">// recv character count</span>
+	<span class="n">WSADATA</span> <span class="n">wsadata</span><span class="p">;</span>
+	<span class="n">WSAStartup</span><span class="p">(</span><span class="n">WSVERS</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wsadata</span><span class="p">);</span> <span class="c1">// 启动某版本Socket的DLL</span>
+	<span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="p">(</span><span class="n">PF_INET</span><span class="p">,</span> <span class="n">SOCK_DGRAM</span><span class="p">,</span> <span class="n">IPPROTO_UDP</span><span class="p">);</span>
+	<span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">toAddr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">toAddr</span><span class="p">));</span>
+	<span class="n">toAddr</span><span class="p">.</span><span class="n">sin_family</span> <span class="o">=</span> <span class="n">AF_INET</span><span class="p">;</span>
+	<span class="n">toAddr</span><span class="p">.</span><span class="n">sin_port</span> <span class="o">=</span> <span class="n">htons</span><span class="p">((</span><span class="n">u_short</span><span class="p">)</span><span class="n">atoi</span><span class="p">(</span><span class="n">service</span><span class="p">));</span> <span class="c1">//atoi：把ascii转化为int. htons：主机序(host)转化为网络序(network), s--short</span>
+	<span class="n">toAddr</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">s_addr</span> <span class="o">=</span> <span class="n">inet_addr</span><span class="p">(</span><span class="n">host</span><span class="p">);</span>		 <span class="c1">//如果host为域名，需要先用函数gethostbyname把域名转化为IP地址</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"Send the Message:</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+	<span class="n">gets</span><span class="p">(</span><span class="n">buf</span><span class="p">);</span>
+	<span class="n">cc</span> <span class="o">=</span> <span class="n">sendto</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">strlen</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">SOCKADDR</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">toAddr</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">toAddr</span><span class="p">));</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="n">SOCKET_ERROR</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Error:</span><span class="se">\n</span><span class="s">%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">WSAGetLastError</span><span class="p">());</span>
+	<span class="k">else</span>
+	<span class="p">{</span>
+		<span class="n">cc</span> <span class="o">=</span> <span class="n">recvfrom</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">BUFLEN</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">SOCKADDR</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">from</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">fromsize</span><span class="p">);</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">cc</span> <span class="o">==</span> <span class="n">SOCKET_ERROR</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"Receive Error:</span><span class="se">\n</span><span class="s">%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">WSAGetLastError</span><span class="p">());</span>
+		<span class="k">else</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"%s"</span><span class="p">,</span> <span class="n">buf</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="n">closesocket</span><span class="p">(</span><span class="n">sock</span><span class="p">);</span>
+	<span class="n">WSACleanup</span><span class="p">();</span> <span class="c1">// 卸载某版本的DLL</span>
+	<span class="n">system</span><span class="p">(</span><span class="s">"pause"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="实验体会">实验体会</h2>
+
+<p>在Windows下使用gcc编译，需要加编译指令-lwsock32来引入套接字的库，于是写了如下脚本帮助编译：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gcc TCPServer.c <span class="nt">-o</span> TCPServer <span class="nt">-lwsock32</span>
+gcc TCPClient.c <span class="nt">-o</span> TCPClient <span class="nt">-lwsock32</span>
+</code></pre></div></div>
+
+<p>节省了不少时间。</p>
+
+<p>服务器对收到的消息进行处理这里使用了sprintf这个函数，感觉相比别的方法简化了很多代码。</p>
+
+<p>想当然的认为服务器程序只需要按下键盘就会退出，说明一开始对阻塞的理解还不透彻啊。</p>
+:ET

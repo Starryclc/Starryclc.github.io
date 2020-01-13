@@ -1,0 +1,30 @@
+I"<p><a href="https://easyhpc.org/problems/program/364/">题目链接</a></p>
+
+<blockquote>
+  <p>给出以下openmp程序（点击参考代码获取），修改代码为不使用reduction的版本。</p>
+</blockquote>
+
+<p>原网页上下下来的代码很坑，乘号和减号都不是ascii字符……</p>
+
+<p>这个求PI的代码也很迷，步长必须设成<code class="highlighter-rouge">1e-3</code>才能得到比较精确的值…</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+#include &lt;omp.h&gt;
+</span><span class="kt">double</span> <span class="nf">calculate_pi</span><span class="p">(</span><span class="kt">double</span> <span class="n">step</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+	<span class="kt">double</span> <span class="n">x</span><span class="p">,</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
+<span class="cp">#pragma omp parallel for private(x)
+</span>	<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">1000000</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="n">step</span><span class="p">;</span>
+<span class="cp">#pragma omp critical
+</span>		<span class="n">sum</span> <span class="o">+=</span> <span class="mi">2</span><span class="p">.</span><span class="mi">0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">step</span> <span class="o">*</span> <span class="n">sum</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"%.9f"</span><span class="p">,</span> <span class="n">calculate_pi</span><span class="p">(</span><span class="mf">1e-3</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div></div>
+:ET

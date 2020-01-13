@@ -1,0 +1,76 @@
+I"� <div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">module</span> <span class="nn">HW</span> <span class="kr">where</span>
+
+<span class="cm">{-
+1. 定义求两个非负整数最大公因子的函数：
+mygcd ::Integer -&gt;Integer -&gt;Integer
+-}</span>
+<span class="n">mygcd</span> <span class="o">::</span><span class="kt">Integer</span> <span class="o">-&gt;</span><span class="kt">Integer</span> <span class="o">-&gt;</span><span class="kt">Integer</span>
+<span class="n">mygcd</span> <span class="n">a</span> <span class="mi">0</span><span class="o">=</span><span class="n">a</span>
+<span class="n">mygcd</span> <span class="n">a</span> <span class="n">b</span><span class="o">=</span><span class="n">mygcd</span> <span class="n">b</span> <span class="p">(</span><span class="n">mod</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="cm">{-
+2. 定义阶乘函数
+fac :: Integer -&gt; Integer 
+-}</span>
+<span class="n">fac</span> <span class="o">::</span> <span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">Integer</span> 
+<span class="n">fac</span> <span class="mi">0</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">fac</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="o">*</span> <span class="n">fac</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="cm">{-
+3. 定义下列函数：
+sumFacs :: Integer -&gt; Integer
+使得sumFacs n = fac 0 + fac 1 + ... + fac n
+-}</span>
+<span class="n">sumFacs</span> <span class="o">::</span> <span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">Integer</span>
+<span class="n">sumFacs</span> <span class="mi">0</span><span class="o">=</span><span class="n">fac</span> <span class="mi">0</span>
+<span class="n">sumFacs</span> <span class="n">n</span><span class="o">=</span><span class="n">fac</span> <span class="n">n</span><span class="o">+</span><span class="n">sumFacs</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="cm">{-
+4. 上述函数sumFacs可以对输入n返回和fac 0 + fac 1 + ... + fac n。
+任意给定一个函数f, 一个非负整数n, 能否求出和f 0 + f 1 + ... + f n呢？
+答案是肯定的。请您定义这样的函数：
+sumFun :: (Integer -&gt; Integer) -&gt; Integer -&gt; Integer
+使得sumFun f n = f 0 + f 1 + ... + f n
+-}</span>
+<span class="n">sumFun</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">Integer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">Integer</span>
+<span class="n">sumFun</span> <span class="n">f</span> <span class="mi">0</span><span class="o">=</span><span class="n">f</span> <span class="mi">0</span>
+<span class="n">sumFun</span> <span class="n">f</span> <span class="n">n</span><span class="o">=</span><span class="n">f</span> <span class="n">n</span><span class="o">+</span><span class="n">sumFun</span> <span class="n">f</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="cm">{-
+5. 定义函数
+maxFun :: (Integer -&gt; Integer) -&gt; Integer -&gt; Integer
+使得maxFun f n 等于f 0 ， f 1 ， ... ， f n中的最大值。
+-}</span>
+<span class="n">maxFun</span> <span class="o">::</span> <span class="p">(</span><span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">Integer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">Integer</span>
+<span class="n">maxFun</span> <span class="n">f</span> <span class="mi">0</span><span class="o">=</span><span class="n">f</span> <span class="mi">0</span>
+<span class="n">maxFun</span> <span class="n">f</span> <span class="n">n</span><span class="o">=</span><span class="n">max</span> <span class="p">(</span><span class="n">f</span> <span class="n">n</span><span class="p">)</span> <span class="p">(</span><span class="n">maxFun</span> <span class="n">f</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="cm">{-
+6. 定义函数：
+fib :: Integer -&gt;Integer
+使得fib n 返回第n个斐波那契数，如fib 0  =0, fib 1 = 1, fib 2 = 1, fib 3 = 2, fib 4 = 5 ,...。
+-}</span>
+<span class="n">fib</span> <span class="o">::</span> <span class="kt">Integer</span> <span class="o">-&gt;</span><span class="kt">Integer</span>
+<span class="n">fib</span> <span class="n">n</span><span class="o">=</span><span class="kr">if</span><span class="p">(</span><span class="n">n</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">)</span><span class="kr">then</span> <span class="n">n</span> <span class="kr">else</span> <span class="n">fib</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">fib</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="cm">{-
+7. 利用我们可以利用下列迭代公式求2的近似平方根：
+ xn+1 = (xn + 2/xn)/2
+方法是从任意一个初值x0开始，如x0 = 1, x1 = (x0 +2/x0)/2 =1.5, x2 = (x1 + 2/x1)/2= 1.41667, ...
+请定义一个函数
+sqrt2 :: Float -&gt;Integer -&gt;Float
+使得sqrt2 x0 n  等于第n个逼近值xn, 例如，sqrt2 1.0 0 = 1.0, sqrt2 1.0 1 = 1.5, sqrt2 1.0 2 = 1.41667, ...。
+-}</span>
+<span class="n">sqrt2</span> <span class="o">::</span> <span class="kt">Float</span> <span class="o">-&gt;</span> <span class="kt">Integer</span> <span class="o">-&gt;</span> <span class="kt">Float</span>
+<span class="n">sqrt2</span> <span class="n">x0</span> <span class="mi">0</span><span class="o">=</span><span class="n">x0</span>
+<span class="n">sqrt2</span> <span class="n">x0</span> <span class="n">n</span><span class="o">=</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="o">/</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="kr">where</span> <span class="n">x</span><span class="o">=</span><span class="n">sqrt2</span> <span class="n">x0</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="cm">{-
+8. 完成解求一元二次方程根的函数。
+-}</span>
+<span class="n">roots</span><span class="o">::</span><span class="p">(</span><span class="kt">Float</span><span class="p">,</span><span class="kt">Float</span><span class="p">,</span><span class="kt">Float</span><span class="p">)</span><span class="o">-&gt;</span><span class="p">(</span><span class="kt">Float</span><span class="p">,</span><span class="kt">Float</span><span class="p">)</span>
+<span class="n">roots</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">)</span><span class="o">=</span><span class="p">((</span><span class="o">-</span><span class="n">b</span><span class="o">-</span><span class="n">sqrtDelta</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="n">a</span><span class="p">,(</span><span class="o">-</span><span class="n">b</span><span class="o">+</span><span class="n">sqrtDelta</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="n">a</span><span class="p">)</span> <span class="kr">where</span> <span class="n">sqrtDelta</span><span class="o">=</span><span class="n">sqrt</span> <span class="p">(</span><span class="n">b</span><span class="o">*</span><span class="n">b</span><span class="o">-</span><span class="mi">4</span><span class="o">*</span><span class="n">a</span><span class="o">*</span><span class="n">c</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+:ET

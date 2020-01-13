@@ -1,0 +1,53 @@
+I"ª<h2 id="part-i">Part-I</h2>
+
+<blockquote>
+  <p>You can find the bibtex information of your paper from Google Scholar.</p>
+</blockquote>
+
+<p>The bibtex information of the <a href="http://www.cs.wm.edu/~liqun/paper/infocom19.pdf">paper</a> assigned to you:</p>
+
+<div class="language-latex highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@inproceedings<span class="p">{</span>Zijiang2019Nomad,
+  title=<span class="p">{</span>Nomad: An Efficient Consensus Approach for Latency-Sensitive Edge-Cloud Applications<span class="p">}</span>,
+  author=<span class="p">{</span>Zijiang Hao and Shanhe Yi and Qun Li<span class="p">}</span>,
+  booktitle=<span class="p">{</span>IEEE INFOCOM 2019 - IEEE Conference on Computer Communications<span class="p">}</span>,
+  year=<span class="p">{</span>2019<span class="p">}</span>,
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="part-ii">Part-II</h2>
+
+<blockquote>
+  <p>You can write the answers to each question with arbitrary length.</p>
+</blockquote>
+
+<h3 id="what-is-this-paper-doing">What is this paper doing</h3>
+
+<p>The rise of edge computing has given birth to a series of delay-sensitive applications. However, the existing Paxos-based approaches have a severe drawback, that is, they can not support large-scale distributed systems, because the message complexity increases rapidly with the increase of the number of system nodes. As mentioned earlier, the application we studied may run on a large number of distributed parties, so we cannot directly use an Paxos-based approach to solve this problem. For this reason, the author proposes a protocol Nomad to implement fast event ordering in the edge computing environment.</p>
+
+<h3 id="what-are-the-contributions-of-this-paper">What are the contributions of this paper</h3>
+
+<blockquote>
+  <p>Please write the contributions using your own words, TA will compare your answer with the contributions summarized in the paper.</p>
+</blockquote>
+
+<ul>
+  <li>In this paper, a problem of achieving fast message ordering for geo-distributed delay-sensitive edge-cloud applications is proposed, and two realistic application scenarios are proposed to show the significance of studying this problem.</li>
+  <li>A novel Paxos-based consensus protocol is designed for the edge layer, which rapidly orders the messages in individual edge networks. Based on its recent operating history, it dynamically allocates the leadership of a series of Paxos instances among edge servers, and introduces a cloud-based arbitrator to quickly resolve the contentions on the edge.</li>
+  <li>A consensus protocol is designed for the cloud level, which works with edge-level agreements as a whole. It uses a lease-based approach to opportunistically transfer control from the cloud data centers to the heaviest edge network based on recent operating history.</li>
+  <li>A Nomad prototype is implemented and evaluated on the test-bed. The results show that Nomad has high efficiency.  In particular, the edge-level protocol outperforms the existing Paxos-based solutions, such as Multi-Paxos, Mencius and E-Paxos, under different experimental settings.</li>
+</ul>
+
+<h3 id="if-applicable-please-describe-the-methodologyalgorithm-proposed-in-the-paper">If applicable, please describe the methodology/algorithm proposed in the paper</h3>
+
+<p>The new consensus protocol is based on Paxos, for ordering the events on the system containing only one edge network and one backend cloud.Similar to the existing Paxos-based ordering protocols, the protocol also executes a sequence of Paxos instances among the system nodes. Therefore, the leader nodes of the Paxos instances are artificially determined in advance in this consensus protocol, which reduces the communication cost and thus improves the ordering performance. The design philosophy of the consensus protocol is summarized as follows.</p>
+
+<ul>
+  <li>In order to adapt to the changes of the edge workload, the protocol dynamically allocates the leadership of the Paxos instance according to the running history of the edge node, and allocates more leadership to the edge node with heavier load. The intuition of this is that when a workload changes, it has a locality of time and space and can be used to predict the state of the workload in the near future.</li>
+  <li>If no event is submitted in this Paxos instance, any edge node can actively skip the Paxos instance that belongs to another Paxos instance. The intuition of this is to ensure low latency when there is a difference between the predicted workload and the actual workload.</li>
+  <li>If an edge intends to submit an event but fails multiple times because its Paxos instance is skipped by others, it delegates the event to the backend cloud. The intuition of doing this is to reduce the side effects of skipping the plan.</li>
+</ul>
+
+<h3 id="what-are-the-key-findings-and-implications-of-this-paper">What are the key findings and implications of this paper</h3>
+
+<p>In this paper, a consensus protocol Nomad is proposed to realize fast event ordering in large-scale edge cloud applications. Nomad consists of an edge-level adaptive consensus protocol and a cloud-level master-slave protocol, which can work together to effectively sort the events received by the whole system. At the same time, the author implements a prototype of Nomad and deploys it on a real test platform. The evaluation of the prototype shows that the Nomadâ€™s behavior is better than the existing consistent solutions in edge computing environments.</p>
+:ET

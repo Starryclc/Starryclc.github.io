@@ -1,0 +1,378 @@
+I"�<h2 id="decision-tree">Decision Tree</h2>
+
+<h3 id="id3">ID3</h3>
+
+<p>ID3 (Iterative Dichotomiser 3) was developed in 1986 by Ross Quinlan. The algorithm creates a multiway tree, finding for each node (i.e. in a greedy manner) the categorical feature that will yield the largest information gain for categorical targets. Trees are grown to their maximum size and then a pruning step is usually applied to improve the ability of the tree to generalise to unseen data.</p>
+
+<h4 id="algorithm">Algorithm</h4>
+
+<ul>
+  <li>Begins with the original set $S$ as the root node.</li>
+  <li>Calculate the entropy of every attribute $a$ of the data set $S$.</li>
+  <li>Partition the set $S$ into subsets using the attribute for which the resulting entropy after splitting is minimized; or, equivalently, information gain is maximum.</li>
+  <li>Make a decision tree node containing that attribute.</li>
+  <li>Recur on subsets using remaining attributes.</li>
+</ul>
+
+<h4 id="stop-cases">Stop Cases</h4>
+
+<ul>
+  <li>every element in the subset belongs to the same class; in which case the node is turned into a leaf node and labelled with the class of the examples.</li>
+  <li>there are no more attributes to be selected, but the examples still do not belong to the same class. In this case, the node is made a leaf node and labelled with the most common class of the examples in the subset.</li>
+  <li>there are no examples in the subset, which happens when no example in the parent set was found to match a specific value of the selected attribute.</li>
+</ul>
+
+<h4 id="id3-shortcomings">ID3 shortcomings</h4>
+
+<ul>
+  <li>ID3 does not guarantee an optimal solution.</li>
+  <li>ID3 can overfit the training data.</li>
+  <li>ID3 is harder to use on continuous data.</li>
+</ul>
+
+<h4 id="entropy">Entropy</h4>
+
+<p>Entropy $H(S)$ is a measure of the amount of uncertainty in the set $S$.</p>
+
+<p>$H(S)=\sum_{x\in X}-p(x)\log_2p(x)$</p>
+
+<p>where</p>
+
+<ul>
+  <li>$S$ is the current dataset for which entropy is being calculated</li>
+  <li>$X$ is the set of classes in $S$</li>
+  <li>$p(x)$ is the proportion of the number of elements in class $x$ to the number of elements in set $S$.</li>
+</ul>
+
+<h4 id="information-gain">Information gain</h4>
+
+<p>Information gain $IG(A)$ is the measure of the difference in entropy from before to after the set $S$ is split on an attribute $A$. In other words, how much uncertainty in $S$ was reduced after splitting set $S$ on attribute $A$.</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>$IG(S,A)=H(S)-\sum_{t\in T}p(t)H(t)=H(S)-H(S\</td>
+      <td>\ A)$</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>where</p>
+
+<ul>
+  <li>$H(S)$ is the entropy of set $S$</li>
+  <li>$T$ is the subsets created from splitting set $S$ by attribute $A$ such that $S=\cup_{t\in T}t$</li>
+  <li>$p(t)$ is the proportion of the number of elements in $t$ to the number of elements in set $S$</li>
+  <li>$H(t)$ is the entropy of subset $t$.</li>
+</ul>
+
+<h3 id="c45-and-cart">C4.5 and CART</h3>
+
+<p>C4.5 is the successor to ID3 and removed the restriction that features must be categorical by dynamically defining a discrete attribute (based on numerical variables) that partitions the continuous attribute value into a discrete set of intervals. C4.5 converts the trained trees (i.e. the output of the ID3 algorithm) into sets of if-then rules. These accuracy of each rule is then evaluated to determine the order in which they should be applied. Pruning is done by removing a rule’s precondition if the accuracy of the rule improves without it.</p>
+
+<p>C5.0 is Quinlan’s latest version release under a proprietary license. It uses less memory and builds smaller rulesets than C4.5 while being more accurate.</p>
+
+<p>CART (Classification and Regression Trees) is very similar to C4.5, but it differs in that it supports numerical target variables (regression) and does not compute rule sets. CART constructs binary trees using the feature and threshold that yield the largest information gain at each node.</p>
+
+<h3 id="一些反例">一些反例</h3>
+
+<ol>
+  <li><a href="https://github.com/scutan90/DeepLearning-500-questions/blob/master/ch02_%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80/%E7%AC%AC%E4%BA%8C%E7%AB%A0_%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80.md">内容丰富，但有不少错误</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Decision_tree_learning">维基百科</a></li>
+  <li><a href="https://blog.csdn.net/moxigandashu/article/details/71305273?locationNum=9&amp;fps=1">完全抄袭《机器学习实战》</a></li>
+  <li><a href="https://blog.csdn.net/wzmsltw/article/details/51057311">部分抄袭《机器学习实战》</a></li>
+</ol>
+
+<h2 id="datasets">Datasets</h2>
+
+<p>The <a href="http://archive.ics.uci.edu/ml/index.php">UCI dataset</a> is the most widely used dataset for machine learning. If you are interested in other datasets in other areas, you can refer to <a href="https://www.zhihu.com/question/63383992/answer/222718972">https://www.zhihu.com/question/63383992/answer/222718972</a>.</p>
+
+<p>Today’s experiment is conducted with the <strong>Adult Data Set</strong> which can be found in <a href="http://archive.ics.uci.edu/ml/datasets/Adult">http://archive.ics.uci.edu/ml/datasets/Adult</a>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Data Set Characteristics:</th>
+      <th>Multivariate</th>
+      <th>Number of Instances:</th>
+      <th>48842</th>
+      <th>Area:</th>
+      <th>Social</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Attribute Characteristics:</td>
+      <td>Categorical, Integer</td>
+      <td>Number of Attributes:</td>
+      <td>14</td>
+      <td>Date Donated:</td>
+      <td>1996-05-01</td>
+    </tr>
+    <tr>
+      <td>Associated Tasks:</td>
+      <td>Classification</td>
+      <td>Missing Values?</td>
+      <td>Yes</td>
+      <td>Number of Web Hits:</td>
+      <td>1655259</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>You can also find 3 related files in the current folder, <a href="http://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.names">adult.name</a> is the description of <strong>Adult Data Set</strong>, <a href="http://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data">adult.data</a> is the training set, and <a href="http://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.test">adult.test</a> is the testing set. There are 14 attributes in this dataset:</p>
+
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>income: &gt;50K, &lt;=50K.
+<span class="p">
+1.</span> age: continuous.
+<span class="p">2.</span> workclass: Private, Self-emp-not-inc, Self-emp-inc, Federal-gov, Local-gov,
+   State-gov, Without-pay, Never-worked.
+<span class="p">3.</span> fnlwgt: continuous.
+<span class="p">4.</span> education: Bachelors, Some-college, 11th, HS-grad, Prof-school, Assoc-acdm,
+   Assoc-voc, 9th, 7th-8th, 12th, Masters, 5. 1st-4th, 10th, Doctorate, 5th-6th,
+   Preschool.
+<span class="p">5.</span> education-num: continuous.
+<span class="p">6.</span> marital-status: Married-civ-spouse, Divorced, Never-married, Separated,
+   Widowed, Married-spouse-absent, Married-AF-spouse.
+<span class="p">7.</span> occupation: Tech-support, Craft-repair, Other-service, Sales,
+   Exec-managerial, Prof-specialty, Handlers-cleaners, Machine-op-inspct,
+   Adm-clerical,Farming-fishing,Transport-moving,Priv-house-serv,Protective-serv,
+   Armed-Forces.
+<span class="p">8.</span> relationship: Wife,Own-child,Husband,Not-in-family,Other-relative,Unmarried.
+<span class="p">9.</span> race: White, Asian-Pac-Islander, Amer-Indian-Eskimo, Other, Black.
+<span class="p">10.</span> sex: Female, Male.
+<span class="p">11.</span> capital-gain: continuous.
+<span class="p">12.</span> capital-loss: continuous.
+<span class="p">13.</span> hours-per-week: continuous.
+<span class="p">14.</span> native-country: United-States, Cambodia,England,Puerto-Rico,Canada,Germany,
+    Outlying-US(Guam-USVI-etc),India,Japan,Greece, South,China,Cuba,Iran,Honduras,
+    Philippines, Italy, Poland, Jamaica, Vietnam, Mexico, Portugal, Ireland, France,
+    Dominican-Republic,Laos,Ecuador,Taiwan, Haiti, Columbia,Hungary,Guatemala,
+    Nicaragua,Scotland,Thailand,Yugoslavia,El-Salvador, Trinadad&amp;Tobago,Peru,Hong,
+    Holand-Netherlands.
+</code></pre></div></div>
+
+<p>Prediction task is to determine whether a person makes over 50K a year.</p>
+
+<h2 id="tasks">Tasks</h2>
+
+<p>Given the training dataset <a href="http://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data">adult.data</a> and the testing dataset <a href="http://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.test">adult.test</a>, please accomplish the prediction task to determine whether a person makes over 50K a year in <a href="http://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.test">adult.test</a> by using ID3 (or C4.5, CART) algorithm (C++ or Python), and compute the accuracy.</p>
+
+<ul>
+  <li>You can process the continuous data with \textbf{bi-partition} method.</li>
+  <li>You can use prepruning or postpruning to avoid the overfitting problem.</li>
+  <li>You can assign probability weights to solve the missing attributes (data) problem.</li>
+</ul>
+
+<h2 id="codes-and-results">Codes and Results</h2>
+
+<h3 id="codesid3cpp">Codes<code class="highlighter-rouge">ID3.cpp</code></h3>
+
+<p>按照<code class="highlighter-rouge">csv</code>格式读入，然后进行数据清洗。我写的ID3决策树框架接受一个<code class="highlighter-rouge">vector&lt;vector&lt;int&gt;&gt;</code>用于训练，其中每一行是一个训练数据的离散值，第0列代表要预测的标签。由于ID3算法仅支持离散值的预测，这里我直接将连续的数据清洗掉了，这也许是预测成功率不那么高的原因吧（就是菜，别找借口了）。</p>
+
+<p>代码总量仅<strong>145</strong>行，而核心的决策树代码仅<strong>55</strong>行！</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;bits/stdc++.h&gt;
+</span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;&gt;</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">string</span> <span class="n">s</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;&gt;</span> <span class="n">r</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="n">ifstream</span> <span class="n">fin</span><span class="p">(</span><span class="n">s</span><span class="p">);</span> <span class="n">getline</span><span class="p">(</span><span class="n">fin</span><span class="p">,</span> <span class="n">s</span><span class="p">);)</span>
+	<span class="p">{</span>
+		<span class="n">r</span><span class="p">.</span><span class="n">push_back</span><span class="p">({});</span>
+		<span class="k">for</span> <span class="p">(</span><span class="n">istringstream</span> <span class="n">sin</span><span class="p">(</span><span class="n">s</span><span class="p">);</span> <span class="n">getline</span><span class="p">(</span><span class="n">sin</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="sc">','</span><span class="p">);)</span>
+			<span class="n">r</span><span class="p">.</span><span class="n">back</span><span class="p">().</span><span class="n">push_back</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">r</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">void</span> <span class="nf">clean_data_test</span><span class="p">(</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;&gt;</span> <span class="n">_data</span><span class="p">,</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;&gt;</span> <span class="n">_test</span><span class="p">,</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">,</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="o">&amp;</span><span class="n">test</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">cols</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="o">&amp;</span><span class="n">it</span> <span class="o">:</span> <span class="n">_data</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">cols</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">cols</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">it</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+		<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="o">&amp;</span><span class="n">jt</span> <span class="o">:</span> <span class="n">it</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">string</span> <span class="n">s</span><span class="p">;</span>
+			<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">c</span> <span class="o">:</span> <span class="n">jt</span><span class="p">)</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">isgraph</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">c</span> <span class="o">!=</span> <span class="sc">'.'</span><span class="p">)</span>
+					<span class="n">s</span> <span class="o">+=</span> <span class="n">c</span><span class="p">;</span>
+			<span class="n">jt</span> <span class="o">=</span> <span class="n">s</span><span class="p">;</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="o">&amp;</span><span class="n">it</span> <span class="o">:</span> <span class="n">_test</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">cols</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">cols</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">it</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+		<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="o">&amp;</span><span class="n">jt</span> <span class="o">:</span> <span class="n">it</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">string</span> <span class="n">s</span><span class="p">;</span>
+			<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">c</span> <span class="o">:</span> <span class="n">jt</span><span class="p">)</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">isgraph</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">c</span> <span class="o">!=</span> <span class="sc">'.'</span><span class="p">)</span>
+					<span class="n">s</span> <span class="o">+=</span> <span class="n">c</span><span class="p">;</span>
+			<span class="n">jt</span> <span class="o">=</span> <span class="n">s</span><span class="p">;</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">valid_col</span><span class="p">{</span><span class="mi">14</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">13</span><span class="p">};</span> <span class="c1">//保留离散列</span>
+	<span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">map</span><span class="o">&lt;</span><span class="n">string</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">mp</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">:</span> <span class="n">valid_col</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="n">it</span> <span class="o">:</span> <span class="n">_data</span><span class="p">)</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="n">cols</span><span class="p">)</span>
+				<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">mp</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">count</span><span class="p">(</span><span class="n">it</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+					<span class="n">mp</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">emplace</span><span class="p">(</span><span class="n">it</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">mp</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">size</span><span class="p">());</span>
+		<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="n">it</span> <span class="o">:</span> <span class="n">_test</span><span class="p">)</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="n">cols</span><span class="p">)</span>
+				<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">mp</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">count</span><span class="p">(</span><span class="n">it</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+					<span class="n">mp</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">emplace</span><span class="p">(</span><span class="n">it</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">mp</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">size</span><span class="p">());</span>
+	<span class="p">}</span>
+	<span class="n">data</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+	<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="n">it</span> <span class="o">:</span> <span class="n">_data</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="n">cols</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">data</span><span class="p">.</span><span class="n">push_back</span><span class="p">({});</span>
+			<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">id</span> <span class="o">:</span> <span class="n">valid_col</span><span class="p">)</span>
+				<span class="n">data</span><span class="p">.</span><span class="n">back</span><span class="p">().</span><span class="n">push_back</span><span class="p">(</span><span class="n">mp</span><span class="p">[</span><span class="n">id</span><span class="p">][</span><span class="n">it</span><span class="p">[</span><span class="n">id</span><span class="p">]]);</span>
+		<span class="p">}</span>
+	<span class="n">test</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span>
+	<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="n">it</span> <span class="o">:</span> <span class="n">_test</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="n">cols</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">test</span><span class="p">.</span><span class="n">push_back</span><span class="p">({});</span>
+			<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">id</span> <span class="o">:</span> <span class="n">valid_col</span><span class="p">)</span>
+				<span class="n">test</span><span class="p">.</span><span class="n">back</span><span class="p">().</span><span class="n">push_back</span><span class="p">(</span><span class="n">mp</span><span class="p">[</span><span class="n">id</span><span class="p">][</span><span class="n">it</span><span class="p">[</span><span class="n">id</span><span class="p">]]);</span>
+		<span class="p">}</span>
+<span class="p">}</span>
+<span class="k">struct</span> <span class="n">IterativeDichotomiser3</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">val</span><span class="p">,</span> <span class="n">dim</span><span class="p">;</span>						 <span class="c1">//这个点的值，这个点的特征维度</span>
+	<span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">IterativeDichotomiser3</span><span class="o">&gt;</span> <span class="n">ch</span><span class="p">;</span> <span class="c1">//划分维度对应取值的子节点</span>
+	<span class="n">IterativeDichotomiser3</span><span class="p">(</span><span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">pair</span><span class="o">&lt;</span><span class="kt">double</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">{</span><span class="o">-</span><span class="mf">1e9</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">};</span>
+		<span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">mp</span><span class="p">;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="n">it</span> <span class="o">:</span> <span class="n">data</span><span class="p">)</span>
+			<span class="o">++</span><span class="n">mp</span><span class="p">[</span><span class="n">it</span><span class="p">[</span><span class="mi">0</span><span class="p">]];</span> <span class="c1">//用于统计这一维的频数</span>
+		<span class="kt">double</span> <span class="n">orgin_entropy</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">it</span> <span class="o">:</span> <span class="n">mp</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">p</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="p">{</span><span class="n">it</span><span class="p">.</span><span class="n">second</span><span class="p">,</span> <span class="n">it</span><span class="p">.</span><span class="n">first</span><span class="p">});</span>
+			<span class="kt">double</span> <span class="n">pr</span> <span class="o">=</span> <span class="p">(</span><span class="kt">double</span><span class="p">)</span><span class="n">it</span><span class="p">.</span><span class="n">second</span> <span class="o">/</span> <span class="n">data</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+			<span class="n">orgin_entropy</span> <span class="o">-=</span> <span class="n">pr</span> <span class="o">*</span> <span class="n">log2</span><span class="p">(</span><span class="n">pr</span><span class="p">);</span>
+		<span class="p">}</span>
+		<span class="n">val</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="n">second</span><span class="p">;</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">mp</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="c1">//剪枝，只有一类</span>
+			<span class="k">return</span><span class="p">;</span>
+		<span class="n">p</span> <span class="o">=</span> <span class="p">{</span><span class="o">-</span><span class="mf">1e9</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">};</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="c1">//i==0是类别标签</span>
+			<span class="k">if</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>				 <span class="c1">//选择未删除的维度</span>
+			<span class="p">{</span>
+				<span class="kt">double</span> <span class="n">gain</span> <span class="o">=</span> <span class="n">orgin_entropy</span><span class="p">;</span> <span class="c1">//要计算第i维的信息增益</span>
+				<span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">mp</span><span class="p">;</span>
+				<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="n">it</span> <span class="o">:</span> <span class="n">data</span><span class="p">)</span>
+					<span class="o">++</span><span class="n">mp</span><span class="p">[</span><span class="n">it</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="n">it</span><span class="p">[</span><span class="mi">0</span><span class="p">]];</span>
+				<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="n">it</span> <span class="o">:</span> <span class="n">mp</span><span class="p">)</span>
+				<span class="p">{</span>
+					<span class="kt">double</span> <span class="n">subset</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">entropy</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+					<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">jt</span> <span class="o">:</span> <span class="n">it</span><span class="p">.</span><span class="n">second</span><span class="p">)</span> <span class="c1">//计算划分出的子集大小</span>
+						<span class="n">subset</span> <span class="o">+=</span> <span class="n">jt</span><span class="p">.</span><span class="n">second</span><span class="p">;</span>
+					<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">jt</span> <span class="o">:</span> <span class="n">it</span><span class="p">.</span><span class="n">second</span><span class="p">)</span> <span class="c1">//计算子集信息熵</span>
+						<span class="n">entropy</span> <span class="o">-=</span> <span class="p">(</span><span class="n">jt</span><span class="p">.</span><span class="n">second</span> <span class="o">/</span> <span class="n">subset</span><span class="p">)</span> <span class="o">*</span> <span class="n">log2</span><span class="p">(</span><span class="n">jt</span><span class="p">.</span><span class="n">second</span> <span class="o">/</span> <span class="n">subset</span><span class="p">);</span>
+					<span class="n">gain</span> <span class="o">-=</span> <span class="n">entropy</span> <span class="o">*</span> <span class="n">subset</span> <span class="o">/</span> <span class="n">data</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+				<span class="p">}</span>
+				<span class="n">p</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="p">{</span><span class="n">gain</span><span class="p">,</span> <span class="n">i</span><span class="p">});</span> <span class="c1">//选择信息增益最大的特征作为结点的特征</span>
+			<span class="p">}</span>
+		<span class="n">dim</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="n">second</span><span class="p">;</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">dim</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="c1">//未找到可用于划分的维度，同样结束</span>
+			<span class="k">return</span><span class="p">;</span>
+		<span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&gt;</span> <span class="n">mmp</span><span class="p">;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="n">it</span> <span class="o">:</span> <span class="n">data</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">mmp</span><span class="p">[</span><span class="n">it</span><span class="p">[</span><span class="n">dim</span><span class="p">]].</span><span class="n">push_back</span><span class="p">(</span><span class="n">it</span><span class="p">);</span>
+			<span class="n">mmp</span><span class="p">[</span><span class="n">it</span><span class="p">[</span><span class="n">dim</span><span class="p">]].</span><span class="n">back</span><span class="p">().</span><span class="n">at</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="c1">//删除这一维的信息</span>
+		<span class="p">}</span>
+		<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="n">it</span> <span class="o">:</span> <span class="n">mmp</span><span class="p">)</span>
+			<span class="n">ch</span><span class="p">.</span><span class="n">emplace</span><span class="p">(</span><span class="n">it</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="kt">int</span> <span class="n">ask</span><span class="p">(</span><span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">test</span><span class="p">)</span> <span class="k">const</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">ch</span><span class="p">.</span><span class="n">count</span><span class="p">(</span><span class="n">test</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span> <span class="o">?</span> <span class="n">ch</span><span class="p">.</span><span class="n">at</span><span class="p">(</span><span class="n">test</span><span class="p">[</span><span class="n">dim</span><span class="p">]).</span><span class="n">ask</span><span class="p">(</span><span class="n">test</span><span class="p">)</span> <span class="o">:</span> <span class="n">val</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">};</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">data</span><span class="p">,</span> <span class="n">test</span><span class="p">;</span>
+	<span class="n">clean_data_test</span><span class="p">(</span>
+		<span class="n">read_csv</span><span class="p">(</span><span class="s">"adult.data"</span><span class="p">),</span>
+		<span class="n">read_csv</span><span class="p">(</span><span class="s">"adult.test"</span><span class="p">),</span>
+		<span class="n">data</span><span class="p">,</span>
+		<span class="n">test</span><span class="p">);</span>
+	<span class="n">IterativeDichotomiser3</span> <span class="n">id3</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+	<span class="kt">double</span> <span class="n">success</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span> <span class="o">&amp;</span><span class="n">it</span> <span class="o">:</span> <span class="n">test</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">id3</span><span class="p">.</span><span class="n">ask</span><span class="p">(</span><span class="n">it</span><span class="p">)</span> <span class="o">==</span> <span class="n">it</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+			<span class="n">success</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">success</span> <span class="o">/</span> <span class="n">test</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>运行下述指令编译。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>g++ ID3.cpp <span class="nt">-o</span> ID3 <span class="nt">-O3</span> <span class="nt">-std</span><span class="o">=</span>c++11
+</code></pre></div></div>
+
+<p>计时运行并得到预测准确率。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">time</span> ./ID3
+0.814385
+real    0m0.266s
+user    0m0.219s
+sys     0m0.000s
+</code></pre></div></div>
+
+<h3 id="codesdtpy">Codes<code class="highlighter-rouge">DT.py</code></h3>
+
+<p>自己手动实现完C++版本的决策树之后，再来和sklearn库里面实现的决策树进行一个比较~由于是直接调包实现的数据读入、清洗还有决策树算法，这里代码非常的少了…</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeClassifier</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+
+<span class="k">def</span> <span class="nf">get_data_set</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">(</span>
+        <span class="s">"age, workclass, fnlwgt, education, education-num, marital-status, occupation, relationship, race, sex, capital-gain, capital-loss, hours-per-week, native-country, income"</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">', '</span><span class="p">))</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">'income'</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s">'income'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">numeric_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="s">'i'</span><span class="p">,</span> <span class="s">'f'</span><span class="p">)]</span>  <span class="c1"># 提取数值类型为整数或浮点数的变量
+</span>    <span class="n">numeric_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">numeric_features</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">numeric_features</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># pandas.factorize即可将分类变量转换为数值表示
+</span>    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="nb">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">factorize</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># apply运算将转换函数应用到每一个变量维度
+</span>    <span class="n">features</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">numeric_data</span><span class="p">,</span> <span class="n">data</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># 收入水平 "&gt;50K" 记为1，“&lt;=50K” 记为0
+</span>    <span class="k">return</span> <span class="n">features</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="s">' &gt;50K'</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+
+<span class="c1">#X_train, y_train = get_data_set('https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data')
+#X_test, y_test = get_data_set('https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.test')
+</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="n">get_data_set</span><span class="p">(</span><span class="s">'adult.data'</span><span class="p">)</span>
+<span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">get_data_set</span><span class="p">(</span><span class="s">'adult.test'</span><span class="p">)</span>
+<span class="n">clf</span> <span class="o">=</span> <span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
+<span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="bp">None</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>运行下述指令得到预测准确率。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>python DT.py
+0.9999692884125181
+</code></pre></div></div>
+
+<p>是我太菜了，告辞…</p>
+:ET

@@ -1,0 +1,132 @@
+I"�:<h2 id="ida-algorithm">IDA* Algorithm</h2>
+
+<h3 id="description">Description</h3>
+
+<p>Iterative deepening A* (IDA*) was ﬁrst described by Richard Korf in 1985, which is a graph traversal and path search algorithm that can ﬁnd the shortest path between a designated start node and any member of a set of goal nodes in a weighted graph.</p>
+
+<p>It is a variant of <strong>iterative deepening depth-ﬁrst search</strong> that borrows the idea to use a heuristic function to evaluate the remaining cost to get to the goal from the <strong>A* search algorithm</strong>.</p>
+
+<p>Since it is a depth-ﬁrst search algorithm, its memory usage is lower than in A*, but unlike ordinary iterative deepening search, it concentrates on exploring the most promising nodes and thus does not go to the same depth everywhere in the search tree.</p>
+
+<p><strong>Iterative-deepening-A* works as follows:</strong> at each iteration, perform a depth-ﬁrst search, cutting oﬀ a branch when its total cost f(n) = g(n)+h(n) exceeds a given threshold. This threshold starts at the estimate of the cost at the initial state, and increases for each iteration of the algorithm. At each iteration, the threshold used for the next iteration is the minimum cost of all values that exceeded the current threshold.</p>
+
+<h2 id="tasks">Tasks</h2>
+
+<ul>
+  <li>Please solve 15-Puzzle problem by using IDA* (Python or C++). You can use one of the two commonly used heuristic functions: h1 = the number of misplaced tiles. h2 = the sum of the distances of the tiles from their goal positions.</li>
+  <li>Here are 4 test cases for you to verify your algorithm correctness. You can also play this game (15puzzle.zip) for more information.</li>
+</ul>
+
+<h2 id="codes">Codes</h2>
+
+<p>代码做了如下剪枝：</p>
+
+<ul>
+  <li>使用所有元素到目标位置的曼哈顿距离之和作为预估函数</li>
+  <li>通过逆序对判断是否有解</li>
+  <li>针对路径判重或判环实测代价比较大，这里仅判断了回路</li>
+</ul>
+
+<blockquote>
+  <ul>
+    <li>在算N数码的逆序数时，不把0算入在内；</li>
+    <li>当N为奇数时，当两个N数码的逆序数奇偶性相同时，可以互达，否则不行；</li>
+    <li>当N为偶数时，当两个N数码的奇偶性相同的话，那么两个N数码中的0所在行的差值k，k也必须是偶数时，才能互达；</li>
+    <li>当两个N数码的奇偶性不同时，那么两个N数码中的0所在行的差值k，k也必须是奇数时，才能互达；</li>
+  </ul>
+</blockquote>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;bits/stdc++.h&gt;
+#define DIST(x, y) (abs((a[x][y] - 1) / 4 - (x)) + abs((a[x][y] - 1) % 4 - (y)))
+</span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">t</span><span class="p">,</span> <span class="n">a</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">4</span><span class="p">],</span> <span class="n">ans</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+<span class="kt">int</span> <span class="nf">dfs</span><span class="p">(</span><span class="kt">int</span> <span class="n">cur</span><span class="p">,</span> <span class="kt">int</span> <span class="n">h</span><span class="p">,</span> <span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">,</span> <span class="kt">int</span> <span class="n">dep</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">cur</span> <span class="o">+</span> <span class="n">h</span> <span class="o">&gt;</span> <span class="n">dep</span><span class="p">)</span>
+		<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">h</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">cur</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"%c"</span><span class="p">,</span> <span class="s">"RLDU"</span><span class="p">[</span><span class="n">ans</span><span class="p">[</span><span class="n">i</span><span class="p">]]);</span>
+		<span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">},</span> <span class="n">dy</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">},</span> <span class="n">tx</span><span class="p">,</span> <span class="n">ty</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="k">if</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">min</span><span class="p">(</span><span class="n">tx</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">dx</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ty</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="n">max</span><span class="p">(</span><span class="n">tx</span><span class="p">,</span> <span class="n">ty</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">)</span>
+			<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">cur</span> <span class="o">||</span> <span class="n">i</span> <span class="o">!=</span> <span class="p">(</span><span class="n">ans</span><span class="p">[</span><span class="n">cur</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">^</span> <span class="mi">1</span><span class="p">))</span>
+			<span class="p">{</span>
+				<span class="n">ans</span><span class="p">[</span><span class="n">cur</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+				<span class="kt">int</span> <span class="n">t</span> <span class="o">=</span> <span class="n">DIST</span><span class="p">(</span><span class="n">tx</span><span class="p">,</span> <span class="n">ty</span><span class="p">);</span>
+				<span class="n">swap</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="n">tx</span><span class="p">][</span><span class="n">ty</span><span class="p">]);</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">dfs</span><span class="p">(</span><span class="n">cur</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">h</span> <span class="o">-</span> <span class="n">t</span> <span class="o">+</span> <span class="n">DIST</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">tx</span><span class="p">,</span> <span class="n">ty</span><span class="p">,</span> <span class="n">dep</span><span class="p">))</span>
+					<span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+				<span class="n">swap</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="n">tx</span><span class="p">][</span><span class="n">ty</span><span class="p">]);</span>
+			<span class="p">}</span>
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">t</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">t</span><span class="p">);</span> <span class="n">t</span><span class="o">--</span><span class="p">;</span> <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">))</span>
+	<span class="p">{</span>
+		<span class="kt">int</span> <span class="n">h</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">inv</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">x</span><span class="p">)</span>
+			<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">y</span><span class="p">)</span>
+			<span class="p">{</span>
+				<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">]);</span>
+				<span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">])</span>
+				<span class="p">{</span>
+					<span class="n">h</span> <span class="o">+=</span> <span class="n">DIST</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
+					<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span> <span class="o">|</span> <span class="n">y</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">i</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span><span class="p">)</span>
+						<span class="n">inv</span> <span class="o">+=</span> <span class="n">a</span><span class="p">[</span><span class="n">j</span> <span class="o">/</span> <span class="mi">4</span><span class="p">][</span><span class="n">j</span> <span class="o">%</span> <span class="mi">4</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">a</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="n">y</span><span class="p">];</span>
+				<span class="p">}</span>
+				<span class="k">else</span>
+					<span class="n">sx</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">sy</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+			<span class="p">}</span>
+		<span class="k">if</span> <span class="p">((</span><span class="n">inv</span> <span class="o">+</span> <span class="n">sx</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span>
+			<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">dep</span> <span class="o">=</span> <span class="n">h</span><span class="p">;</span> <span class="o">!</span><span class="n">dfs</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">sx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">dep</span><span class="p">);)</span>
+				<span class="o">++</span><span class="n">dep</span><span class="p">;</span>
+		<span class="k">else</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"This puzzle is not solvable."</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="results">Results</h2>
+
+<h3 id="本地测试">本地测试</h3>
+
+<h4 id="input">input</h4>
+
+<p>使用了TA演示中的数据。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>4
+11 3 1 7
+4 6 8 2
+15 9 10 13
+14 12 5 0
+14 10 6 0
+4 9 1 8
+2 3 5 11
+12 13 7 15
+0 5 15 14
+7 9 6 13
+1 2 12 10
+8 11 4 3
+6 10 3 15
+14 8 7 11
+5 1 0 2
+13 12 9 4
+</code></pre></div></div>
+
+<h4 id="output">output</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>LLURRDLURULLURDLLURDDRRULLDLURRDLLDRRULLDRUURULDRRULDRDD
+LLDLURDRULDDLUURDDRRUULLDDDLURDRULDLUURRRDLLURDDR
+DRDLURULDRDDLUURRDRDLLURURDDLUUURDDDLUUULLDDRDRUUURDDDLULLDRRR
+DLLURRURDDLLURURULDRDLULLDDRRULUULDDDRUUURRDLDRD
+</code></pre></div></div>
+
+<h3 id="在线测试"><a href="https://vjudge.net/problem/UVA-10181">在线测试</a></h3>
+
+<p><a href="https://vjudge.net/solution/21644000">WuK’s solution for [UVA-10181]</a>，运行时间150ms。</p>
+:ET

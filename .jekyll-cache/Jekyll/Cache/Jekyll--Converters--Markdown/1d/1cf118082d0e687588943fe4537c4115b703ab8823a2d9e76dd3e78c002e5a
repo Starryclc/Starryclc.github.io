@@ -1,0 +1,158 @@
+I"]<h2 id="伽马变换">伽马变换</h2>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nb">close</span> <span class="nb">all</span><span class="p">;</span><span class="nb">clc</span><span class="p">;</span><span class="nb">clear</span> <span class="nb">all</span><span class="p">;</span>
+	<span class="n">I</span><span class="o">=</span><span class="nb">imread</span><span class="p">(</span><span class="s1">'MizunoAi.jpg'</span><span class="p">);</span>
+	<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span><span class="nb">imshow</span><span class="p">(</span><span class="n">I</span><span class="p">);</span><span class="nb">title</span><span class="p">(</span><span class="s1">'原始图像'</span><span class="p">);</span>
+	<span class="n">c</span><span class="o">=</span><span class="nb">cat</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="nb">gamma</span><span class="p">(</span><span class="n">I</span><span class="p">(:,:,</span><span class="mi">1</span><span class="p">),</span><span class="mi">2</span><span class="p">),</span><span class="nb">gamma</span><span class="p">(</span><span class="n">I</span><span class="p">(:,:,</span><span class="mi">2</span><span class="p">),</span><span class="mi">2</span><span class="p">),</span><span class="nb">gamma</span><span class="p">(</span><span class="n">I</span><span class="p">(:,:,</span><span class="mi">3</span><span class="p">),</span><span class="mi">2</span><span class="p">));</span>
+	<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span><span class="nb">imshow</span><span class="p">(</span><span class="n">c</span><span class="p">);</span><span class="nb">title</span><span class="p">(</span><span class="s1">'伽马变换，gamma=2'</span><span class="p">);</span>
+	<span class="n">c</span><span class="o">=</span><span class="nb">cat</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="nb">gamma</span><span class="p">(</span><span class="n">I</span><span class="p">(:,:,</span><span class="mi">1</span><span class="p">),</span><span class="mf">0.5</span><span class="p">),</span><span class="nb">gamma</span><span class="p">(</span><span class="n">I</span><span class="p">(:,:,</span><span class="mi">2</span><span class="p">),</span><span class="mf">0.5</span><span class="p">),</span><span class="nb">gamma</span><span class="p">(</span><span class="n">I</span><span class="p">(:,:,</span><span class="mi">3</span><span class="p">),</span><span class="mf">0.5</span><span class="p">));</span>
+	<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span><span class="nb">imshow</span><span class="p">(</span><span class="n">c</span><span class="p">);</span><span class="nb">title</span><span class="p">(</span><span class="s1">'伽马变换，gamma=0.5'</span><span class="p">);</span>
+<span class="k">function</span> <span class="n">J</span><span class="o">=</span><span class="nb">gamma</span><span class="p">(</span><span class="n">I</span><span class="p">,</span><span class="n">g</span><span class="p">)</span>
+	<span class="n">c</span> <span class="o">=</span> <span class="mi">255</span><span class="o">^</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">g</span><span class="p">);</span>
+	<span class="n">J</span> <span class="o">=</span> <span class="n">c</span> <span class="o">*</span> <span class="nb">double</span><span class="p">(</span><span class="n">I</span><span class="p">)</span><span class="o">.^</span><span class="n">g</span><span class="p">;</span>
+	<span class="n">J</span> <span class="o">=</span> <span class="n">mat2gray</span><span class="p">(</span><span class="n">J</span><span class="p">);</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><img src="/public/image/2019-09-03-4.jpg" alt="运行结果" /></p>
+
+<h2 id="project-03-02-multiple-uses-histogram-equalization">PROJECT 03-02 [Multiple Uses] Histogram Equalization</h2>
+
+<ol>
+  <li>Write a computer program for computing the histogram of an image.</li>
+  <li>Implement the histogram equalization technique discussed in Section 3.3.1.</li>
+  <li>Download Fig. 3.8(a) and perform histogram equalization on it.</li>
+</ol>
+
+<p>As a minimum, your report should include the original image, a plot of its histogram, a plot of the histogram-equalization transformation function, the enhanced image, and a plot of its histogram. Use this information to explain why the resulting image was enhanced as it was.</p>
+
+<p>变换函数是：$s_k=T(r_k)=(L-1)\sum_{j=0}^kp_r(r_j)=(L-1)\sum_{j=0}^k\frac{n_j}{n}$，其中$k=0,1,\ldots,L-1$</p>
+
+<p>我想做一些加强，针对彩色图片做直方图均衡化。查了一些网上资料，就是对三维RGB图像的三种颜色分别做一次灰度均衡。</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="n">I</span><span class="o">=</span><span class="nb">imread</span><span class="p">(</span><span class="s1">'MizunoAi.jpg'</span><span class="p">);</span>
+	<span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span><span class="nb">imshow</span><span class="p">(</span><span class="n">I</span><span class="p">);</span><span class="nb">title</span><span class="p">(</span><span class="s1">'原始图像'</span><span class="p">);</span><span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">);</span><span class="n">imhist</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+	<span class="n">c</span><span class="o">=</span><span class="n">histeq</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+	<span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span><span class="nb">imshow</span><span class="p">(</span><span class="n">c</span><span class="p">);</span><span class="nb">title</span><span class="p">(</span><span class="s1">'直方均衡化·调库'</span><span class="p">);</span><span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">);</span><span class="n">imhist</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+	<span class="n">c</span><span class="o">=</span><span class="nb">cat</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="nb">histogram</span><span class="p">(</span><span class="n">I</span><span class="p">(:,:,</span><span class="mi">1</span><span class="p">)),</span><span class="nb">histogram</span><span class="p">(</span><span class="n">I</span><span class="p">(:,:,</span><span class="mi">2</span><span class="p">)),</span><span class="nb">histogram</span><span class="p">(</span><span class="n">I</span><span class="p">(:,:,</span><span class="mi">3</span><span class="p">)));</span>
+	<span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span><span class="nb">imshow</span><span class="p">(</span><span class="n">c</span><span class="p">);</span><span class="nb">title</span><span class="p">(</span><span class="s1">'直方均衡化'</span><span class="p">);</span><span class="nb">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">);</span><span class="n">imhist</span><span class="p">(</span><span class="n">c</span><span class="p">);</span>
+<span class="k">function</span> <span class="n">J</span><span class="o">=</span><span class="nb">histogram</span><span class="p">(</span><span class="n">I</span><span class="p">)</span>
+	<span class="n">J</span><span class="o">=</span><span class="n">I</span><span class="p">;</span>
+	<span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">]</span><span class="o">=</span><span class="nb">size</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+	<span class="n">a</span><span class="o">=</span><span class="nb">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">256</span><span class="p">);</span>
+	<span class="n">b</span><span class="o">=</span><span class="nb">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">256</span><span class="p">);</span>
+	<span class="k">for</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">n</span>
+		<span class="k">for</span> <span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">m</span>
+			<span class="n">a</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">I</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">=</span><span class="n">a</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">I</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+		<span class="k">end</span>
+	<span class="k">end</span>
+	<span class="nb">sum</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+	<span class="k">for</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="mi">256</span>
+		<span class="nb">sum</span><span class="o">=</span><span class="nb">sum</span><span class="o">+</span><span class="n">a</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">);</span>
+		<span class="n">b</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">)</span><span class="o">=</span><span class="mi">255</span><span class="o">*</span><span class="nb">sum</span><span class="p">/(</span><span class="n">m</span><span class="o">*</span><span class="n">n</span><span class="p">);</span>
+	<span class="k">end</span>
+	<span class="k">for</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">n</span>
+		<span class="k">for</span> <span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">m</span>
+			<span class="n">d</span><span class="o">=</span><span class="n">J</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+			<span class="n">J</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span><span class="o">=</span><span class="n">b</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">d</span><span class="p">);</span>
+		<span class="k">end</span>
+	<span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>运行结果如下，同时输出调用matlab自己的直方图均衡函数的结果作为对比，发现自己写的图像均衡偏绿，不知道彩色图像做均衡化要做什么黑科技…不过右侧阴影处的细节确实变得清晰了。</p>
+
+<p><img src="/public/image/2019-09-03-1.jpg" alt="运行结果" /></p>
+
+<h2 id="project-03-05-enhancement-using-the-laplacian">PROJECT 03-05 Enhancement Using the Laplacian</h2>
+
+<ol>
+  <li>Use the programs developed in Projects 03-03 and 03-04 to implement the Laplacian enhancement technique described in connection with Eq. (3.7-5).  Use the mask shown in Fig. 3.39(d).</li>
+  <li>Duplicate the results in Fig. 3.40.  You will need to  download Fig. 3.40(a).</li>
+</ol>
+
+<h3 id="原理">原理</h3>
+
+<p>对连续函数情形，最简单且各向同性的二阶微分算子是拉普拉斯（Laplacian）算子$\triangledown^2f=\frac{\partial^2f}{\partial x^2}+\frac{\partial^2f}{\partial y^2}$。</p>
+
+<p>离散情况下，$\frac{\partial^2f}{\partial x^2}=f(x-1,y)+f(x+1,y)-2f(x,y)$，$\frac{\partial^2f}{\partial y^2}=f(x,y-1)+f(x,y+1)-2f(x,y)$，于是$\triangledown^2f=f(x+1,y)+f(x-1,y)+f(x,y+1)+f(x,y-1)-4f(x,y)$</p>
+
+<ol>
+  <li>当拉普拉斯算子中心系数为正的时候，有$g(x,y)=f(x,y)+\triangledown^2f$</li>
+  <li>当拉普拉斯算子中心系数为正的时候，有$g(x,y)=f(x,y)-\triangledown^2f$</li>
+</ol>
+
+<h3 id="源代码">源代码</h3>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">close</span> <span class="nb">all</span><span class="p">;</span><span class="nb">clc</span><span class="p">;</span>
+<span class="n">I</span><span class="o">=</span><span class="nb">imread</span><span class="p">(</span><span class="s1">'liftingbody.png'</span><span class="p">);</span>
+<span class="n">I</span><span class="o">=</span><span class="nb">im2double</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+<span class="n">J</span><span class="o">=</span><span class="nb">zeros</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">I</span><span class="p">));</span>
+<span class="p">[</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="p">]</span><span class="o">=</span><span class="nb">size</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+<span class="k">for</span> <span class="n">x</span><span class="o">=</span><span class="mi">2</span><span class="p">:</span><span class="n">M</span><span class="o">-</span><span class="mi">1</span>
+	<span class="k">for</span> <span class="n">y</span><span class="o">=</span><span class="mi">2</span><span class="p">:</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span>
+		<span class="n">J</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">=</span><span class="mi">9</span><span class="o">*</span><span class="n">I</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">);</span>
+		<span class="k">for</span> <span class="n">dx</span><span class="o">=-</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span>
+			<span class="k">for</span> <span class="n">dy</span><span class="o">=-</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span>
+				<span class="n">J</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">=</span><span class="n">J</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">-</span><span class="n">I</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">dx</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="n">dy</span><span class="p">);</span>
+			<span class="k">end</span>
+		<span class="k">end</span>
+	<span class="k">end</span>
+<span class="k">end</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span><span class="nb">imshow</span><span class="p">(</span><span class="n">im2uint8</span><span class="p">(</span><span class="n">I</span><span class="p">));</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span><span class="nb">imshow</span><span class="p">(</span><span class="n">im2uint8</span><span class="p">(</span><span class="n">J</span><span class="p">));</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span><span class="nb">imshow</span><span class="p">(</span><span class="n">im2uint8</span><span class="p">(</span><span class="n">I</span><span class="o">+</span><span class="n">J</span><span class="p">));</span>
+</code></pre></div></div>
+
+<h3 id="运行结果">运行结果</h3>
+
+<p><img src="/public/image/2019-09-03-2.jpg" alt="运行结果" /></p>
+
+<p>左一是原图，左二是模板，左三是拉普拉斯变换得到的最终图像，可以看到，增强后的第三张图中阴影边缘对比变强了。</p>
+
+<h2 id="project-03-06-unsharp-masking">PROJECT 03-06 Unsharp Masking</h2>
+
+<ol>
+  <li>Use the programs developed in Projects 03-03 and 03-04 to implement highboost filtering, as given in Eq. (3.7-8).  The averaging part of the process should be done using the mask in Fig. 3.34(a).</li>
+  <li>Download Fig. 3.43(a) and enhance it using the program you developed in (a).  Your objective is to choose constant A so that your result visually approximates Fig. 3.43(d).</li>
+</ol>
+
+<h3 id="原理-1">原理</h3>
+
+<ol>
+  <li>当拉普拉斯算子中心系数为正的时候，有$f_{hb}(x,y)=Af(x,y)+\triangledown^2f$</li>
+  <li>当拉普拉斯算子中心系数为正的时候，有$f_{hb}(x,y)=Af(x,y)-\triangledown^2f$</li>
+</ol>
+
+<p>可以看出，基于拉普拉斯算子的高提升滤波，当$A=1$时就是拉普拉斯图像增强方法，当$A$足够大时，锐化效果将变得不明显</p>
+
+<h3 id="源代码-1">源代码</h3>
+
+<p>因为拉普拉斯变换就是特定条件的基于拉普拉斯算子的高提升滤波，所以和上一个代码几乎相同。</p>
+
+<div class="language-matlab highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">close</span> <span class="nb">all</span><span class="p">;</span><span class="nb">clc</span><span class="p">;</span>
+<span class="n">I</span><span class="o">=</span><span class="nb">imread</span><span class="p">(</span><span class="s1">'liftingbody.png'</span><span class="p">);</span>
+<span class="n">I</span><span class="o">=</span><span class="nb">im2double</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+<span class="n">J</span><span class="o">=</span><span class="nb">zeros</span><span class="p">(</span><span class="nb">size</span><span class="p">(</span><span class="n">I</span><span class="p">));</span>
+<span class="p">[</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="p">]</span><span class="o">=</span><span class="nb">size</span><span class="p">(</span><span class="n">I</span><span class="p">);</span>
+<span class="k">for</span> <span class="n">x</span><span class="o">=</span><span class="mi">2</span><span class="p">:</span><span class="n">M</span><span class="o">-</span><span class="mi">1</span>
+	<span class="k">for</span> <span class="n">y</span><span class="o">=</span><span class="mi">2</span><span class="p">:</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span>
+		<span class="n">J</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">=</span><span class="mi">9</span><span class="o">*</span><span class="n">I</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">);</span>
+		<span class="k">for</span> <span class="n">dx</span><span class="o">=-</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span>
+			<span class="k">for</span> <span class="n">dy</span><span class="o">=-</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span>
+				<span class="n">J</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">=</span><span class="n">J</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">-</span><span class="n">I</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">dx</span><span class="p">,</span><span class="n">y</span><span class="o">+</span><span class="n">dy</span><span class="p">);</span>
+			<span class="k">end</span>
+		<span class="k">end</span>
+	<span class="k">end</span>
+<span class="k">end</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span><span class="nb">imshow</span><span class="p">(</span><span class="n">im2uint8</span><span class="p">(</span><span class="n">I</span><span class="o">+</span><span class="n">J</span><span class="p">));</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span><span class="nb">imshow</span><span class="p">(</span><span class="n">im2uint8</span><span class="p">(</span><span class="mf">1.5</span><span class="o">*</span><span class="n">I</span><span class="o">+</span><span class="n">J</span><span class="p">));</span>
+<span class="nb">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span><span class="nb">imshow</span><span class="p">(</span><span class="n">im2uint8</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">I</span><span class="o">+</span><span class="n">J</span><span class="p">));</span>
+</code></pre></div></div>
+
+<h3 id="运行结果-1">运行结果</h3>
+
+<p><img src="/public/image/2019-09-03-3.jpg" alt="运行结果" /></p>
+
+<p>如图，上面三张图自左向右是分别赋值<code class="highlighter-rouge">A=1</code>、<code class="highlighter-rouge">A=1.5</code>、<code class="highlighter-rouge">A=2</code>时的非锐化掩模，其中<code class="highlighter-rouge">A=1</code>时就是标准拉普拉斯锐化。自左向右图像的边缘突出效果不断增加。</p>
+:ET

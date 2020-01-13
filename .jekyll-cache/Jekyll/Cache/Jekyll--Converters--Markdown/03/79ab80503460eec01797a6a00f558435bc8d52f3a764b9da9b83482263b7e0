@@ -1,0 +1,254 @@
+I"�E<h2 id="引言">引言</h2>
+
+<p>最开始我是在<a href="https://blog.csdn.net/w_weilan">CSDN</a>上写博客的。博客写了一年多，访问量勉强破万，感觉其中至少有三成是自己贡献的。而且CSDN上的广告是越来越多，网页编辑器也是越来越不好用。</p>
+
+<p>十一月份，在青岛的ICPC区域赛失利之后，想要重新开始，和过去告别。也从此转移自己写博客的阵地。考虑过转投暂时还比较干净而且可以部分定义页面的<a href="https://www.cnblogs.com/wu-kan/">博客园</a>，但是最终还是决定在<a href="https://pages.github.com/">Github Pages</a>上搭建属于自己的博客。</p>
+
+<p>然后，翻了一些网上的教程，用<a href="https://hexo.io/zh-cn/">Hexo</a>框架和<a href="https://github.com/theme-next/hexo-theme-next">NexT</a>主题搭了一个比较素雅的符合个人审美的博客。然而，Hexo搭建的博客需要先在本地生成博客页面然后再上传到服务器上，每次发博客都需要在电脑重新生成页面并上传，感觉没有那么方便。在不同电脑上想要发博客更是十分困难，感觉如果胡乱操作后本地部署的文件发生了一定的错乱，恢复起来会十分麻烦。</p>
+
+<p>后来发现，Github Pages原生支持<a href="https://www.jekyll.com.cn/">Jekyll</a>，因此如果只需要推送文章可以直接在github的仓库里做。于是决定在期末考试后用Jekyll重新搭建个人博客。原来的博客不再维护。</p>
+
+<h2 id="构思">构思</h2>
+
+<p>目前博客的demo如下：</p>
+
+<p><img src="/public/image/2019-01-18-1.jpg" alt="demo1" /></p>
+
+<p><img src="/public/image/2019-01-18-2.jpg" alt="demo2" /></p>
+
+<p>想搭建一个足够干净、页面几乎不要有多余元素的博客，同时博客的功能还要足够丰富，满足我以下的需求：</p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />用Markdown写博客</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />支持Latex公式</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />支持mermaid等插件</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />个性化Live2D</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />分享一些我在其他网站的个人账号</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />移动端适配</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />足够快的加载速度</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />访问量统计，评论互动</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />……（需求是会逐渐增长的，参见<a href="https://wu-kan.github.io/about">关于</a>）</li>
+</ul>
+
+<p>其中，Live2D是我某次访问别人的博客初次见到的，感觉非常吸引人。最终的目标是去掉网页上所有多余的元素，只剩下博文和Live2D看板娘，看板娘本身还可以作为博客访问的导航，感觉会十分有新意。</p>
+
+<h2 id="搭建过程不定期更新">搭建过程（不定期更新）</h2>
+
+<p>我目前读的专业是计科超算方向，所以软件工程专业相关方面的基础几乎为0😌，大部分的内容都是参考网上教程慢慢摸索的，假如对某些过程有意见和建议欢迎向我提出！</p>
+
+<h3 id="开发环境">开发环境</h3>
+
+<p>这个学期选了一门Linux相关的公选课，感觉还不错，因此直接把开发环境是搭建在Windows Subsystem for Linux（简称WSL）上了，Windows下也可以直接访问其中的环境，详见<a href="https://wu-kan.github.io/posts/linux/Windows-Subsystem-for-Linux">这篇博客</a>。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nb">install </span>jekyll
+</code></pre></div></div>
+
+<p>Jekyll是基于Ruby和Node.js环境的，很多依赖的包也会同时安装进来。现在，找在目录下打开终端，运行如下代码，加入新建了一个名为<code class="highlighter-rouge">blog</code>的文件夹，则说明安装成功了。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll new blog
+</code></pre></div></div>
+
+<h3 id="结构解析">结构解析</h3>
+
+<p>观察刚刚生成的博客目录，有如下的结构：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>├──_config.yml
+├── _drafts
+|   ├── begin-with-the-crazy-ideas.textile
+|   └── on-simplicity-in-technology.markdown
+├── _includes
+|   ├── footer.html
+|   └── header.html
+├── _layouts
+|   ├── default.html
+|   └── post.html
+├── _posts
+|   ├── 2007-10-29-why-every-programmer-should-play-nethack.textile
+|   └── 2009-04-26-barcamp-boston-4-roundup.textile
+├── _site
+├── .jekyll-metadata
+└── index.html
+</code></pre></div></div>
+
+<p>它的结构还算是比较简单清晰，详细功能如下表。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>文件/目录</th>
+      <th>描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>_config.yml</td>
+      <td>保存配置数据。很多配置选项都可以直接在命令行中进行设置，但是如果把那些配置写在这儿，就不用非要去记住那些命令了。</td>
+    </tr>
+    <tr>
+      <td>_drafts</td>
+      <td>drafts（草稿）是未发布的文章。这些文件的格式中都没有 title.MARKUP 数据。学习如何使用草稿。</td>
+    </tr>
+    <tr>
+      <td>_includes</td>
+      <td>可以加载这些包含部分到的布局或者文章中以方便重用。</td>
+    </tr>
+    <tr>
+      <td>_layouts</td>
+      <td>layouts（布局）是包裹在文章外部的模板。布局可以在 YAML 头信息中根据不同文章进行选择</td>
+    </tr>
+    <tr>
+      <td>_posts</td>
+      <td>这里放的就是的文章了。文件格式很重要，必须要符合:YEAR-MONTH-DAY-title.MARKUP。 永久链接 可以在文章中自己定制，但是数据和标记语言都是根据文件名来确定的。</td>
+    </tr>
+    <tr>
+      <td>_data</td>
+      <td>格式化好的网站数据应放在这里。jekyll 的引擎会自动加载在该目录下所有的 yaml 文件（后缀是 .yml, .yaml, .json 或者 .csv ）。这些文件可以经由 ｀site.data｀ 访问。如果有一个 members.yml 文件在该目录下，就可以通过 site.data.members 获取该文件的内容。</td>
+    </tr>
+    <tr>
+      <td>_site</td>
+      <td>一旦 Jekyll 完成转换，就会将生成的页面放在这里（默认）。最好将这个目录放进 .gitignore 文件中。</td>
+    </tr>
+    <tr>
+      <td>.jekyll-metadata</td>
+      <td>该文件帮助 Jekyll 跟踪哪些文件从上次建立站点开始到现在没有被修改，哪些文件需要在下一次站点建立时重新生成。该文件不会被包含在生成的站点中。将它加入到 .gitignore 文件可能是一个好注意。</td>
+    </tr>
+    <tr>
+      <td>index.html and other HTML, Markdown, Textile files</td>
+      <td>如果这些文件中包含 YAML 头信息 部分，Jekyll 就会自动将它们进行转换。当然，其他的如 .html, .markdown, .md, 或者 .textile 等在的站点根目录下或者不是以上提到的目录中的文件也会被转换。</td>
+    </tr>
+    <tr>
+      <td>Other Files/Folders</td>
+      <td>其他一些未被提及的目录和文件如 css 还有 images 文件夹， favicon.ico 等文件都将被完全拷贝到生成的 site 中。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="选取模板">选取模板</h3>
+
+<p>和丰富精美的Hexo比起来，好的Jekyll模板真的是太少了…经过漫长时间的挑选，最终选择在<a href="https://github.com/poole/lanyon">lanyon</a>主题的基础上修改啦。</p>
+
+<p>这里选我自己的博客为模板，也可以在GitHub上慢慢翻一些别人的博客或模板。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/wu-kan/wu-kan.github.io YourBlog
+</code></pre></div></div>
+
+<h3 id="发送到github托管">发送到Github托管</h3>
+
+<p>把本地文件修改后，上传到博客仓库的<code class="highlighter-rouge">master</code>或者<code class="highlighter-rouge">gh-pages</code>分支即可。</p>
+
+<h3 id="定制">定制</h3>
+
+<blockquote>
+  <p>Update: 注意！以下移植插件的办法即将/已经过时。目前的计划（v2.3.0）是，将所有插件做成jsloader的形式，这样引用的时候只要<code class="highlighter-rouge">&lt;script src='/public/js/x.js'&gt;&lt;/script&gt;</code>即可，可以加快页面访问速度。目前的计划是<strong>完全</strong>去掉<code class="highlighter-rouge">_include/</code>目录下的所有文件。</p>
+</blockquote>
+
+<p>我把博客实现的的插件基本上都封装起来了，拿走的流程都差不多：</p>
+
+<ul>
+  <li>将我博客代码仓库下<code class="highlighter-rouge">_includes\</code>相关文件加入你自己的<code class="highlighter-rouge">_includes</code></li>
+  <li>在你的<code class="highlighter-rouge">_config.yml</code>内加入相关配置项（如果有的话，可以参看我的）</li>
+  <li>最后在需要这个插件的地方加入<code class="highlighter-rouge">include语句</code>即可</li>
+</ul>
+
+<h4 id="加入live2d看板娘">加入Live2D看板娘</h4>
+
+<p>参考<a href="https://www.fghrsh.net/post/123.html">网页添加 Live2D 看板娘</a>。</p>
+
+<p>已经将相关代码封装，将我博客代码仓库下<code class="highlighter-rouge">_includes\live2d.html</code>加入你自己的<code class="highlighter-rouge">_includes</code>，在<code class="highlighter-rouge">&lt;/body&gt;</code>标签前加入如下代码。</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{% include live2d.html %}
+</code></pre></div></div>
+
+<p>随后在你的<code class="highlighter-rouge">_config.yml</code>内加入如下配置项：</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">live2d</span><span class="pi">:</span>
+  <span class="na">enable</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">live2d_settings</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">key</span><span class="pi">:</span> <span class="s2">"</span><span class="s">'waifuEdgeSide'"</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s2">"</span><span class="s">'right:0'"</span>
+    <span class="pi">-</span> <span class="na">key</span><span class="pi">:</span> <span class="s2">"</span><span class="s">'modelId'"</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="m">5</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Live2D的前端基于<a href="https://github.com/fghrsh/live2d_demo">fghrsh/live2d_demo</a>修改，感谢。</li>
+  <li>Live2D的后端暂时使用了<a href="https://www.fghrsh.net/post/170.html">fghrsh</a>提供的api，感谢。</li>
+</ul>
+
+<h4 id="数学公式渲染">数学公式渲染</h4>
+
+<p>这里选择速度更快的KaTeX来渲染，参考<a href="https://www.jianshu.com/p/f2b28954d902">使用KaTeX代替MathJax渲染公式</a>。</p>
+
+<p>已经将相关代码封装，将我博客代码仓库下<code class="highlighter-rouge">_includes\katex.html</code>加入你自己的<code class="highlighter-rouge">_includes</code>，在<code class="highlighter-rouge">&lt;/body&gt;</code>标签前加入如下代码。</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{% include katex.html %}
+</code></pre></div></div>
+
+<p>随后在你的<code class="highlighter-rouge">_config.yml</code>内加入如下配置项：</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">katex</span><span class="pi">:</span> <span class="c1"># KaTeX</span>
+  <span class="na">enable</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">stylesheet</span><span class="pi">:</span> <span class="s">//unpkg.com/katex/dist/katex.min.css</span>
+  <span class="na">src</span><span class="pi">:</span> <span class="s">//unpkg.com/katex/dist/katex.min.js</span>
+  <span class="na">auto-render</span><span class="pi">:</span> <span class="s">//unpkg.com/katex/dist/contrib/auto-render.min.js</span>
+  <span class="na">delimiters</span><span class="pi">:</span> <span class="no">true</span> <span class="c1"># 开启行内公式$\KaTeX$支持</span>
+</code></pre></div></div>
+
+<h4 id="mermaid流程图">mermaid流程图</h4>
+
+<p>已经将相关代码封装，将我博客代码仓库下<code class="highlighter-rouge">_includes\mermaid.html</code>加入你自己的<code class="highlighter-rouge">_includes</code>，在<code class="highlighter-rouge">&lt;/body&gt;</code>标签前加入如下代码。</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{% include mermaid.html %}
+</code></pre></div></div>
+
+<p>随后在你的<code class="highlighter-rouge">_config.yml</code>内加入如下配置项：</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">mermaid</span><span class="pi">:</span> <span class="c1"># https://github.com/knsv/mermaid</span>
+  <span class="na">enable</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">src</span><span class="pi">:</span> <span class="s">//unpkg.com/mermaid/dist/mermaid.min.js</span>
+  <span class="na">stylesheet</span><span class="pi">:</span> <span class="s">//unpkg.com/mermaid/dist/mermaid.min.css</span>
+  <span class="na">markdown-expand</span><span class="pi">:</span> <span class="no">true</span>
+</code></pre></div></div>
+
+<h4 id="valine评论系统">valine评论系统</h4>
+
+<p>配置详见<a href="https://valine.js.org/">官方手册</a>，说得很清楚了。</p>
+
+<p>已经将相关代码封装，将我博客代码仓库下<code class="highlighter-rouge">_includes\valine.html</code>加入你自己的<code class="highlighter-rouge">_includes</code>，在你需要评论模块的地方加入如下代码。</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{% include valine.html %}
+</code></pre></div></div>
+
+<p>随后在你的<code class="highlighter-rouge">_config.yml</code>内加入如下配置项（这是我的，请根据官方手册上的说明获取自己的参数）：</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">valine</span><span class="pi">:</span>
+  <span class="na">enable</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">src</span><span class="pi">:</span> <span class="s">//unpkg.com/valine/dist/Valine.min.js</span>
+  <span class="na">appId</span><span class="pi">:</span> <span class="err">******</span>
+  <span class="na">appKey</span><span class="pi">:</span> <span class="err">******</span>
+  <span class="na">notify</span><span class="pi">:</span> <span class="no">true</span> <span class="c1"># 评论回复邮件提醒</span>
+  <span class="na">verify</span><span class="pi">:</span> <span class="no">true</span> <span class="c1"># 验证码服务</span>
+  <span class="na">avatar</span><span class="pi">:</span> <span class="s">identicon</span>
+  <span class="na">placeholder</span><span class="pi">:</span> <span class="s">在这里评论吧！</span>
+  <span class="na">visitor</span><span class="pi">:</span> <span class="no">true</span> <span class="c1"># 文章访问量统计</span>
+  <span class="na">highlight</span><span class="pi">:</span> <span class="no">true</span> <span class="c1"># 代码高亮</span>
+  <span class="na">avatarForce</span><span class="pi">:</span> <span class="no">false</span> <span class="c1"># 每次访问强制拉取最新的评论列表头像</span>
+  <span class="na">recordIP</span><span class="pi">:</span> <span class="no">true</span> <span class="c1"># 记录评论者IP</span>
+</code></pre></div></div>
+
+<h2 id="下一步计划">下一步计划</h2>
+
+<p>详细的开发计划及建站内容详见<a href="https://wu-kan.github.io/about">博客详情页</a>。</p>
+
+<p>从<a href="https://magical-girl.site/">这个页面</a>得到的灵感，目标是博客上除了文章和作为导航的Live2D之外不出现其他的模块，尽量的干净、快速。</p>
+
+<h2 id="参考资料">参考资料</h2>
+
+<p>大部分的参考链接已在原文给出，同时搭建本博客的过程中还参考了以下内容，感谢作者们：</p>
+
+<ul>
+  <li><a href="https://www.jianshu.com/p/9f198d5779e6">Jekyll + Github Pages 博客搭建入门</a></li>
+  <li><a href="https://blog.csdn.net/ds19991999/article/details/81516568">Jekyll博客Next主题超深度配置</a></li>
+  <li><a href="https://www.jianshu.com/p/bb184f61c9ae">【应用软件】Jekyll 配置</a></li>
+</ul>
+:ET

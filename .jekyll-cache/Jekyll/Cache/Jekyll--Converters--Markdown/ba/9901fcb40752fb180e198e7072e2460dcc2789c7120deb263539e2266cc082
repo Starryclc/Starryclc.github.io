@@ -1,0 +1,1197 @@
+I"�<h2 id="实现并行梯形数值积分的mpi算法">实现并行梯形数值积分的MPI算法</h2>
+
+<p>下为单节点求解$\int_{a}^bf(x)dx$的函数，其中<code class="highlighter-rouge">e</code>是逼近的步长。由于单账号的运行时间权限是一个小时，这里我经过调参，取<code class="highlighter-rouge">e=1e-2</code>是可以在时限内计算完毕的（约四十分钟）。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">lf</span> <span class="nf">ask</span><span class="p">(</span><span class="n">lf</span> <span class="n">a</span><span class="p">,</span> <span class="n">lf</span> <span class="n">b</span><span class="p">,</span> <span class="n">lf</span> <span class="n">f</span><span class="p">(</span><span class="n">lf</span> <span class="n">x</span><span class="p">),</span> <span class="n">lf</span> <span class="n">e</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">lf</span> <span class="n">ans</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">fa</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+	<span class="k">while</span> <span class="p">(</span><span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">lf</span> <span class="n">fb</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">a</span> <span class="o">+=</span> <span class="n">e</span><span class="p">);</span>
+		<span class="n">ans</span> <span class="o">+=</span> <span class="n">fa</span> <span class="o">+</span> <span class="n">fb</span><span class="p">;</span>
+		<span class="n">fa</span> <span class="o">=</span> <span class="n">fb</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">ans</span> <span class="o">*</span> <span class="n">e</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>这里有几处优化细节，通过调整求值关系，使得每个点处的函数值不被重复计算；同时把梯形的高移动到循环外面，减少计算次数。</p>
+
+<p>当然，由于这里的步长其实只有百分之一，因此最后求出来的积分其实精度不怎么高，和自己手算的结果相比只能保证五六位的有效位数。</p>
+
+<h3 id="用mpi的点对点通信函数完成梯形数值积分的并行算法">用MPI的点对点通信函数完成梯形数值积分的并行算法</h3>
+
+<p>各进程将各自计算的结果<code class="highlighter-rouge">myAns</code>发送到0号进程并求和<code class="highlighter-rouge">ans</code>。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">id</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numThreads</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">MPI_Recv</span><span class="p">(</span>
+				<span class="o">&amp;</span><span class="n">myAns</span><span class="p">,</span>
+				<span class="mi">1</span><span class="p">,</span>
+				<span class="n">MPI_DOUBLE</span><span class="p">,</span>
+				<span class="n">i</span><span class="p">,</span>
+				<span class="mi">0</span><span class="p">,</span>
+				<span class="n">MPI_COMM_WORLD</span><span class="p">,</span>
+				<span class="n">MPI_STATUES_IGNORE</span><span class="p">);</span>
+			<span class="n">ans</span> <span class="o">+=</span> <span class="n">myAns</span><span class="p">;</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="k">else</span>
+		<span class="nf">MPI_Send</span><span class="p">(</span>
+			<span class="o">&amp;</span><span class="n">myAns</span><span class="p">,</span>
+			<span class="mi">1</span><span class="p">,</span>
+			<span class="n">MPI_DOUBLE</span><span class="p">,</span>
+			<span class="mi">0</span><span class="p">,</span>
+			<span class="mi">0</span><span class="p">,</span>
+			<span class="n">MPI_COMM_WORLD</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h3 id="用mpi的集合通信函数完成梯形数值积分的并行算法">用MPI的集合通信函数完成梯形数值积分的并行算法</h3>
+
+<p>使用<code class="highlighter-rouge">Reduce</code>操作将各线程的结果<code class="highlighter-rouge">myAns</code>归约到0号进程的<code class="highlighter-rouge">ans</code>。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="n">MPI_Reduce</span><span class="p">(</span>
+		<span class="o">&amp;</span><span class="n">myAns</span><span class="p">,</span>
+		<span class="o">&amp;</span><span class="n">ans</span><span class="p">,</span>
+		<span class="mi">1</span><span class="p">,</span>
+		<span class="n">MPI_DOUBLE</span><span class="p">,</span>
+		<span class="n">MPI_SUM</span><span class="p">,</span>
+		<span class="mi">0</span><span class="p">,</span>
+		<span class="n">MPI_COMM_WORLD</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h3 id="将上面的算法对瑕积分扩展">将上面的算法对瑕积分扩展</h3>
+
+<p>假设被积函数f(x)可能是无界函数，积分区间也很大，如</p>
+
+<ul>
+  <li>f(x)=exp(bx)/sqrt(1+exp(cx)), 0&lt;x&lt;=L;</li>
+  <li>这时积分区间[0,L]划分不能是等长的，每个任务的小区间需要传递，并且参数b，c，L也需要传递。</li>
+</ul>
+
+<p>这里选择使用自适应辛普森方法求解瑕积分，根据<a href="http://www2.math.umd.edu/~mariakc/teaching/adaptive.pdf">这篇论文</a>，论证了加一个十五分之一的偏移收敛会比较快。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">lf</span> <span class="nf">f</span><span class="p">(</span><span class="n">lf</span> <span class="n">x</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">return</span> <span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">));</span>
+<span class="p">}</span>
+<span class="n">lf</span> <span class="nf">simpson</span><span class="p">(</span><span class="n">lf</span> <span class="n">a</span><span class="p">,</span> <span class="n">lf</span> <span class="n">b</span><span class="p">,</span> <span class="n">lf</span> <span class="n">f</span><span class="p">(</span><span class="n">lf</span> <span class="n">x</span><span class="p">))</span>
+<span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">fabs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">f</span><span class="p">((</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">);</span>
+	<span class="k">return</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">f</span><span class="p">((</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span> <span class="o">+</span> <span class="n">f</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">6</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">lf</span> <span class="nf">ask</span><span class="p">(</span><span class="n">lf</span> <span class="n">a</span><span class="p">,</span> <span class="n">lf</span> <span class="n">b</span><span class="p">,</span> <span class="n">lf</span> <span class="n">f</span><span class="p">(</span><span class="n">lf</span> <span class="n">x</span><span class="p">),</span> <span class="n">lf</span> <span class="n">e</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">e</span> <span class="o">&lt;</span> <span class="n">EPS</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">simpson</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">f</span><span class="p">);</span>
+	<span class="n">lf</span> <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span> <span class="n">L</span> <span class="o">=</span> <span class="n">simpson</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">R</span> <span class="o">=</span> <span class="n">simpson</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">L</span> <span class="o">+</span> <span class="n">R</span> <span class="o">-</span> <span class="n">simpson</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span> <span class="o">/</span> <span class="mi">15</span><span class="p">;</span>
+	<span class="k">return</span> <span class="n">fabs</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">e</span> <span class="o">?</span> <span class="n">L</span> <span class="o">+</span> <span class="n">R</span> <span class="o">+</span> <span class="n">delta</span> <span class="o">:</span> <span class="n">ask</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">e</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span> <span class="o">+</span> <span class="n">ask</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">e</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>不过，在对老师给的这个函数（取<code class="highlighter-rouge">b = c = 1</code>）进行瑕积分求解的时候，发现积分上限达到$2^{10}$的时候，结果已经超过了<code class="highlighter-rouge">double</code>类型的表示范围，因此这段代码仅用来验证瑕积分求解的正确性，下面进行多核测速的代码仍然使用的是梯形积分法。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">time </span>mpiexec <span class="nt">-n</span> 1 ./integral 9
+3022859422404135022056366724809190601572944773201862114369138391962853640177743445854646916709852400063199838208.000000 with 1 proces, problem size 512.
+real    0m0.058s
+user    0m0.000s
+sys     0m0.063s
+<span class="nv">$ </span><span class="nb">time </span>mpiexec <span class="nt">-n</span> 1 ./integral 10
+<span class="nt">-nan</span> with 1 proces, problem size 1024.
+real    0m0.058s
+user    0m0.000s
+sys     0m0.047s
+</code></pre></div></div>
+
+<h3 id="填表">填表</h3>
+
+<h4 id="运行时间t单位s">运行时间T（单位s）</h4>
+
+<p>详见下面的输出文件部分。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>进程数\问题规模</th>
+      <th>$2^{14}$</th>
+      <th>$2^{18}$</th>
+      <th>$2^{22}$</th>
+      <th>$2^{26}$</th>
+      <th>$2^{30}$</th>
+      <th>$2^{31}$</th>
+      <th>$2^{32}$</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>0.424</td>
+      <td>0.513</td>
+      <td>1.928</td>
+      <td>23.536</td>
+      <td>357.396</td>
+      <td>706.644</td>
+      <td>1441.164</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>0.426</td>
+      <td>0.553</td>
+      <td>1.403</td>
+      <td>11.794</td>
+      <td>182.182</td>
+      <td>354.155</td>
+      <td>706.369</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0.466</td>
+      <td>0.542</td>
+      <td>1.019</td>
+      <td>6.230</td>
+      <td>92.010</td>
+      <td>179.062</td>
+      <td>353.818</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>0.543</td>
+      <td>0.487</td>
+      <td>0.716</td>
+      <td>3.667</td>
+      <td>46.014</td>
+      <td>92.823</td>
+      <td>177.530</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>0.541</td>
+      <td>0.576</td>
+      <td>0.719</td>
+      <td>2.177</td>
+      <td>23.253</td>
+      <td>46.102</td>
+      <td>93.670</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>0.898</td>
+      <td>0.747</td>
+      <td>0.826</td>
+      <td>1.663</td>
+      <td>12.633</td>
+      <td>23.169</td>
+      <td>45.404</td>
+    </tr>
+    <tr>
+      <td>64</td>
+      <td>1.464</td>
+      <td>1.067</td>
+      <td>1.116</td>
+      <td>1.638</td>
+      <td>6.812</td>
+      <td>12.324</td>
+      <td>23.790</td>
+    </tr>
+    <tr>
+      <td>128</td>
+      <td>1.110</td>
+      <td>1.076</td>
+      <td>1.176</td>
+      <td>1.416</td>
+      <td>4.105</td>
+      <td>6.952</td>
+      <td>12.525</td>
+    </tr>
+    <tr>
+      <td>256</td>
+      <td>1.534</td>
+      <td>1.188</td>
+      <td>1.196</td>
+      <td>1.319</td>
+      <td>2.848</td>
+      <td>4.110</td>
+      <td>6.936</td>
+    </tr>
+    <tr>
+      <td>512</td>
+      <td>1.802</td>
+      <td>1.704</td>
+      <td>1.695</td>
+      <td>1.754</td>
+      <td>2.210</td>
+      <td>2.626</td>
+      <td>3.478</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>可以看到：</p>
+
+<ul>
+  <li>随着问题规模增加，同进程数下运行时间不断增加</li>
+  <li>问题规模比较小的时候，进程越多并行时间开销越大</li>
+  <li>问题规模比较大的时候，运行时间减少</li>
+</ul>
+
+<h4 id="加速比s">加速比S</h4>
+
+<p>加速比S=同等规模下的串行时间/并行时间。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>进程数\问题规模</th>
+      <th>$2^{14}$</th>
+      <th>$2^{18}$</th>
+      <th>$2^{22}$</th>
+      <th>$2^{26}$</th>
+      <th>$2^{30}$</th>
+      <th>$2^{31}$</th>
+      <th>$2^{32}$</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>1.00</td>
+      <td>0.93</td>
+      <td>1.37</td>
+      <td>2.00</td>
+      <td>1.96</td>
+      <td>2.00</td>
+      <td>2.04</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0.91</td>
+      <td>0.95</td>
+      <td>1.89</td>
+      <td>3.78</td>
+      <td>3.88</td>
+      <td>3.94</td>
+      <td>4.07</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>0.78</td>
+      <td>1.05</td>
+      <td>2.69</td>
+      <td>6.41</td>
+      <td>7.77</td>
+      <td>7.61</td>
+      <td>8.12</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>0.78</td>
+      <td>0.89</td>
+      <td>2.68</td>
+      <td>10.81</td>
+      <td>15.37</td>
+      <td>15.33</td>
+      <td>15.39</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>0.47</td>
+      <td>0.69</td>
+      <td>2.33</td>
+      <td>14.15</td>
+      <td>28.29</td>
+      <td>30.50</td>
+      <td>31.74</td>
+    </tr>
+    <tr>
+      <td>64</td>
+      <td>0.29</td>
+      <td>0.48</td>
+      <td>1.72</td>
+      <td>14.38</td>
+      <td>52.47</td>
+      <td>57.34</td>
+      <td>60.58</td>
+    </tr>
+    <tr>
+      <td>128</td>
+      <td>0.38</td>
+      <td>0.48</td>
+      <td>1.63</td>
+      <td>16.62</td>
+      <td>87.06</td>
+      <td>101.65</td>
+      <td>115.06</td>
+    </tr>
+    <tr>
+      <td>256</td>
+      <td>0.28</td>
+      <td>0.43</td>
+      <td>1.61</td>
+      <td>17.84</td>
+      <td>125.49</td>
+      <td>171.93</td>
+      <td>207.78</td>
+    </tr>
+    <tr>
+      <td>512</td>
+      <td>0.24</td>
+      <td>0.30</td>
+      <td>1.14</td>
+      <td>13.42</td>
+      <td>161.71</td>
+      <td>269.10</td>
+      <td>414.37</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>可以看到：</p>
+
+<ul>
+  <li>随着问题规模增加，同进程数下加速比不断增加</li>
+  <li>随着进程数增加，同问题规模下加速比不断减少</li>
+</ul>
+
+<h4 id="效率e">效率E</h4>
+
+<p>运行效率E=加速比S/并行线程数。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>进程数\问题规模</th>
+      <th>$2^{14}$</th>
+      <th>$2^{18}$</th>
+      <th>$2^{22}$</th>
+      <th>$2^{26}$</th>
+      <th>$2^{30}$</th>
+      <th>$2^{31}$</th>
+      <th>$2^{32}$</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>0.50</td>
+      <td>0.93</td>
+      <td>0.68</td>
+      <td>1.00</td>
+      <td>0.98</td>
+      <td>1.00</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0.23</td>
+      <td>0.24</td>
+      <td>0.47</td>
+      <td>0.95</td>
+      <td>0.97</td>
+      <td>0.99</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>0.10</td>
+      <td>0.13</td>
+      <td>0.34</td>
+      <td>0.81</td>
+      <td>0.97</td>
+      <td>0.95</td>
+      <td>1.02</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>0.05</td>
+      <td>0.06</td>
+      <td>0.17</td>
+      <td>0.68</td>
+      <td>0.96</td>
+      <td>0.96</td>
+      <td>0.96</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>0.01</td>
+      <td>0.02</td>
+      <td>0.07</td>
+      <td>0.44</td>
+      <td>0.88</td>
+      <td>0.95</td>
+      <td>0.99</td>
+    </tr>
+    <tr>
+      <td>64</td>
+      <td>0.005</td>
+      <td>0.008</td>
+      <td>0.03</td>
+      <td>0.22</td>
+      <td>0.82</td>
+      <td>0.90</td>
+      <td>0.95</td>
+    </tr>
+    <tr>
+      <td>128</td>
+      <td>0.003</td>
+      <td>0.004</td>
+      <td>0.01</td>
+      <td>0.13</td>
+      <td>0.68</td>
+      <td>0.79</td>
+      <td>0.90</td>
+    </tr>
+    <tr>
+      <td>256</td>
+      <td>0.001</td>
+      <td>0.002</td>
+      <td>0.006</td>
+      <td>0.07</td>
+      <td>0.49</td>
+      <td>0.67</td>
+      <td>0.81</td>
+    </tr>
+    <tr>
+      <td>512</td>
+      <td>0.0005</td>
+      <td>0.0006</td>
+      <td>0.002</td>
+      <td>0.03</td>
+      <td>0.32</td>
+      <td>0.53</td>
+      <td>0.81</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>可以看到：</p>
+
+<ul>
+  <li>随着问题规模增加，同进程数下效率不断增加</li>
+  <li>随着进程数增加，同问题规模下效率不断减少</li>
+</ul>
+
+<p>此外，部分数据出现了效率略大于1的情况，可能是由于系统运行时的“抖动”造成的，仍然在误差范围内，符合常识。</p>
+
+<h3 id="源代码integralc">源代码<code class="highlighter-rouge">integral.c</code></h3>
+
+<p>去掉<code class="highlighter-rouge">#define WK_SIMPSON</code>前的注释符号即可选用自适应辛普森公式求解瑕积分。</p>
+
+<p>去掉<code class="highlighter-rouge">#define WK_P2P</code>前的注释符号即可选用点对点通信。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//#define WK_SIMPSON</span>
+<span class="c1">//#define WK_P2P</span>
+<span class="cp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;math.h&gt;
+#include &lt;mpi.h&gt;
+</span><span class="k">typedef</span> <span class="kt">double</span> <span class="n">lf</span><span class="p">;</span>
+<span class="k">const</span> <span class="n">lf</span> <span class="n">EPS</span> <span class="o">=</span> <span class="mf">1e-5</span><span class="p">;</span>
+<span class="cp">#ifdef WK_SIMPSON
+</span><span class="n">lf</span> <span class="nf">f</span><span class="p">(</span><span class="n">lf</span> <span class="n">x</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">return</span> <span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">));</span>
+<span class="p">}</span>
+<span class="n">lf</span> <span class="nf">simpson</span><span class="p">(</span><span class="n">lf</span> <span class="n">a</span><span class="p">,</span> <span class="n">lf</span> <span class="n">b</span><span class="p">,</span> <span class="n">lf</span> <span class="n">f</span><span class="p">(</span><span class="n">lf</span> <span class="n">x</span><span class="p">))</span>
+<span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">fabs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">EPS</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">f</span><span class="p">((</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">);</span>
+	<span class="k">return</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">f</span><span class="p">((</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span> <span class="o">+</span> <span class="n">f</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">6</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">lf</span> <span class="nf">ask</span><span class="p">(</span><span class="n">lf</span> <span class="n">a</span><span class="p">,</span> <span class="n">lf</span> <span class="n">b</span><span class="p">,</span> <span class="n">lf</span> <span class="n">f</span><span class="p">(</span><span class="n">lf</span> <span class="n">x</span><span class="p">),</span> <span class="n">lf</span> <span class="n">e</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">e</span> <span class="o">&lt;</span> <span class="n">EPS</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">simpson</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">f</span><span class="p">);</span>
+	<span class="n">lf</span> <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">,</span> <span class="n">L</span> <span class="o">=</span> <span class="n">simpson</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">R</span> <span class="o">=</span> <span class="n">simpson</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">L</span> <span class="o">+</span> <span class="n">R</span> <span class="o">-</span> <span class="n">simpson</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span> <span class="o">/</span> <span class="mi">15</span><span class="p">;</span>
+	<span class="k">return</span> <span class="n">fabs</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">e</span> <span class="o">?</span> <span class="n">L</span> <span class="o">+</span> <span class="n">R</span> <span class="o">+</span> <span class="n">delta</span> <span class="o">:</span> <span class="n">ask</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">e</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span> <span class="o">+</span> <span class="n">ask</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">e</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cp">#else
+</span><span class="n">lf</span> <span class="nf">f</span><span class="p">(</span><span class="n">lf</span> <span class="n">x</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">return</span> <span class="n">x</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">lf</span> <span class="nf">ask</span><span class="p">(</span><span class="n">lf</span> <span class="n">a</span><span class="p">,</span> <span class="n">lf</span> <span class="n">b</span><span class="p">,</span> <span class="n">lf</span> <span class="n">f</span><span class="p">(</span><span class="n">lf</span> <span class="n">x</span><span class="p">),</span> <span class="n">lf</span> <span class="n">e</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">lf</span> <span class="n">ans</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">fa</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+	<span class="k">while</span> <span class="p">(</span><span class="n">a</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">lf</span> <span class="n">fb</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">a</span> <span class="o">+=</span> <span class="n">e</span><span class="p">);</span>
+		<span class="n">ans</span> <span class="o">+=</span> <span class="n">fa</span> <span class="o">+</span> <span class="n">fb</span><span class="p">;</span>
+		<span class="n">fa</span> <span class="o">=</span> <span class="n">fb</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">ans</span> <span class="o">*</span> <span class="n">e</span> <span class="o">*</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="cp">#endif
+</span><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">MPI_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">argc</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">argv</span><span class="p">);</span>
+	<span class="kt">int</span> <span class="n">id</span><span class="p">,</span> <span class="n">numThreads</span><span class="p">;</span>
+	<span class="n">MPI_Comm_rank</span><span class="p">(</span><span class="n">MPI_COMM_WORLD</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">id</span><span class="p">);</span>
+	<span class="n">MPI_Comm_size</span><span class="p">(</span><span class="n">MPI_COMM_WORLD</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">numThreads</span><span class="p">);</span>
+	<span class="n">lf</span> <span class="n">n</span> <span class="o">=</span> <span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">atoi</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
+	   <span class="n">len</span> <span class="o">=</span> <span class="n">n</span> <span class="o">/</span> <span class="n">numThreads</span><span class="p">,</span>
+	   <span class="n">myL</span> <span class="o">=</span> <span class="n">id</span> <span class="o">*</span> <span class="n">len</span><span class="p">,</span>
+	   <span class="n">myAns</span> <span class="o">=</span> <span class="n">ask</span><span class="p">(</span><span class="n">myL</span><span class="p">,</span> <span class="n">myL</span> <span class="o">+</span> <span class="n">len</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">),</span>
+	   <span class="n">ans</span> <span class="o">=</span> <span class="n">myAns</span><span class="p">;</span>
+<span class="cp">#ifdef WK_P2P
+</span>	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">id</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numThreads</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">MPI_Recv</span><span class="p">(</span>
+				<span class="o">&amp;</span><span class="n">myAns</span><span class="p">,</span>
+				<span class="mi">1</span><span class="p">,</span>
+				<span class="n">MPI_DOUBLE</span><span class="p">,</span>
+				<span class="n">i</span><span class="p">,</span>
+				<span class="mi">0</span><span class="p">,</span>
+				<span class="n">MPI_COMM_WORLD</span><span class="p">,</span>
+				<span class="n">MPI_STATUES_IGNORE</span><span class="p">);</span>
+			<span class="n">ans</span> <span class="o">+=</span> <span class="n">myAns</span><span class="p">;</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+	<span class="k">else</span>
+		<span class="n">MPI_Send</span><span class="p">(</span>
+			<span class="o">&amp;</span><span class="n">myAns</span><span class="p">,</span>
+			<span class="mi">1</span><span class="p">,</span>
+			<span class="n">MPI_DOUBLE</span><span class="p">,</span>
+			<span class="mi">0</span><span class="p">,</span>
+			<span class="mi">0</span><span class="p">,</span>
+			<span class="n">MPI_COMM_WORLD</span><span class="p">);</span>
+<span class="cp">#else
+</span>	<span class="n">MPI_Reduce</span><span class="p">(</span>
+		<span class="o">&amp;</span><span class="n">myAns</span><span class="p">,</span>
+		<span class="o">&amp;</span><span class="n">ans</span><span class="p">,</span>
+		<span class="mi">1</span><span class="p">,</span>
+		<span class="n">MPI_DOUBLE</span><span class="p">,</span>
+		<span class="n">MPI_SUM</span><span class="p">,</span>
+		<span class="mi">0</span><span class="p">,</span>
+		<span class="n">MPI_COMM_WORLD</span><span class="p">);</span>
+<span class="cp">#endif
+</span>	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">id</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"%f with %d proces, problem size %.0f."</span><span class="p">,</span> <span class="n">ans</span><span class="p">,</span> <span class="n">numThreads</span><span class="p">,</span> <span class="n">n</span><span class="p">);</span>
+	<span class="n">MPI_Finalize</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="作业脚本integralpbs">作业脚本<code class="highlighter-rouge">integral.pbs</code></h3>
+
+<p>对于不同的核数需要不同的作业脚本，这里只给出512核对应的作业脚本<code class="highlighter-rouge">integral.pbs</code>。</p>
+
+<p>这里学习了一下从PBS的本地变量中获得mpiexec的运行配置的方法。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#PBS -N integral</span>
+<span class="c">#PBS -l nodes=16:ppn=32</span>
+<span class="c">#PBS -j oe</span>
+
+<span class="nb">source</span> /public/software/profile.d/mpi_openmpi-intel-2.1.2.sh
+mpicc integral.c <span class="nt">-o</span> integral <span class="nt">-std</span><span class="o">=</span>c11 <span class="nt">-lm</span>
+<span class="k">for </span>logN <span class="k">in </span>14 18 22 26 30 31 32
+<span class="k">do
+</span><span class="nb">time </span>mpiexec <span class="nt">-machinefile</span> <span class="nv">$PBS_NODEFILE</span> ./integral <span class="nv">$logN</span>
+<span class="k">done</span>
+</code></pre></div></div>
+
+<h3 id="输出文件integralo1761">输出文件<code class="highlighter-rouge">integral.o1761</code></h3>
+
+<p>对于不同的核数需要不同的输出文件，这里只给出512核对应输出文件<code class="highlighter-rouge">integral.o1761</code>。</p>
+
+<p>其他核数对应的输出文件见附件</p>
+
+<ul>
+  <li><code class="highlighter-rouge">integral.o1795</code>对应256核（<code class="highlighter-rouge">nodes=8:ppn=32</code>）</li>
+  <li><code class="highlighter-rouge">integral.o1796</code>对应128核（<code class="highlighter-rouge">nodes=4:ppn=32</code>）</li>
+  <li><code class="highlighter-rouge">integral.o1797</code>对应64核（<code class="highlighter-rouge">nodes=2:ppn=32</code>）</li>
+  <li><code class="highlighter-rouge">integral.o1798</code>对应32核（<code class="highlighter-rouge">nodes=1:ppn=32</code>）</li>
+  <li><code class="highlighter-rouge">integral.o1799</code>对应16核（<code class="highlighter-rouge">nodes=1:ppn=16</code>）</li>
+  <li><code class="highlighter-rouge">integral.o1800</code>对应8核（<code class="highlighter-rouge">nodes=1:ppn=8</code>）</li>
+  <li><code class="highlighter-rouge">integral.o1801</code>对应4核（<code class="highlighter-rouge">nodes=1:ppn=4</code>）</li>
+  <li><code class="highlighter-rouge">integral.o1802</code>对应2核（<code class="highlighter-rouge">nodes=1:ppn=2</code>）</li>
+  <li><code class="highlighter-rouge">integral.o1803</code>对应1核（<code class="highlighter-rouge">nodes=1:ppn=1</code>）</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>134218391.043055 with 512 proces, problem size 16384.
+real	0m1.802s
+user	0m2.328s
+sys	0m6.054s
+34359872522.271759 with 512 proces, problem size 262144.
+real	0m1.704s
+user	0m2.188s
+sys	0m5.706s
+8796101094338.814453 with 512 proces, problem size 4194304.
+real	0m1.695s
+user	0m2.281s
+sys	0m5.844s
+2251800146489160.500000 with 512 proces, problem size 67108864.
+real	0m1.754s
+user	0m4.053s
+sys	0m5.900s
+576461292861516288.000000 with 512 proces, problem size 1073741824.
+real	0m2.210s
+user	0m20.316s
+sys	0m5.308s
+2305845201815247872.000000 with 512 proces, problem size 2147483648.
+real	0m2.626s
+user	0m36.019s
+sys	0m4.861s
+9223215905289959424.000000 with 512 proces, problem size 4294967296.
+real	0m3.478s
+user	0m59.168s
+sys	0m5.120s
+</code></pre></div></div>
+
+<h2 id="完成正则采样排序psrs的mpi算法">完成正则采样排序PSRS的MPI算法</h2>
+
+<p>排序文件放在集群的shared_dir目录下，文件名为：psrs_data。文件采用二进制格式：头八个字节为排序数据个数(long int), 每个数据为8个字节。</p>
+
+<p>请按要求使用MPI集合通信：具体要求见课件。</p>
+
+<h3 id="psrsc">psrs.c</h3>
+
+<p>这里遇到一个问题，MPI数据类型选择<code class="highlighter-rouge">MPI_LONG_INT</code>时发现传过来的数据大小只有4个字节？于是使用<code class="highlighter-rouge">MPI_BYTE</code>类型，而将我们的数据按照比特重新计算大小并传输。</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//#define WK_GEN_DATA</span>
+<span class="cp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;mpi.h&gt;
+</span><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">int</span> <span class="n">ll</span><span class="p">;</span>
+<span class="kt">int</span> <span class="nf">sgn</span><span class="p">(</span><span class="n">ll</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="o">-</span><span class="mi">1</span> <span class="o">:</span> <span class="n">a</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span> <span class="p">}</span>
+<span class="kt">int</span> <span class="nf">cmpll</span><span class="p">(</span><span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">b</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">sgn</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">ll</span> <span class="o">*</span><span class="p">)</span><span class="n">a</span> <span class="o">-</span> <span class="o">*</span><span class="p">(</span><span class="n">ll</span> <span class="o">*</span><span class="p">)</span><span class="n">b</span><span class="p">);</span> <span class="p">}</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">id</span><span class="p">,</span> <span class="n">numThreads</span><span class="p">;</span>
+	<span class="n">MPI_Init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">argc</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">argv</span><span class="p">);</span>
+	<span class="kt">double</span> <span class="n">start</span> <span class="o">=</span> <span class="n">MPI_Wtime</span><span class="p">();</span>
+	<span class="n">MPI_Comm_rank</span><span class="p">(</span><span class="n">MPI_COMM_WORLD</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">id</span><span class="p">);</span>
+	<span class="n">MPI_Comm_size</span><span class="p">(</span><span class="n">MPI_COMM_WORLD</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">numThreads</span><span class="p">);</span>
+<span class="cp">#ifdef WK_GEN_DATA
+</span>	<span class="n">ll</span> <span class="n">n</span> <span class="o">=</span> <span class="p">((</span><span class="n">ll</span><span class="p">)</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">atoi</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+	   <span class="n">len</span> <span class="o">=</span> <span class="n">n</span> <span class="o">/</span> <span class="n">numThreads</span><span class="p">,</span>
+	   <span class="o">*</span><span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">ll</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">len</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">));</span>
+<span class="cp">#else
+</span>	<span class="n">ll</span> <span class="n">n</span><span class="p">;</span>
+	<span class="n">MPI_File</span> <span class="n">fh</span><span class="p">;</span>
+	<span class="n">MPI_File_open</span><span class="p">(</span>
+		<span class="n">MPI_COMM_WORLD</span><span class="p">,</span>
+		<span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+		<span class="n">MPI_MODE_RDONLY</span><span class="p">,</span>
+		<span class="n">MPI_INFO_NULL</span><span class="p">,</span>
+		<span class="o">&amp;</span><span class="n">fh</span><span class="p">);</span>
+	<span class="n">MPI_File_read_at_all</span><span class="p">(</span>
+		<span class="n">fh</span><span class="p">,</span>
+		<span class="mi">0</span><span class="p">,</span>
+		<span class="o">&amp;</span><span class="n">n</span><span class="p">,</span>
+		<span class="mi">1</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">),</span> <span class="c1">//1,</span>
+		<span class="n">MPI_BYTE</span><span class="p">,</span>		<span class="c1">//MPI_LONG_INT,</span>
+		<span class="n">MPI_STATUSES_IGNORE</span><span class="p">);</span>
+	<span class="n">ll</span> <span class="n">blockSize</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">numThreads</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">numThreads</span><span class="p">,</span>
+	   <span class="n">beg</span> <span class="o">=</span> <span class="n">id</span> <span class="o">*</span> <span class="n">blockSize</span><span class="p">,</span>
+	   <span class="n">end</span> <span class="o">=</span> <span class="n">beg</span> <span class="o">+</span> <span class="n">blockSize</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="o">?</span> <span class="n">beg</span> <span class="o">+</span> <span class="n">blockSize</span> <span class="o">:</span> <span class="n">n</span><span class="p">,</span>
+	   <span class="n">len</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">beg</span><span class="p">,</span>
+	   <span class="o">*</span><span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">ll</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">len</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">));</span>
+	<span class="n">MPI_File_read_at_all</span><span class="p">(</span>
+		<span class="n">fh</span><span class="p">,</span>
+		<span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">beg</span><span class="p">),</span>
+		<span class="n">a</span><span class="p">,</span>
+		<span class="n">len</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">),</span> <span class="c1">//len,</span>
+		<span class="n">MPI_BYTE</span><span class="p">,</span>		  <span class="c1">//MPI_LONG_INT,</span>
+		<span class="n">MPI_STATUSES_IGNORE</span><span class="p">);</span>
+	<span class="n">MPI_File_close</span><span class="p">(</span><span class="o">&amp;</span><span class="n">fh</span><span class="p">);</span>
+	<span class="n">MPI_Barrier</span><span class="p">(</span><span class="n">MPI_COMM_WORLD</span><span class="p">);</span>
+	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">id</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Finish reading %ld datas at %fs with %d procs.</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">MPI_Wtime</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="n">numThreads</span><span class="p">);</span>
+<span class="cp">#endif
+</span>	<span class="n">qsort</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">),</span> <span class="n">cmpll</span><span class="p">);</span>
+	<span class="c1">//局部排序</span>
+	<span class="n">ll</span> <span class="o">*</span><span class="n">sample</span> <span class="o">=</span> <span class="p">(</span><span class="n">ll</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">numThreads</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">)),</span>
+	   <span class="o">*</span><span class="n">sampleGather</span> <span class="o">=</span> <span class="p">(</span><span class="n">ll</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">numThreads</span> <span class="o">*</span> <span class="n">numThreads</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">));</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numThreads</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">sample</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">len</span> <span class="o">/</span> <span class="n">numThreads</span> <span class="o">*</span> <span class="n">i</span><span class="p">];</span>
+
+	<span class="c1">//采样</span>
+	<span class="n">MPI_Gather</span><span class="p">(</span>
+		<span class="n">sample</span><span class="p">,</span>
+		<span class="n">numThreads</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">),</span> <span class="c1">//numThreads,</span>
+		<span class="n">MPI_BYTE</span><span class="p">,</span>				 <span class="c1">//MPI_LONG_INT,</span>
+		<span class="n">sampleGather</span><span class="p">,</span>
+		<span class="n">numThreads</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">),</span> <span class="c1">//numThreads,</span>
+		<span class="n">MPI_BYTE</span><span class="p">,</span>				 <span class="c1">//MPI_LONG_INT,</span>
+		<span class="mi">0</span><span class="p">,</span>
+		<span class="n">MPI_COMM_WORLD</span><span class="p">);</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">id</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">qsort</span><span class="p">(</span><span class="n">sampleGather</span><span class="p">,</span> <span class="n">numThreads</span> <span class="o">*</span> <span class="n">numThreads</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">),</span> <span class="n">cmpll</span><span class="p">);</span> <span class="c1">//可优化为n路归并</span>
+		<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numThreads</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="n">sample</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampleGather</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">numThreads</span><span class="p">];</span> <span class="c1">//获得主元</span>
+<span class="cp">#ifndef WK_GEN_DATA
+</span>		<span class="n">printf</span><span class="p">(</span><span class="s">"Get privot at %fs with %d procs.</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">MPI_Wtime</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="n">numThreads</span><span class="p">);</span>
+<span class="cp">#endif
+</span>	<span class="p">}</span>
+
+	<span class="n">MPI_Bcast</span><span class="p">(</span>
+		<span class="n">sample</span><span class="p">,</span>
+		<span class="n">numThreads</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">),</span> <span class="c1">//numThreads,</span>
+		<span class="n">MPI_BYTE</span><span class="p">,</span>				 <span class="c1">//MPI_LONG_INT,</span>
+		<span class="mi">0</span><span class="p">,</span>
+		<span class="n">MPI_COMM_WORLD</span><span class="p">);</span> <span class="c1">//分发主元</span>
+
+	<span class="kt">int</span> <span class="o">*</span><span class="n">sendCounts</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">numThreads</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)),</span>
+		<span class="o">*</span><span class="n">recvCounts</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">numThreads</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)),</span>
+		<span class="o">*</span><span class="n">sdisp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">numThreads</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)),</span>
+		<span class="o">*</span><span class="n">rdisp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">numThreads</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numThreads</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">sendCounts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">while</span> <span class="p">(</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">numThreads</span> <span class="o">&amp;&amp;</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">sample</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+			<span class="o">++</span><span class="n">j</span><span class="p">;</span>
+		<span class="c1">//++sendCounts[j - 1];</span>
+		<span class="n">sendCounts</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">);</span>
+	<span class="p">}</span>
+
+	<span class="n">MPI_Alltoall</span><span class="p">(</span> <span class="c1">//提前通知一下节点，各个节点要准备接收多少数据</span>
+		<span class="n">sendCounts</span><span class="p">,</span>
+		<span class="c1">//1 * sizeof(int),</span>
+		<span class="mi">1</span><span class="p">,</span>
+		<span class="c1">//MPI_BYTE,</span>
+		<span class="n">MPI_INT</span><span class="p">,</span>
+		<span class="n">recvCounts</span><span class="p">,</span>
+		<span class="c1">//1 * sizeof(int),</span>
+		<span class="mi">1</span><span class="p">,</span>
+		<span class="c1">//MPI_BYTE,</span>
+		<span class="n">MPI_INT</span><span class="p">,</span>
+		<span class="n">MPI_COMM_WORLD</span><span class="p">);</span>
+<span class="cp">#ifndef WK_GEN_DATA
+</span>	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">id</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Send counts at %fs with %d procs.</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">MPI_Wtime</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="n">numThreads</span><span class="p">);</span>
+<span class="cp">#endif
+</span>	<span class="n">sdisp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">rdisp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">numThreads</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">sdisp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sendCounts</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">sdisp</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+		<span class="n">rdisp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">recvCounts</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">rdisp</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+	<span class="p">}</span>
+
+	<span class="c1">//ll *local = (ll *)malloc((rdisp[numThreads - 1] + recvCounts[numThreads - 1]) * sizeof(ll));</span>
+	<span class="n">ll</span> <span class="o">*</span><span class="n">local</span> <span class="o">=</span> <span class="p">(</span><span class="n">ll</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">rdisp</span><span class="p">[</span><span class="n">numThreads</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">recvCounts</span><span class="p">[</span><span class="n">numThreads</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]);</span>
+
+	<span class="n">MPI_Alltoallv</span><span class="p">(</span>
+		<span class="n">a</span><span class="p">,</span>
+		<span class="n">sendCounts</span><span class="p">,</span>
+		<span class="n">sdisp</span><span class="p">,</span>
+		<span class="n">MPI_BYTE</span><span class="p">,</span> <span class="c1">//MPI_LONG_INT,</span>
+		<span class="n">local</span><span class="p">,</span>
+		<span class="n">recvCounts</span><span class="p">,</span>
+		<span class="n">rdisp</span><span class="p">,</span>
+		<span class="n">MPI_BYTE</span><span class="p">,</span> <span class="c1">//MPI_LONG_INT,</span>
+		<span class="n">MPI_COMM_WORLD</span><span class="p">);</span>
+<span class="cp">#ifndef WK_GEN_DATA
+</span>	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">id</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Alltoallv at %fs with %d procs.</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">MPI_Wtime</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="n">numThreads</span><span class="p">);</span>
+<span class="cp">#endif
+</span>	<span class="c1">//qsort(local, rdisp[numThreads - 1] + recvCounts[numThreads - 1], sizeof(ll), cmpll); //可优化为n路归并</span>
+	<span class="n">qsort</span><span class="p">(</span><span class="n">local</span><span class="p">,</span> <span class="p">(</span><span class="n">rdisp</span><span class="p">[</span><span class="n">numThreads</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">recvCounts</span><span class="p">[</span><span class="n">numThreads</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">),</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ll</span><span class="p">),</span> <span class="n">cmpll</span><span class="p">);</span> <span class="c1">//可优化为n路归并</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">id</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Finish sort %ld elements at %fs with %d procs.</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">MPI_Wtime</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="n">numThreads</span><span class="p">);</span>
+
+	<span class="n">free</span><span class="p">(</span><span class="n">local</span><span class="p">);</span>
+	<span class="n">free</span><span class="p">(</span><span class="n">sendCounts</span><span class="p">);</span>
+	<span class="n">free</span><span class="p">(</span><span class="n">recvCounts</span><span class="p">);</span>
+	<span class="n">free</span><span class="p">(</span><span class="n">sdisp</span><span class="p">);</span>
+	<span class="n">free</span><span class="p">(</span><span class="n">rdisp</span><span class="p">);</span>
+
+	<span class="n">free</span><span class="p">(</span><span class="n">sample</span><span class="p">);</span>
+	<span class="n">free</span><span class="p">(</span><span class="n">sampleGather</span><span class="p">);</span>
+	<span class="n">free</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+
+	<span class="n">MPI_Finalize</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="psrspbs">psrs.pbs</h3>
+
+<p>作业调度脚本，直接使用能够获得的最大计算资源（512核）进行计算。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#PBS -N psrs</span>
+<span class="c">#PBS -l nodes=16:ppn=32</span>
+<span class="c">#PBS -j oe</span>
+
+<span class="nb">source</span> /public/software/profile.d/mpi_openmpi-intel-2.1.2.sh
+mpicc psrs.c <span class="nt">-o</span> psrs <span class="nt">-std</span><span class="o">=</span>c11
+mpiexec <span class="nt">-machinefile</span> <span class="nv">$PBS_NODEFILE</span> ./psrs /public/home/shared_dir/psrs_data
+</code></pre></div></div>
+
+<h3 id="psrso1529">psrs.o1529</h3>
+
+<p>作业脚本得到的输出文件。可以看到，这里一共使用了<code class="highlighter-rouge">18.124634s</code>就成功对<code class="highlighter-rouge">4294967295</code>个数进行了排序，其中有<code class="highlighter-rouge">6.403623s</code>花费在文件读入上，也就是总共花了不到十二秒就完成了排序，还是明显优于单机串行排序的。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Finish reading 4294967295 datas at 6.403623s with 512 procs.
+Get privot at 8.314104s with 512 procs.
+Send counts at 8.333872s with 512 procs.
+Alltoallv at 17.238057s with 512 procs.
+Finish all the works at 18.124634s with 512 procs.
+</code></pre></div></div>
+
+<h3 id="填表-1">填表</h3>
+
+<p>去掉<code class="highlighter-rouge">#define WK_GEN_DATA</code>前的注释，进行测试（不再从输入文件中得到数据，各进程随机生成指定问题规模规模的数据）。</p>
+
+<p>此外，由于并行正则采样排序的限制，排序元素的数量至少要是进程数的平方倍。因此这里问题规模从$2^18$开始（进程数最多有$512=2^9$个）。</p>
+
+<p>由于数据规模过大，进程数少的时候运行时间超过一小时被调度器<code class="highlighter-rouge">kill</code>了，因此对应数据没有测出运行时间和相应加速比。</p>
+
+<h4 id="运行时间t单位s-1">运行时间T（单位s）</h4>
+
+<p>详见下面的输出文件部分。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>进程数\问题规模</th>
+      <th>$2^{18}$</th>
+      <th>$2^{22}$</th>
+      <th>$2^{26}$</th>
+      <th>$2^{30}$</th>
+      <th>$2^{31}$</th>
+      <th>$2^{32}$</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>0.04</td>
+      <td>0.35</td>
+      <td>7.10</td>
+      <td>936.30</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>0.04</td>
+      <td>0.23</td>
+      <td>3.10</td>
+      <td>463.53</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0.05</td>
+      <td>0.20</td>
+      <td>2.12</td>
+      <td>229.26</td>
+      <td>890.62</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>0.05</td>
+      <td>0.18</td>
+      <td>1.56</td>
+      <td>149.69</td>
+      <td>592.83</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>0.05</td>
+      <td>0.20</td>
+      <td>1.22</td>
+      <td>80.37</td>
+      <td>250.98</td>
+      <td>490.23</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>0.09</td>
+      <td>0.22</td>
+      <td>0.96</td>
+      <td>43.30</td>
+      <td>176.67</td>
+      <td>277.68</td>
+    </tr>
+    <tr>
+      <td>64</td>
+      <td>0.14</td>
+      <td>0.47</td>
+      <td>0.89</td>
+      <td>21.77</td>
+      <td>136.30</td>
+      <td>90.79</td>
+    </tr>
+    <tr>
+      <td>128</td>
+      <td>0.21</td>
+      <td>0.44</td>
+      <td>1.13</td>
+      <td>17.87</td>
+      <td>33.21</td>
+      <td>44.52</td>
+    </tr>
+    <tr>
+      <td>256</td>
+      <td>0.29</td>
+      <td>0.45</td>
+      <td>1.28</td>
+      <td>9.22</td>
+      <td>17.43</td>
+      <td>23.93</td>
+    </tr>
+    <tr>
+      <td>512</td>
+      <td>0.38</td>
+      <td>0.57</td>
+      <td>1.47</td>
+      <td>5.10</td>
+      <td>8.30</td>
+      <td>14.47</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="加速比s-1">加速比S</h4>
+
+<p>加速比S=同等规模下的串行时间/并行时间。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>进程数\问题规模</th>
+      <th>$2^{18}$</th>
+      <th>$2^{22}$</th>
+      <th>$2^{26}$</th>
+      <th>$2^{30}$</th>
+      <th>$2^{31}$</th>
+      <th>$2^{32}$</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>1.00</td>
+      <td>0.35</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>1.00</td>
+      <td>1.52</td>
+      <td>2.29</td>
+      <td>2.02</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0.80</td>
+      <td>1.75</td>
+      <td>3.35</td>
+      <td>4.08</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>0.80</td>
+      <td>1.94</td>
+      <td>4.55</td>
+      <td>6.25</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>0.80</td>
+      <td>1.75</td>
+      <td>5.81</td>
+      <td>11.65</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>0.44</td>
+      <td>1.59</td>
+      <td>7.40</td>
+      <td>21.62</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>64</td>
+      <td>0.29</td>
+      <td>0.74</td>
+      <td>7.98</td>
+      <td>43.00</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>128</td>
+      <td>0.19</td>
+      <td>0.80</td>
+      <td>6.28</td>
+      <td>52.40</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>256</td>
+      <td>0.14</td>
+      <td>0.78</td>
+      <td>5.55</td>
+      <td>101.55</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>512</td>
+      <td>0.11</td>
+      <td>0.61</td>
+      <td>4.83</td>
+      <td>183.58</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="效率e-1">效率E</h4>
+
+<p>运行效率E=加速比S/并行线程数。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>进程数\问题规模</th>
+      <th>$2^{18}$</th>
+      <th>$2^{22}$</th>
+      <th>$2^{26}$</th>
+      <th>$2^{30}$</th>
+      <th>$2^{31}$</th>
+      <th>$2^{32}$</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>1.00</td>
+      <td>0.35</td>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>1.00</td>
+      <td>0.76</td>
+      <td>1.15</td>
+      <td>1.01</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0.20</td>
+      <td>0.44</td>
+      <td>0.84</td>
+      <td>1.02</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>0.10</td>
+      <td>0.24</td>
+      <td>0.57</td>
+      <td>0.78</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td>0.05</td>
+      <td>0.11</td>
+      <td>0.32</td>
+      <td>0.73</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>0.01</td>
+      <td>0.05</td>
+      <td>0.23</td>
+      <td>0.66</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>64</td>
+      <td>0.005</td>
+      <td>0.01</td>
+      <td>0.12</td>
+      <td>0.67</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>128</td>
+      <td>0.001</td>
+      <td>0.006</td>
+      <td>0.05</td>
+      <td>0.41</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>256</td>
+      <td>0.0005</td>
+      <td>0.003</td>
+      <td>0.02</td>
+      <td>0.40</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+    <tr>
+      <td>512</td>
+      <td>0.0002</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>0.36</td>
+      <td>x</td>
+      <td>x</td>
+    </tr>
+  </tbody>
+</table>
+:ET

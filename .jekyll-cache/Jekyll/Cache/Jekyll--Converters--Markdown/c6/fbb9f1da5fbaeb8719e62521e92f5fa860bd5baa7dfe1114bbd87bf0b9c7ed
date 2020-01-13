@@ -1,0 +1,319 @@
+I"�<p><a href="https://easyhpc.org/problems/program/355/">题目链接</a></p>
+
+<p>第一次做不是ACM的题解了。</p>
+
+<p>使用MPI实现2.7.1节讨论的直方图程序，进程0读取输入的数据，并将它们分配到其余进程，最后进程0打印该直方图。
+请根据提供的代码，将代码补充完整！ 需要补充的部分见注释 PLEASE ADD THE RIGHT CODES 部分。可直接点击下方作业题目跳转至在线编程平台，点击参考代码，补充完整后提交。（或下载附件 prog3.1_mpi_histo(blank).zip）</p>
+
+<p>在参考代码的基础上加了155行和168~175行就解决问题了。这里找对应下标的时候使用了二分，其实是可以直接算出来的。</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
+ * File:     prog3.1_mpi_histo.c
+ *
+ * Purpose:  Use MPI to implement a program that creates a histogram
+ *
+ * Compile:  mpicc -g -Wall -o prog3.1_mpi_histo prog3.1_mpi_histo.c
+ * Run:      mpiexec -n &lt;comm_sz&gt; ./prog3.1_mpi_histo
+ *
+ * Input:    Number of bins
+ *           Minimum measurement
+ *           Maximum measurement
+ *           Number of data items
+ *
+ * Output:   Histogram of the data.  If DEBUG flag is set, the data
+ *           generated.
+ *
+ * Notes:
+ * 1.  The number of data must be evenly divisible by the number of processes
+ * 2.  The program generates random floats x in the range
+ *
+ *        min measurement &lt;= x &lt; max measurement
+ *
+ * 3.  If i &gt;= 1, the ith bin contains measurements x in the
+ *     range
+ *
+ *        bin_maxes[i-1] &lt;= x &lt; bin_maxes[i]
+ *
+ *     Bin 0 will contain measurements x in the range
+ *
+ *        min measurement &lt;= x &lt; bin_maxes[0]
+ *
+ *
+ * IPP:     Programming Assignment 3.1
+ */</span>
+
+<span class="cp">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;mpi.h&gt;
+</span>
+<span class="kt">void</span> <span class="nf">Get_input</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">bin_count_p</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">min_meas_p</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">max_meas_p</span><span class="p">,</span>
+			   <span class="kt">int</span> <span class="o">*</span><span class="n">data_count_p</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">local_data_count_p</span><span class="p">,</span> <span class="kt">int</span> <span class="n">my_rank</span><span class="p">,</span>
+			   <span class="kt">int</span> <span class="n">comm_sz</span><span class="p">,</span> <span class="n">MPI_Comm</span> <span class="n">comm</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">Check_for_error</span><span class="p">(</span><span class="kt">int</span> <span class="n">local_ok</span><span class="p">,</span> <span class="kt">char</span> <span class="n">fname</span><span class="p">[],</span> <span class="kt">char</span> <span class="n">message</span><span class="p">[],</span>
+					 <span class="n">MPI_Comm</span> <span class="n">comm</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">Gen_data</span><span class="p">(</span><span class="kt">float</span> <span class="n">local_data</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">local_data_count</span><span class="p">,</span> <span class="kt">int</span> <span class="n">data_count</span><span class="p">,</span>
+			  <span class="kt">float</span> <span class="n">min_meas</span><span class="p">,</span> <span class="kt">float</span> <span class="n">max_meas</span><span class="p">,</span> <span class="kt">int</span> <span class="n">my_rank</span><span class="p">,</span> <span class="n">MPI_Comm</span> <span class="n">comm</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">Set_bins</span><span class="p">(</span><span class="kt">float</span> <span class="n">bin_maxes</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">loc_bin_cts</span><span class="p">[],</span> <span class="kt">float</span> <span class="n">min_meas</span><span class="p">,</span>
+			  <span class="kt">float</span> <span class="n">max_meas</span><span class="p">,</span> <span class="kt">int</span> <span class="n">bin_count</span><span class="p">,</span> <span class="kt">int</span> <span class="n">my_rank</span><span class="p">,</span> <span class="n">MPI_Comm</span> <span class="n">comm</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">Find_bins</span><span class="p">(</span><span class="kt">int</span> <span class="n">bin_counts</span><span class="p">[],</span> <span class="kt">float</span> <span class="n">local_data</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">loc_bin_cts</span><span class="p">[],</span>
+			   <span class="kt">int</span> <span class="n">local_data_count</span><span class="p">,</span> <span class="kt">float</span> <span class="n">bin_maxes</span><span class="p">[],</span>
+			   <span class="kt">int</span> <span class="n">bin_count</span><span class="p">,</span> <span class="kt">float</span> <span class="n">min_meas</span><span class="p">,</span> <span class="n">MPI_Comm</span> <span class="n">comm</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">Which_bin</span><span class="p">(</span><span class="kt">float</span> <span class="n">data</span><span class="p">,</span> <span class="kt">float</span> <span class="n">bin_maxes</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">bin_count</span><span class="p">,</span>
+			  <span class="kt">float</span> <span class="n">min_meas</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">Print_histo</span><span class="p">(</span><span class="kt">float</span> <span class="n">bin_maxes</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">bin_counts</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">bin_count</span><span class="p">,</span>
+				 <span class="kt">float</span> <span class="n">min_meas</span><span class="p">);</span>
+
+<span class="cm">/*---------------------------------------------------------------------*/</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">bin_count</span><span class="p">;</span>
+
+	<span class="kt">float</span> <span class="n">min_meas</span><span class="p">,</span> <span class="n">max_meas</span><span class="p">;</span>
+	<span class="kt">float</span> <span class="o">*</span><span class="n">bin_maxes</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="o">*</span><span class="n">bin_counts</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="o">*</span><span class="n">loc_bin_cts</span><span class="p">;</span>
+
+	<span class="kt">int</span> <span class="n">data_count</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="n">local_data_count</span><span class="p">;</span>
+
+	<span class="kt">float</span> <span class="o">*</span><span class="n">data</span><span class="p">;</span>
+	<span class="kt">float</span> <span class="o">*</span><span class="n">local_data</span><span class="p">;</span>
+
+	<span class="kt">int</span> <span class="n">my_rank</span><span class="p">,</span> <span class="n">comm_sz</span><span class="p">;</span>
+	<span class="n">MPI_Comm</span> <span class="n">comm</span><span class="p">;</span>
+
+	<span class="n">MPI_Init</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+	<span class="n">comm</span> <span class="o">=</span> <span class="n">MPI_COMM_WORLD</span><span class="p">;</span>
+	<span class="n">MPI_Comm_size</span><span class="p">(</span><span class="n">comm</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">comm_sz</span><span class="p">);</span>
+	<span class="n">MPI_Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">my_rank</span><span class="p">);</span>
+
+	<span class="c1">// get user inputs for bin_count, max_meas, min_meas, and data_count</span>
+	<span class="n">Get_input</span><span class="p">(</span><span class="o">&amp;</span><span class="n">bin_count</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">min_meas</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">max_meas</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">data_count</span><span class="p">,</span>
+			  <span class="o">&amp;</span><span class="n">local_data_count</span><span class="p">,</span> <span class="n">my_rank</span><span class="p">,</span> <span class="n">comm_sz</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+
+	<span class="c1">// allocate arrays</span>
+	<span class="n">bin_maxes</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="n">bin_count</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">));</span>
+	<span class="n">bin_counts</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="n">bin_count</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+	<span class="n">loc_bin_cts</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="n">bin_count</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+	<span class="n">data</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="n">data_count</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">));</span>
+	<span class="n">local_data</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="n">local_data_count</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">));</span>
+
+	<span class="n">Set_bins</span><span class="p">(</span><span class="n">bin_maxes</span><span class="p">,</span> <span class="n">loc_bin_cts</span><span class="p">,</span> <span class="n">min_meas</span><span class="p">,</span> <span class="n">max_meas</span><span class="p">,</span> <span class="n">bin_count</span><span class="p">,</span>
+			 <span class="n">my_rank</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+	<span class="n">Gen_data</span><span class="p">(</span><span class="n">local_data</span><span class="p">,</span> <span class="n">local_data_count</span><span class="p">,</span> <span class="n">data_count</span><span class="p">,</span> <span class="n">min_meas</span><span class="p">,</span>
+			 <span class="n">max_meas</span><span class="p">,</span> <span class="n">my_rank</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+	<span class="n">Find_bins</span><span class="p">(</span><span class="n">bin_counts</span><span class="p">,</span> <span class="n">local_data</span><span class="p">,</span> <span class="n">loc_bin_cts</span><span class="p">,</span> <span class="n">local_data_count</span><span class="p">,</span>
+			  <span class="n">bin_maxes</span><span class="p">,</span> <span class="n">bin_count</span><span class="p">,</span> <span class="n">min_meas</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">my_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+		<span class="n">Print_histo</span><span class="p">(</span><span class="n">bin_maxes</span><span class="p">,</span> <span class="n">bin_counts</span><span class="p">,</span> <span class="n">bin_count</span><span class="p">,</span> <span class="n">min_meas</span><span class="p">);</span>
+
+	<span class="n">free</span><span class="p">(</span><span class="n">bin_maxes</span><span class="p">);</span>
+	<span class="n">free</span><span class="p">(</span><span class="n">bin_counts</span><span class="p">);</span>
+	<span class="n">free</span><span class="p">(</span><span class="n">loc_bin_cts</span><span class="p">);</span>
+	<span class="n">free</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+	<span class="n">free</span><span class="p">(</span><span class="n">local_data</span><span class="p">);</span>
+	<span class="n">MPI_Finalize</span><span class="p">();</span>
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="p">}</span> <span class="cm">/* main */</span>
+
+<span class="cm">/*---------------------------------------------------------------------*/</span>
+<span class="kt">void</span> <span class="nf">Print_histo</span><span class="p">(</span>
+	<span class="kt">float</span> <span class="n">bin_maxes</span><span class="p">[]</span> <span class="cm">/* in */</span><span class="p">,</span>
+	<span class="kt">int</span> <span class="n">bin_counts</span><span class="p">[]</span> <span class="cm">/* in */</span><span class="p">,</span>
+	<span class="kt">int</span> <span class="n">bin_count</span> <span class="cm">/* in */</span><span class="p">,</span>
+	<span class="kt">float</span> <span class="n">min_meas</span> <span class="cm">/* in */</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">;</span>
+	<span class="kt">float</span> <span class="n">bin_max</span><span class="p">,</span> <span class="n">bin_min</span><span class="p">;</span>
+
+	<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">bin_count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">bin_max</span> <span class="o">=</span> <span class="n">bin_maxes</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+		<span class="n">bin_min</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">?</span> <span class="n">min_meas</span> <span class="o">:</span> <span class="n">bin_maxes</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"%.3f-%.3f:</span><span class="se">\t</span><span class="s">"</span><span class="p">,</span> <span class="n">bin_min</span><span class="p">,</span> <span class="n">bin_max</span><span class="p">);</span>
+		<span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">bin_counts</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"X"</span><span class="p">);</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">}</span> <span class="cm">/* Print_histo */</span>
+
+<span class="cm">/*---------------------------------------------------------------------*/</span>
+<span class="kt">void</span> <span class="nf">Find_bins</span><span class="p">(</span>
+	<span class="kt">int</span> <span class="n">bin_counts</span><span class="p">[]</span> <span class="cm">/* out */</span><span class="p">,</span>
+	<span class="kt">float</span> <span class="n">local_data</span><span class="p">[]</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="kt">int</span> <span class="n">loc_bin_cts</span><span class="p">[]</span> <span class="cm">/* out */</span><span class="p">,</span>
+	<span class="kt">int</span> <span class="n">local_data_count</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="kt">float</span> <span class="n">bin_maxes</span><span class="p">[]</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="kt">int</span> <span class="n">bin_count</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="kt">float</span> <span class="n">min_meas</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="n">MPI_Comm</span> <span class="n">comm</span><span class="p">)</span>
+<span class="p">{</span>
+
+	<span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">bin</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">local_data_count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">bin</span> <span class="o">=</span> <span class="n">Which_bin</span><span class="p">(</span><span class="n">local_data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">bin_maxes</span><span class="p">,</span> <span class="n">bin_count</span><span class="p">,</span> <span class="n">min_meas</span><span class="p">);</span>
+		<span class="n">loc_bin_cts</span><span class="p">[</span><span class="n">bin</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="cm">/*******************************************************************/</span>
+
+	<span class="c1">//PLEASE ADD THE RIGHT CODES</span>
+	<span class="n">MPI_Reduce</span><span class="p">(</span><span class="n">loc_bin_cts</span><span class="p">,</span> <span class="n">bin_counts</span><span class="p">,</span> <span class="n">bin_count</span><span class="p">,</span> <span class="n">MPI_INT</span><span class="p">,</span> <span class="n">MPI_SUM</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+
+	<span class="cm">/******************************************************************/</span>
+<span class="p">}</span> <span class="cm">/* Find_bins */</span>
+
+<span class="cm">/*---------------------------------------------------------------------*/</span>
+<span class="kt">int</span> <span class="nf">Which_bin</span><span class="p">(</span><span class="kt">float</span> <span class="n">data</span><span class="p">,</span> <span class="kt">float</span> <span class="n">bin_maxes</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">bin_count</span><span class="p">,</span>
+			  <span class="kt">float</span> <span class="n">min_meas</span><span class="p">)</span>
+<span class="p">{</span>
+
+	<span class="cm">/*******************************************************************/</span>
+
+	<span class="c1">//PLEASE ADD THE RIGHT CODES</span>
+	<span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">e</span> <span class="o">=</span> <span class="n">bin_count</span><span class="p">;</span>
+	<span class="k">while</span> <span class="p">(</span><span class="n">e</span> <span class="o">-</span> <span class="n">b</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="kt">int</span> <span class="n">m</span> <span class="o">=</span> <span class="n">b</span> <span class="o">+</span> <span class="p">(</span><span class="n">e</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+		<span class="n">data</span> <span class="o">&lt;</span> <span class="n">bin_maxes</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">?</span> <span class="p">(</span><span class="n">b</span> <span class="o">=</span> <span class="n">m</span><span class="p">)</span> <span class="o">:</span> <span class="p">(</span><span class="n">e</span> <span class="o">=</span> <span class="n">m</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">b</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">b</span><span class="p">;</span>
+	<span class="cm">/******************************************************************/</span>
+
+	<span class="n">printf</span><span class="p">(</span><span class="s">"Uh oh . . .</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span> <span class="cm">/* Which_bin */</span>
+
+<span class="cm">/*---------------------------------------------------------------------*/</span>
+<span class="kt">void</span> <span class="nf">Set_bins</span><span class="p">(</span>
+	<span class="kt">float</span> <span class="n">bin_maxes</span><span class="p">[]</span> <span class="cm">/* out */</span><span class="p">,</span>
+	<span class="kt">int</span> <span class="n">loc_bin_cts</span><span class="p">[]</span> <span class="cm">/* out */</span><span class="p">,</span>
+	<span class="kt">float</span> <span class="n">min_meas</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="kt">float</span> <span class="n">max_meas</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="kt">int</span> <span class="n">bin_count</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="kt">int</span> <span class="n">my_rank</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="n">MPI_Comm</span> <span class="n">comm</span> <span class="cm">/* in  */</span><span class="p">)</span>
+<span class="p">{</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">my_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+		<span class="kt">float</span> <span class="n">bin_width</span><span class="p">;</span>
+		<span class="n">bin_width</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_meas</span> <span class="o">-</span> <span class="n">min_meas</span><span class="p">)</span> <span class="o">/</span> <span class="n">bin_count</span><span class="p">;</span>
+
+		<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">bin_count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">loc_bin_cts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+			<span class="n">bin_maxes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_meas</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">bin_width</span><span class="p">;</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="c1">// set bin_maxes for each proc</span>
+	<span class="n">MPI_Bcast</span><span class="p">(</span><span class="n">bin_maxes</span><span class="p">,</span> <span class="n">bin_count</span><span class="p">,</span> <span class="n">MPI_FLOAT</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+
+	<span class="c1">// reset loc_bin_cts of each proc</span>
+	<span class="n">MPI_Bcast</span><span class="p">(</span><span class="n">loc_bin_cts</span><span class="p">,</span> <span class="n">bin_count</span><span class="p">,</span> <span class="n">MPI_INT</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+<span class="p">}</span> <span class="cm">/* Set_bins */</span>
+
+<span class="cm">/*---------------------------------------------------------------------*/</span>
+<span class="kt">void</span> <span class="nf">Gen_data</span><span class="p">(</span>
+	<span class="kt">float</span> <span class="n">local_data</span><span class="p">[]</span> <span class="cm">/* out */</span><span class="p">,</span>
+	<span class="kt">int</span> <span class="n">local_data_count</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="kt">int</span> <span class="n">data_count</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="kt">float</span> <span class="n">min_meas</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="kt">float</span> <span class="n">max_meas</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="kt">int</span> <span class="n">my_rank</span> <span class="cm">/* in  */</span><span class="p">,</span>
+	<span class="n">MPI_Comm</span> <span class="n">comm</span> <span class="cm">/* in  */</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+	<span class="kt">float</span> <span class="o">*</span><span class="n">data</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">my_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">data</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="n">data_count</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">float</span><span class="p">));</span>
+		<span class="n">srandom</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+		<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">data_count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+			<span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span>
+				<span class="n">min_meas</span> <span class="o">+</span> <span class="p">(</span><span class="n">max_meas</span> <span class="o">-</span> <span class="n">min_meas</span><span class="p">)</span> <span class="o">*</span> <span class="n">random</span><span class="p">()</span> <span class="o">/</span> <span class="p">((</span><span class="kt">double</span><span class="p">)</span><span class="n">RAND_MAX</span><span class="p">);</span>
+<span class="cp">#ifdef DEBUG
+</span>		<span class="n">printf</span><span class="p">(</span><span class="s">"Generated data:</span><span class="se">\n</span><span class="s">   "</span><span class="p">);</span>
+		<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">data_count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+			<span class="n">printf</span><span class="p">(</span><span class="s">"%.3f "</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">);</span>
+<span class="cp">#endif
+</span>		<span class="n">MPI_Scatter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">local_data_count</span><span class="p">,</span> <span class="n">MPI_FLOAT</span><span class="p">,</span> <span class="n">local_data</span><span class="p">,</span>
+					<span class="n">local_data_count</span><span class="p">,</span> <span class="n">MPI_FLOAT</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+		<span class="n">free</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+	<span class="p">}</span>
+	<span class="k">else</span>
+	<span class="p">{</span>
+		<span class="n">MPI_Scatter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">local_data_count</span><span class="p">,</span> <span class="n">MPI_FLOAT</span><span class="p">,</span> <span class="n">local_data</span><span class="p">,</span>
+					<span class="n">local_data_count</span><span class="p">,</span> <span class="n">MPI_FLOAT</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+	<span class="p">}</span>
+
+<span class="p">}</span> <span class="cm">/* Gen_data */</span>
+
+<span class="cm">/*---------------------------------------------------------------------*/</span>
+<span class="kt">void</span> <span class="nf">Get_input</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">bin_count_p</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">min_meas_p</span><span class="p">,</span> <span class="kt">float</span> <span class="o">*</span><span class="n">max_meas_p</span><span class="p">,</span>
+			   <span class="kt">int</span> <span class="o">*</span><span class="n">data_count_p</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">local_data_count_p</span><span class="p">,</span> <span class="kt">int</span> <span class="n">my_rank</span><span class="p">,</span>
+			   <span class="kt">int</span> <span class="n">comm_sz</span><span class="p">,</span> <span class="n">MPI_Comm</span> <span class="n">comm</span><span class="p">)</span>
+<span class="p">{</span>
+
+	<span class="kt">int</span> <span class="n">local_ok</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">my_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Enter the number of bins</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span> <span class="n">bin_count_p</span><span class="p">);</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Enter the minimum measurement</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%f"</span><span class="p">,</span> <span class="n">min_meas_p</span><span class="p">);</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Enter the maximum measurement</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%f"</span><span class="p">,</span> <span class="n">max_meas_p</span><span class="p">);</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"Enter the number of data</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span> <span class="n">data_count_p</span><span class="p">);</span>
+	<span class="p">}</span>
+
+	<span class="n">MPI_Bcast</span><span class="p">(</span><span class="n">bin_count_p</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">MPI_INT</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+	<span class="n">MPI_Bcast</span><span class="p">(</span><span class="n">min_meas_p</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">MPI_INT</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+	<span class="n">MPI_Bcast</span><span class="p">(</span><span class="n">max_meas_p</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">MPI_INT</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+	<span class="n">MPI_Bcast</span><span class="p">(</span><span class="n">data_count_p</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">MPI_INT</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">data_count_p</span> <span class="o">%</span> <span class="n">comm_sz</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+		<span class="n">local_ok</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+	<span class="n">Check_for_error</span><span class="p">(</span><span class="n">local_ok</span><span class="p">,</span> <span class="s">"Get_input"</span><span class="p">,</span>
+					<span class="s">"data_count must be evenly divisible by comm_sz"</span><span class="p">,</span>
+					<span class="n">comm</span><span class="p">);</span>
+	<span class="o">*</span><span class="n">local_data_count_p</span> <span class="o">=</span> <span class="o">*</span><span class="n">data_count_p</span> <span class="o">/</span> <span class="n">comm_sz</span><span class="p">;</span>
+
+<span class="p">}</span> <span class="cm">/* Get_input */</span>
+
+<span class="cm">/*---------------------------------------------------------------------*/</span>
+<span class="kt">void</span> <span class="nf">Check_for_error</span><span class="p">(</span>
+	<span class="kt">int</span> <span class="n">local_ok</span> <span class="cm">/* in */</span><span class="p">,</span>
+	<span class="kt">char</span> <span class="n">fname</span><span class="p">[]</span> <span class="cm">/* in */</span><span class="p">,</span>
+	<span class="kt">char</span> <span class="n">message</span><span class="p">[]</span> <span class="cm">/* in */</span><span class="p">,</span>
+	<span class="n">MPI_Comm</span> <span class="n">comm</span> <span class="cm">/* in */</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">ok</span><span class="p">;</span>
+
+	<span class="n">MPI_Allreduce</span><span class="p">(</span><span class="o">&amp;</span><span class="n">local_ok</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ok</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">MPI_INT</span><span class="p">,</span> <span class="n">MPI_MIN</span><span class="p">,</span> <span class="n">comm</span><span class="p">);</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">ok</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="kt">int</span> <span class="n">my_rank</span><span class="p">;</span>
+		<span class="n">MPI_Comm_rank</span><span class="p">(</span><span class="n">comm</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">my_rank</span><span class="p">);</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">my_rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+		<span class="p">{</span>
+			<span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">"Proc %d &gt; In %s, %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">my_rank</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span>
+					<span class="n">message</span><span class="p">);</span>
+			<span class="n">fflush</span><span class="p">(</span><span class="n">stderr</span><span class="p">);</span>
+		<span class="p">}</span>
+		<span class="n">MPI_Finalize</span><span class="p">();</span>
+		<span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+	<span class="p">}</span>
+<span class="p">}</span> <span class="cm">/* Check_for_error */</span>
+</code></pre></div></div>
+:ET

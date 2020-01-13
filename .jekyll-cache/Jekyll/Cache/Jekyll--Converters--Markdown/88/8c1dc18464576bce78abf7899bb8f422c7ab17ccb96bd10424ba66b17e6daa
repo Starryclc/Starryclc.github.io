@@ -1,0 +1,51 @@
+I"8 <p><a href="https://easyhpc.org/problems/program/362/">题目链接</a></p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;semaphore.h&gt;
+</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">sem_t</span> <span class="n">sumMux</span><span class="p">;</span>
+<span class="kt">void</span> <span class="nf">myMin</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">ret</span> <span class="o">=</span> <span class="n">ret</span> <span class="o">&lt;</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">?</span> <span class="n">ret</span> <span class="o">:</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+	<span class="n">sem_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sumMux</span><span class="p">);</span>
+	<span class="n">sum</span> <span class="o">+=</span> <span class="n">ret</span><span class="p">;</span>
+	<span class="n">sem_post</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sumMux</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kt">void</span> <span class="nf">myMax</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">ret</span> <span class="o">=</span> <span class="n">ret</span> <span class="o">&gt;</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">?</span> <span class="n">ret</span> <span class="o">:</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+	<span class="n">sem_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sumMux</span><span class="p">);</span>
+	<span class="n">sum</span> <span class="o">+=</span> <span class="n">ret</span><span class="p">;</span>
+	<span class="n">sem_post</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sumMux</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kt">void</span> <span class="nf">myAvg</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">ret</span> <span class="o">+=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+	<span class="n">sem_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sumMux</span><span class="p">);</span>
+	<span class="n">sum</span> <span class="o">+=</span> <span class="n">ret</span> <span class="o">/</span> <span class="n">n</span><span class="p">;</span>
+	<span class="n">sem_post</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sumMux</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">n</span><span class="p">);</span>
+	<span class="n">a</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">n</span><span class="p">);</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+	<span class="n">pthread_t</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+	<span class="n">sem_init</span><span class="p">(</span><span class="o">&amp;</span><span class="n">sumMux</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+	<span class="n">pthread_create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">myMin</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+	<span class="n">pthread_create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">myMax</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+	<span class="n">pthread_create</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">myAvg</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+	<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ret</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+		<span class="n">pthread_join</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">NULL</span><span class="p">);</span>
+	<span class="n">free</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span> <span class="n">sum</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+:ET

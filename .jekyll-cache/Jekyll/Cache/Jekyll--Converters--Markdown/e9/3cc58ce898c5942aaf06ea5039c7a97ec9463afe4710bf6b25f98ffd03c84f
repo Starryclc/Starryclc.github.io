@@ -1,0 +1,4 @@
+I"m<p><a href="https://vjudge.net/problem/UVA-11992">题目链接</a>
+<a href="https://wu-kan.github.io/posts/acm/template/数据结构">数据结构模板</a>
+对蓝书上的懒标记进行加强，将对区间的操作改成区间线性变换，那么区间修改就是区间先乘0在修改，区间加就是区间先乘1再加。这样敲反而简单很多。</p>
+:ET

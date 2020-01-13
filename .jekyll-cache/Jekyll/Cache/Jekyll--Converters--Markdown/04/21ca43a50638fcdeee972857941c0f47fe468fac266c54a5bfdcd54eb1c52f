@@ -1,0 +1,3734 @@
+I"͜<h2 id="实验题目">实验题目</h2>
+
+<p>RIP配置实验</p>
+
+<h2 id="实验目的">实验目的</h2>
+
+<p>学习RIPv2的配置方法。</p>
+
+<h2 id="配置命令">配置命令</h2>
+
+<h3 id="配置ripv2协议">配置RIPv2协议</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>       R1<span class="o">(</span>config<span class="o">)</span><span class="c"># router rip</span>
+       R1<span class="o">(</span>config-router<span class="o">)</span><span class="c"># version 2</span>
+       R1<span class="o">(</span>config-router<span class="o">)</span><span class="c"># network 192.168.2.0   ! 发布属于有类网络的网络的接口的子网</span>
+       R1<span class="o">(</span>config-router<span class="o">)</span><span class="c"># network 192.168.3.0</span>
+</code></pre></div></div>
+
+<h3 id="把交换机接口变为三层接口然后就可以配置ip地址本实验要把交换机当路由器用">把交换机接口变为三层接口，然后就可以配置IP地址。（本实验要把交换机当路由器用）</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="o">(</span>config<span class="o">)</span><span class="c">#interface f0/1</span>
+   <span class="o">(</span>config-if<span class="o">)</span><span class="c">#no switchport</span>
+   <span class="o">(</span>config-if<span class="o">)</span><span class="c">#ip address  192.168.1.5  255.255.255.0</span>
+</code></pre></div></div>
+
+<h3 id="为环回接口配置ip地址环回接口是路由器内部的软接口除非路由器失效否则环回接口一直有效">为环回接口配置IP地址。环回接口是路由器内部的软接口，除非路由器失效，否则，环回接口一直有效</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="o">(</span>config<span class="o">)</span><span class="c">#interface loopback 0              ！号码范围：0~2147483647</span>
+   <span class="o">(</span>config-if<span class="o">)</span><span class="c">#ip address  192.168.1.5  255.255.255.0</span>
+</code></pre></div></div>
+
+<h3 id="取消自动汇总">取消自动汇总</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="o">(</span>config-router<span class="o">)</span><span class="c">#router rip</span>
+       <span class="o">(</span>config-router<span class="o">)</span><span class="c">#auto-summary       !启动自动汇总</span>
+       <span class="o">(</span>config-router<span class="o">)</span><span class="c">#no auto-summary    !取消自动汇总</span>
+</code></pre></div></div>
+
+<h3 id="配置水平分割">配置水平分割</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   <span class="o">(</span>config<span class="o">)</span><span class="c">#interface f0/1</span>
+       <span class="o">(</span>config-if<span class="o">)</span><span class="c">#ip split-horizon        ! 配置水平分割(默认)</span>
+       <span class="o">(</span>config-if<span class="o">)</span><span class="c">#no ip split-horizon     ! 取消水平分割</span>
+</code></pre></div></div>
+
+<h3 id="显示调试信息">显示调试信息</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>       <span class="c">#debug ip rip      ！显示rip调试信息</span>
+       <span class="c">#no debug ip rip   ！停止显示rip调试信息</span>
+       <span class="c">#no debug all      ！停止显示所有调试信息</span>
+</code></pre></div></div>
+
+<h2 id="实验任务">实验任务</h2>
+
+<h3 id="按下图配置rip路由协议">按下图配置RIP路由协议</h3>
+
+<h4 id="1apc1-ping-pc2和pc3后截屏">1A、PC1 ping PC2和PC3后截屏</h4>
+
+<p><img src="/public/image/2019-05-24-1.jpg" alt="图片描述" /></p>
+
+<h4 id="1brouter1的路由表">1B、Router1的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-2.jpg" alt="图片描述" /></p>
+
+<h4 id="1crouter2的路由表">1C、Router2的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-3.jpg" alt="图片描述" /></p>
+
+<h4 id="1d把router1router2的running-config保存到文件s1txt">1D、把Router1、Router2的Running-Config保存到文件s1.txt</h4>
+
+<h5 id="router1">Router1</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Building configuration...
+Current configuration : 1898 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>3b23<span class="o">)</span> Release<span class="o">(</span>176514<span class="o">)(</span>Mon Jul 28 18:19:31 CST 2014 <span class="nt">-ngcf62</span><span class="o">)</span>
+webmaster level 0 username admin password 7 14134e00281c
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+diffserv domain default
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+cwmp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+control-plane
+<span class="o">!</span>
+control-plane protocol
+ no acpp
+<span class="o">!</span>
+control-plane manage
+ no port-filter
+ no arp-car
+ no acpp
+<span class="o">!</span>
+control-plane data
+ no glean-car
+ no acpp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="nb">enable </span>service web-server http
+<span class="nb">enable </span>service web-server https
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface Serial 2/0
+ encapsulation HDLC
+ clock rate 64000
+<span class="o">!</span>
+interface FastEthernet 1/0
+<span class="o">!</span>
+interface FastEthernet 1/1
+<span class="o">!</span>
+interface FastEthernet 1/2
+<span class="o">!</span>
+interface FastEthernet 1/3
+<span class="o">!</span>
+interface FastEthernet 1/4
+<span class="o">!</span>
+interface FastEthernet 1/5
+<span class="o">!</span>
+interface FastEthernet 1/6
+<span class="o">!</span>
+interface FastEthernet 1/7
+<span class="o">!</span>
+interface FastEthernet 1/8
+<span class="o">!</span>
+interface FastEthernet 1/9
+<span class="o">!</span>
+interface FastEthernet 1/10
+<span class="o">!</span>
+interface FastEthernet 1/11
+<span class="o">!</span>
+interface FastEthernet 1/12
+<span class="o">!</span>
+interface FastEthernet 1/13
+<span class="o">!</span>
+interface FastEthernet 1/14
+<span class="o">!</span>
+interface FastEthernet 1/15
+<span class="o">!</span>
+interface FastEthernet 1/16
+<span class="o">!</span>
+interface FastEthernet 1/17
+<span class="o">!</span>
+interface FastEthernet 1/18
+<span class="o">!</span>
+interface FastEthernet 1/19
+<span class="o">!</span>
+interface FastEthernet 1/20
+<span class="o">!</span>
+interface FastEthernet 1/21
+<span class="o">!</span>
+interface FastEthernet 1/22
+<span class="o">!</span>
+interface FastEthernet 1/23
+<span class="o">!</span>
+interface GigabitEthernet 0/0
+ ip address 192.168.1.1 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ ip address 192.168.2.1 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface VLAN 1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+ network 192.168.2.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+ref parameter 75 140
+line con 0
+line aux 0
+line <span class="nb">tty </span>1
+ modem InOut
+line vty 0 4
+ login
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="router2">Router2</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Routing Protocol is <span class="s2">"rip"</span>
+  Sending updates every 30 seconds
+  Invalid after 180 seconds, flushed after 120 seconds
+  Outgoing update filter list <span class="k">for </span>all interface is: not <span class="nb">set
+  </span>Incoming update filter list <span class="k">for </span>all interface is: not <span class="nb">set
+  </span>Redistribution default metric is 1
+  Redistributing:
+  Default version control: send version 2, receive version 2
+    Interface                      Send  Recv
+    GigabitEthernet 0/0            2     2
+    GigabitEthernet 0/1            2     2
+  Routing <span class="k">for </span>Networks:
+    192.168.2.0 255.255.255.0
+    192.168.3.0 255.255.255.0
+  Distance: <span class="o">(</span>default is 120<span class="o">)</span>
+  Graceful-restart disabled
+
+Ruijie<span class="o">(</span>config<span class="o">)</span><span class="c">#show ip route</span>
+
+Codes:  C - connected, S - static, R - RIP, B - BGP
+        O - OSPF, IA - OSPF inter area
+        N1 - OSPF NSSA external <span class="nb">type </span>1, N2 - OSPF NSSA external <span class="nb">type </span>2
+        E1 - OSPF external <span class="nb">type </span>1, E2 - OSPF external <span class="nb">type </span>2
+        i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+        ia - IS-IS inter area, <span class="k">*</span> - candidate default
+
+Gateway of last resort is no <span class="nb">set
+</span>R    192.168.1.0/24 <span class="o">[</span>120/1] via 192.168.2.1, 00:02:56, GigabitEthernet 0/1
+C    192.168.2.0/24 is directly connected, GigabitEthernet 0/1
+C    192.168.2.2/32 is <span class="nb">local </span>host.
+C    192.168.3.0/24 is directly connected, GigabitEthernet 0/0
+C    192.168.3.2/32 is <span class="nb">local </span>host.
+Ruijie<span class="o">(</span>config<span class="o">)</span><span class="c">#show running-config</span>
+
+Building configuration...
+Current configuration : 1918 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>3b23<span class="o">)</span> Release<span class="o">(</span>176514<span class="o">)(</span>Mon Jul 28 18:19:31 CST 2014 <span class="nt">-ngcf62</span><span class="o">)</span>
+webmaster level 0 username admin password 7 073f07221c1c
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+diffserv domain default
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+cwmp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+control-plane
+<span class="o">!</span>
+control-plane protocol
+ no acpp
+<span class="o">!</span>
+control-plane manage
+ no port-filter
+ no arp-car
+ no acpp
+<span class="o">!</span>
+control-plane data
+ no glean-car
+ no acpp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="nb">enable </span>service web-server http
+<span class="nb">enable </span>service web-server https
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface Serial 2/0
+ encapsulation HDLC
+<span class="o">!</span>
+interface Serial 3/0
+ encapsulation HDLC
+ clock rate 64000
+<span class="o">!</span>
+interface FastEthernet 1/0
+<span class="o">!</span>
+interface FastEthernet 1/1
+<span class="o">!</span>
+interface FastEthernet 1/2
+<span class="o">!</span>
+interface FastEthernet 1/3
+<span class="o">!</span>
+interface FastEthernet 1/4
+<span class="o">!</span>
+interface FastEthernet 1/5
+<span class="o">!</span>
+interface FastEthernet 1/6
+<span class="o">!</span>
+interface FastEthernet 1/7
+<span class="o">!</span>
+interface FastEthernet 1/8
+<span class="o">!</span>
+interface FastEthernet 1/9
+<span class="o">!</span>
+interface FastEthernet 1/10
+<span class="o">!</span>
+interface FastEthernet 1/11
+<span class="o">!</span>
+interface FastEthernet 1/12
+<span class="o">!</span>
+interface FastEthernet 1/13
+<span class="o">!</span>
+interface FastEthernet 1/14
+<span class="o">!</span>
+interface FastEthernet 1/15
+<span class="o">!</span>
+interface FastEthernet 1/16
+<span class="o">!</span>
+interface FastEthernet 1/17
+<span class="o">!</span>
+interface FastEthernet 1/18
+<span class="o">!</span>
+interface FastEthernet 1/19
+<span class="o">!</span>
+interface FastEthernet 1/20
+<span class="o">!</span>
+interface FastEthernet 1/21
+<span class="o">!</span>
+interface FastEthernet 1/22
+<span class="o">!</span>
+interface FastEthernet 1/23
+<span class="o">!</span>
+interface GigabitEthernet 0/0
+ ip address 192.168.3.2 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ ip address 192.168.2.2 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface VLAN 1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.2.0
+ network 192.168.3.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+ref parameter 75 140
+line con 0
+line aux 0
+line vty 0 4
+ login
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h4 id="1e拔掉router2的f01的线后显示router1的路由表">1E、拔掉Router2的F0/1的线后显示Router1的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-4.jpg" alt="图片描述" /></p>
+
+<h3 id="配置ripv2连续子网把两台交换机当成路由器使用并配置三层接口如下图所示把1921681024划分成四个子网子网1子网4并和19216820241921683024一起配置成七个网络见下图路由器和交换机均设置为自动汇总默认请先在下图标注网络号接口名和接口ip地址keyi-利用已有的输入位置然后进行配置">配置RIPv2（连续子网）。把两台交换机当成路由器使用，并配置三层接口。如下图所示,把192.168.1.0/24划分成四个子网(子网1~子网4)，并和192.168.2.0/24、192.168.3.0/24一起配置成七个网络，见下图。路由器和交换机均设置为自动汇总（默认）。请先在下图标注网络号、接口名和接口IP地址(keyi 利用已有的输入位置.)，然后进行配置</h3>
+
+<h4 id="2apc1-ping-pc2和pc3后截屏">2A、PC1 ping PC2和PC3后截屏</h4>
+
+<p><img src="/public/image/2019-05-24-5.jpg" alt="图片描述" /></p>
+
+<h4 id="2brouter1的路由表">2B、Router1的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-6.jpg" alt="图片描述" /></p>
+
+<h4 id="2crouter2的路由表">2C、Router2的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-7.jpg" alt="图片描述" /></p>
+
+<h4 id="2dswitch1的路由表">2D、Switch1的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-8.jpg" alt="图片描述" /></p>
+
+<h4 id="2eswitch2的路由表">2E、Switch2的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-9.jpg" alt="图片描述" /></p>
+
+<h4 id="2f把router1router2switch1switch2的running-config保存到文件s2txt">2F、把Router1、Router2、Switch1、Switch2的Running-Config保存到文件s2.txt</h4>
+
+<h5 id="router1-1">Router1</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>show running-config
+Building configuration...
+Current configuration : 1902 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>3b23<span class="o">)</span> Release<span class="o">(</span>176514<span class="o">)(</span>Mon Jul 28 18:19:31 CST 2014 <span class="nt">-ngcf62</span><span class="o">)</span>
+webmaster level 0 username admin password 7 0121474e3e16
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+diffserv domain default
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+cwmp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+control-plane
+<span class="o">!</span>
+control-plane protocol
+ no acpp
+<span class="o">!</span>
+control-plane manage
+ no port-filter
+ no arp-car
+ no acpp
+<span class="o">!</span>
+control-plane data
+ no glean-car
+ no acpp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="nb">enable </span>service web-server http
+<span class="nb">enable </span>service web-server https
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface Serial 2/0
+ encapsulation HDLC
+ clock rate 64000
+<span class="o">!</span>
+interface FastEthernet 1/0
+<span class="o">!</span>
+interface FastEthernet 1/1
+<span class="o">!</span>
+interface FastEthernet 1/2
+<span class="o">!</span>
+interface FastEthernet 1/3
+<span class="o">!</span>
+interface FastEthernet 1/4
+<span class="o">!</span>
+interface FastEthernet 1/5
+<span class="o">!</span>
+interface FastEthernet 1/6
+<span class="o">!</span>
+interface FastEthernet 1/7
+<span class="o">!</span>
+interface FastEthernet 1/8
+<span class="o">!</span>
+interface FastEthernet 1/9
+<span class="o">!</span>
+interface FastEthernet 1/10
+<span class="o">!</span>
+interface FastEthernet 1/11
+<span class="o">!</span>
+interface FastEthernet 1/12
+<span class="o">!</span>
+interface FastEthernet 1/13
+<span class="o">!</span>
+interface FastEthernet 1/14
+<span class="o">!</span>
+interface FastEthernet 1/15
+<span class="o">!</span>
+interface FastEthernet 1/16
+<span class="o">!</span>
+interface FastEthernet 1/17
+<span class="o">!</span>
+interface FastEthernet 1/18
+<span class="o">!</span>
+interface FastEthernet 1/19
+<span class="o">!</span>
+interface FastEthernet 1/20
+<span class="o">!</span>
+interface FastEthernet 1/21
+<span class="o">!</span>
+interface FastEthernet 1/22
+<span class="o">!</span>
+interface FastEthernet 1/23
+<span class="o">!</span>
+interface GigabitEthernet 0/0
+ ip address 192.168.1.130 255.255.255.192
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ ip address 192.168.2.1 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface VLAN 1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+ network 192.168.2.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+ref parameter 75 140
+line con 0
+line aux 0
+line <span class="nb">tty </span>1
+ modem InOut
+line vty 0 4
+ login
+<span class="o">!</span>
+<span class="o">!</span>
+End
+</code></pre></div></div>
+
+<h5 id="router2-1">Router2</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>show running-config
+Building configuration...
+Current configuration : 1982 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>3b23<span class="o">)</span> Release<span class="o">(</span>176514<span class="o">)(</span>Mon Jul 28 18:19:31 CST 2014 <span class="nt">-ngcf62</span><span class="o">)</span>
+webmaster level 0 username admin password 7 111323081b44
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+diffserv domain default
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+cwmp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+control-plane
+<span class="o">!</span>
+control-plane protocol
+ no acpp
+<span class="o">!</span>
+control-plane manage
+ no port-filter
+ no arp-car
+ no acpp
+<span class="o">!</span>
+control-plane data
+ no glean-car
+ no acpp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="nb">enable </span>service web-server http
+<span class="nb">enable </span>service web-server https
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface Serial 2/0
+ encapsulation HDLC
+<span class="o">!</span>
+interface Serial 3/0
+ encapsulation HDLC
+ clock rate 64000
+<span class="o">!</span>
+interface FastEthernet 1/0
+<span class="o">!</span>
+interface FastEthernet 1/1
+<span class="o">!</span>
+interface FastEthernet 1/2
+<span class="o">!</span>
+interface FastEthernet 1/3
+<span class="o">!</span>
+interface FastEthernet 1/4
+<span class="o">!</span>
+interface FastEthernet 1/5
+<span class="o">!</span>
+interface FastEthernet 1/6
+<span class="o">!</span>
+interface FastEthernet 1/7
+<span class="o">!</span>
+interface FastEthernet 1/8
+<span class="o">!</span>
+interface FastEthernet 1/9
+<span class="o">!</span>
+interface FastEthernet 1/10
+<span class="o">!</span>
+interface FastEthernet 1/11
+<span class="o">!</span>
+interface FastEthernet 1/12
+<span class="o">!</span>
+interface FastEthernet 1/13
+<span class="o">!</span>
+interface FastEthernet 1/14
+<span class="o">!</span>
+interface FastEthernet 1/15
+<span class="o">!</span>
+interface FastEthernet 1/16
+<span class="o">!</span>
+interface FastEthernet 1/17
+<span class="o">!</span>
+interface FastEthernet 1/18
+<span class="o">!</span>
+interface FastEthernet 1/19
+<span class="o">!</span>
+interface FastEthernet 1/20
+<span class="o">!</span>
+interface FastEthernet 1/21
+<span class="o">!</span>
+interface FastEthernet 1/22
+<span class="o">!</span>
+interface FastEthernet 1/23
+<span class="o">!</span>
+interface GigabitEthernet 0/0
+ ip address 192.168.2.2 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ ip address 192.168.3.2 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface Loopback 0
+ ip address 192.168.4.1 255.255.255.0
+<span class="o">!</span>
+interface VLAN 1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.2.0
+ network 192.168.3.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+ref parameter 75 140
+line con 0
+line aux 0
+line vty 0 4
+ login
+<span class="o">!</span>
+<span class="o">!</span>
+End
+</code></pre></div></div>
+
+<h5 id="switch1">Switch1</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>show running-config
+Building configuration...
+Current configuration : 1470 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>2b12<span class="o">)</span>p2 Release<span class="o">(</span>180357<span class="o">)(</span>Mon Dec  1 17:42:40 CST 2014 <span class="nt">-ngcf64</span><span class="o">)</span>
+<span class="nb">hostname </span>19-S5750-1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+nfpp
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.1 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/2
+<span class="o">!</span>
+interface GigabitEthernet 0/3
+<span class="o">!</span>
+interface GigabitEthernet 0/4
+<span class="o">!</span>
+interface GigabitEthernet 0/5
+<span class="o">!</span>
+interface GigabitEthernet 0/6
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.65 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/7
+<span class="o">!</span>
+interface GigabitEthernet 0/8
+<span class="o">!</span>
+interface GigabitEthernet 0/9
+<span class="o">!</span>
+interface GigabitEthernet 0/10
+<span class="o">!</span>
+interface GigabitEthernet 0/11
+<span class="o">!</span>
+interface GigabitEthernet 0/12
+<span class="o">!</span>
+interface GigabitEthernet 0/13
+<span class="o">!</span>
+interface GigabitEthernet 0/14
+<span class="o">!</span>
+interface GigabitEthernet 0/15
+<span class="o">!</span>
+interface GigabitEthernet 0/16
+<span class="o">!</span>
+interface GigabitEthernet 0/17
+<span class="o">!</span>
+interface GigabitEthernet 0/18
+<span class="o">!</span>
+interface GigabitEthernet 0/19
+<span class="o">!</span>
+interface GigabitEthernet 0/20
+<span class="o">!</span>
+interface GigabitEthernet 0/21
+<span class="o">!</span>
+interface GigabitEthernet 0/22
+<span class="o">!</span>
+interface GigabitEthernet 0/23
+<span class="o">!</span>
+interface GigabitEthernet 0/24
+<span class="o">!</span>
+interface GigabitEthernet 0/25
+<span class="o">!</span>
+interface GigabitEthernet 0/26
+<span class="o">!</span>
+interface GigabitEthernet 0/27
+<span class="o">!</span>
+interface GigabitEthernet 0/28
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+line con 0
+line vty 0 4
+ login
+ password b402
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="switch2">Switch2</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>show running-config
+Building configuration...
+Current configuration : 1549 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>2b12<span class="o">)</span>p2 Release<span class="o">(</span>180357<span class="o">)(</span>Mon Dec  1 17:42:40 CST 2014 <span class="nt">-ngcf64</span><span class="o">)</span>
+<span class="nb">hostname </span>19-S5750-2
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+nfpp
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.193 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/2
+<span class="o">!</span>
+interface GigabitEthernet 0/3
+<span class="o">!</span>
+interface GigabitEthernet 0/4
+<span class="o">!</span>
+interface GigabitEthernet 0/5
+<span class="o">!</span>
+interface GigabitEthernet 0/6
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.66 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/7
+<span class="o">!</span>
+interface GigabitEthernet 0/8
+<span class="o">!</span>
+interface GigabitEthernet 0/9
+<span class="o">!</span>
+interface GigabitEthernet 0/10
+<span class="o">!</span>
+interface GigabitEthernet 0/11
+<span class="o">!</span>
+interface GigabitEthernet 0/12
+<span class="o">!</span>
+interface GigabitEthernet 0/13
+<span class="o">!</span>
+interface GigabitEthernet 0/14
+<span class="o">!</span>
+interface GigabitEthernet 0/15
+<span class="o">!</span>
+interface GigabitEthernet 0/16
+<span class="o">!</span>
+interface GigabitEthernet 0/17
+<span class="o">!</span>
+interface GigabitEthernet 0/18
+<span class="o">!</span>
+interface GigabitEthernet 0/19
+<span class="o">!</span>
+interface GigabitEthernet 0/20
+<span class="o">!</span>
+interface GigabitEthernet 0/21
+<span class="o">!</span>
+interface GigabitEthernet 0/22
+<span class="o">!</span>
+interface GigabitEthernet 0/23
+<span class="o">!</span>
+interface GigabitEthernet 0/24
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.129 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/25
+<span class="o">!</span>
+interface GigabitEthernet 0/26
+<span class="o">!</span>
+interface GigabitEthernet 0/27
+<span class="o">!</span>
+interface GigabitEthernet 0/28
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+line con 0
+line vty 0 4
+ login
+ password b402
+<span class="o">!</span>
+<span class="o">!</span>
+End
+</code></pre></div></div>
+
+<h3 id="接上一步调整配为下图的非连续子网标注网络号接口名和接口ip地址路由器和交换机均设置为自动汇总默认">接上一步,调整配为下图的非连续子网，标注网络号、接口名和接口IP地址。路由器和交换机均设置为自动汇总（默认）</h3>
+
+<h4 id="3apc1-pingpc2和pc3后截屏">3A、PC1 pingPC2和PC3后截屏</h4>
+
+<p><img src="/public/image/2019-05-24-10.jpg" alt="图片描述" /></p>
+
+<h4 id="3bpc1依次ping到pc3的路径上的ip地址后截屏">3B、PC1依次ping到PC3的路径上的IP地址后截屏</h4>
+
+<p>见3A中的图，截在一起了。</p>
+
+<h4 id="3crouter1的路由表">3C、Router1的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-11.jpg" alt="图片描述" /></p>
+
+<h4 id="3drouter2的路由表">3D、Router2的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-12.jpg" alt="图片描述" /></p>
+
+<h4 id="3eswitch1的路由表">3E、Switch1的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-13.jpg" alt="图片描述" /></p>
+
+<h4 id="3fswitch2的路由表">3F、Switch2的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-14.jpg" alt="图片描述" /></p>
+
+<h4 id="3g把router1router2switch1switch2的running-config分别保存到文件s3txt">3G、把Router1、Router2、Switch1、Switch2的Running-Config分别保存到文件s3.txt</h4>
+
+<h5 id="router1-2">Router1</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>show running-config
+Building configuration...
+Current configuration : 1898 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>3b23<span class="o">)</span> Release<span class="o">(</span>176514<span class="o">)(</span>Mon Jul 28 18:19:31 CST 2014 <span class="nt">-ngcf62</span><span class="o">)</span>
+webmaster level 0 username admin password 7 0121474e3e16
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+diffserv domain default
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+cwmp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+control-plane
+<span class="o">!</span>
+control-plane protocol
+ no acpp
+<span class="o">!</span>
+control-plane manage
+ no port-filter
+ no arp-car
+ no acpp
+<span class="o">!</span>
+control-plane data
+ no glean-car
+ no acpp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="nb">enable </span>service web-server http
+<span class="nb">enable </span>service web-server https
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface Serial 2/0
+ encapsulation HDLC
+ clock rate 64000
+<span class="o">!</span>
+interface FastEthernet 1/0
+<span class="o">!</span>
+interface FastEthernet 1/1
+<span class="o">!</span>
+interface FastEthernet 1/2
+<span class="o">!</span>
+interface FastEthernet 1/3
+<span class="o">!</span>
+interface FastEthernet 1/4
+<span class="o">!</span>
+interface FastEthernet 1/5
+<span class="o">!</span>
+interface FastEthernet 1/6
+<span class="o">!</span>
+interface FastEthernet 1/7
+<span class="o">!</span>
+interface FastEthernet 1/8
+<span class="o">!</span>
+interface FastEthernet 1/9
+<span class="o">!</span>
+interface FastEthernet 1/10
+<span class="o">!</span>
+interface FastEthernet 1/11
+<span class="o">!</span>
+interface FastEthernet 1/12
+<span class="o">!</span>
+interface FastEthernet 1/13
+<span class="o">!</span>
+interface FastEthernet 1/14
+<span class="o">!</span>
+interface FastEthernet 1/15
+<span class="o">!</span>
+interface FastEthernet 1/16
+<span class="o">!</span>
+interface FastEthernet 1/17
+<span class="o">!</span>
+interface FastEthernet 1/18
+<span class="o">!</span>
+interface FastEthernet 1/19
+<span class="o">!</span>
+interface FastEthernet 1/20
+<span class="o">!</span>
+interface FastEthernet 1/21
+<span class="o">!</span>
+interface FastEthernet 1/22
+<span class="o">!</span>
+interface FastEthernet 1/23
+<span class="o">!</span>
+interface GigabitEthernet 0/0
+ ip address 192.168.3.2 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ ip address 192.168.2.1 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface VLAN 1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.2.0
+ network 192.168.3.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+ref parameter 75 140
+line con 0
+line aux 0
+line <span class="nb">tty </span>1
+ modem InOut
+line vty 0 4
+ login
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="router2-2">Router2</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>show running-config
+Building configuration...
+Current configuration : 1986 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>3b23<span class="o">)</span> Release<span class="o">(</span>176514<span class="o">)(</span>Mon Jul 28 18:19:31 CST 2014 <span class="nt">-ngcf62</span><span class="o">)</span>
+webmaster level 0 username admin password 7 111323081b44
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+diffserv domain default
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+cwmp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+control-plane
+<span class="o">!</span>
+control-plane protocol
+ no acpp
+<span class="o">!</span>
+control-plane manage
+ no port-filter
+ no arp-car
+ no acpp
+<span class="o">!</span>
+control-plane data
+ no glean-car
+ no acpp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="nb">enable </span>service web-server http
+<span class="nb">enable </span>service web-server https
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface Serial 2/0
+ encapsulation HDLC
+<span class="o">!</span>
+interface Serial 3/0
+ encapsulation HDLC
+ clock rate 64000
+<span class="o">!</span>
+interface FastEthernet 1/0
+<span class="o">!</span>
+interface FastEthernet 1/1
+<span class="o">!</span>
+interface FastEthernet 1/2
+<span class="o">!</span>
+interface FastEthernet 1/3
+<span class="o">!</span>
+interface FastEthernet 1/4
+<span class="o">!</span>
+interface FastEthernet 1/5
+<span class="o">!</span>
+interface FastEthernet 1/6
+<span class="o">!</span>
+interface FastEthernet 1/7
+<span class="o">!</span>
+interface FastEthernet 1/8
+<span class="o">!</span>
+interface FastEthernet 1/9
+<span class="o">!</span>
+interface FastEthernet 1/10
+<span class="o">!</span>
+interface FastEthernet 1/11
+<span class="o">!</span>
+interface FastEthernet 1/12
+<span class="o">!</span>
+interface FastEthernet 1/13
+<span class="o">!</span>
+interface FastEthernet 1/14
+<span class="o">!</span>
+interface FastEthernet 1/15
+<span class="o">!</span>
+interface FastEthernet 1/16
+<span class="o">!</span>
+interface FastEthernet 1/17
+<span class="o">!</span>
+interface FastEthernet 1/18
+<span class="o">!</span>
+interface FastEthernet 1/19
+<span class="o">!</span>
+interface FastEthernet 1/20
+<span class="o">!</span>
+interface FastEthernet 1/21
+<span class="o">!</span>
+interface FastEthernet 1/22
+<span class="o">!</span>
+interface FastEthernet 1/23
+<span class="o">!</span>
+interface GigabitEthernet 0/0
+ ip address 192.168.2.2 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ ip address 192.168.1.129 255.255.255.192
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface Loopback 0
+ ip address 192.168.4.1 255.255.255.0
+<span class="o">!</span>
+interface VLAN 1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+ network 192.168.2.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+ref parameter 75 140
+line con 0
+line aux 0
+line vty 0 4
+ login
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="switch1-1">Switch1</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>show running-config
+Building configuration...
+Current configuration : 1470 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>2b12<span class="o">)</span>p2 Release<span class="o">(</span>180357<span class="o">)(</span>Mon Dec  1 17:42:40 CST 2014 <span class="nt">-ngcf64</span><span class="o">)</span>
+<span class="nb">hostname </span>19-S5750-1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+nfpp
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.1 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/2
+<span class="o">!</span>
+interface GigabitEthernet 0/3
+<span class="o">!</span>
+interface GigabitEthernet 0/4
+<span class="o">!</span>
+interface GigabitEthernet 0/5
+<span class="o">!</span>
+interface GigabitEthernet 0/6
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.65 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/7
+<span class="o">!</span>
+interface GigabitEthernet 0/8
+<span class="o">!</span>
+interface GigabitEthernet 0/9
+<span class="o">!</span>
+interface GigabitEthernet 0/10
+<span class="o">!</span>
+interface GigabitEthernet 0/11
+<span class="o">!</span>
+interface GigabitEthernet 0/12
+<span class="o">!</span>
+interface GigabitEthernet 0/13
+<span class="o">!</span>
+interface GigabitEthernet 0/14
+<span class="o">!</span>
+interface GigabitEthernet 0/15
+<span class="o">!</span>
+interface GigabitEthernet 0/16
+<span class="o">!</span>
+interface GigabitEthernet 0/17
+<span class="o">!</span>
+interface GigabitEthernet 0/18
+<span class="o">!</span>
+interface GigabitEthernet 0/19
+<span class="o">!</span>
+interface GigabitEthernet 0/20
+<span class="o">!</span>
+interface GigabitEthernet 0/21
+<span class="o">!</span>
+interface GigabitEthernet 0/22
+<span class="o">!</span>
+interface GigabitEthernet 0/23
+<span class="o">!</span>
+interface GigabitEthernet 0/24
+<span class="o">!</span>
+interface GigabitEthernet 0/25
+<span class="o">!</span>
+interface GigabitEthernet 0/26
+<span class="o">!</span>
+interface GigabitEthernet 0/27
+<span class="o">!</span>
+interface GigabitEthernet 0/28
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+line con 0
+line vty 0 4
+ login
+ password b402
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="switch2-1">Switch2</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>show running-config
+
+Building configuration...
+Current configuration : 1567 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>2b12<span class="o">)</span>p2 Release<span class="o">(</span>180357<span class="o">)(</span>Mon Dec  1 17:42:40 CST 2014 <span class="nt">-ngcf64</span><span class="o">)</span>
+<span class="nb">hostname </span>19-S5750-2
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+nfpp
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.193 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/2
+<span class="o">!</span>
+interface GigabitEthernet 0/3
+<span class="o">!</span>
+interface GigabitEthernet 0/4
+<span class="o">!</span>
+interface GigabitEthernet 0/5
+<span class="o">!</span>
+interface GigabitEthernet 0/6
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.66 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/7
+<span class="o">!</span>
+interface GigabitEthernet 0/8
+<span class="o">!</span>
+interface GigabitEthernet 0/9
+<span class="o">!</span>
+interface GigabitEthernet 0/10
+<span class="o">!</span>
+interface GigabitEthernet 0/11
+<span class="o">!</span>
+interface GigabitEthernet 0/12
+<span class="o">!</span>
+interface GigabitEthernet 0/13
+<span class="o">!</span>
+interface GigabitEthernet 0/14
+<span class="o">!</span>
+interface GigabitEthernet 0/15
+<span class="o">!</span>
+interface GigabitEthernet 0/16
+<span class="o">!</span>
+interface GigabitEthernet 0/17
+<span class="o">!</span>
+interface GigabitEthernet 0/18
+<span class="o">!</span>
+interface GigabitEthernet 0/19
+<span class="o">!</span>
+interface GigabitEthernet 0/20
+<span class="o">!</span>
+interface GigabitEthernet 0/21
+<span class="o">!</span>
+interface GigabitEthernet 0/22
+<span class="o">!</span>
+interface GigabitEthernet 0/23
+<span class="o">!</span>
+interface GigabitEthernet 0/24
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.3.1 255.255.255.0
+<span class="o">!</span>
+interface GigabitEthernet 0/25
+<span class="o">!</span>
+interface GigabitEthernet 0/26
+<span class="o">!</span>
+interface GigabitEthernet 0/27
+<span class="o">!</span>
+interface GigabitEthernet 0/28
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+ network 192.168.3.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+line con 0
+line vty 0 4
+ login
+ password b402
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h3 id="接上一步在出问题的路由器或交换机上取消自动汇总然后">接上一步，在出问题的路由器或交换机上取消自动汇总，然后</h3>
+
+<h4 id="4apc1依次ping-pc2和pc3后截屏">4A、PC1依次ping PC2和PC3后截屏</h4>
+
+<p><img src="/public/image/2019-05-24-15.jpg" alt="图片描述" /></p>
+
+<h4 id="4bpc1依次ping到pc3的路径上的ip地址后截屏">4B、PC1依次ping到PC3的路径上的IP地址后截屏</h4>
+
+<p><img src="/public/image/2019-05-24-16.jpg" alt="图片描述" />
+<img src="/public/image/2019-05-24-17.jpg" alt="图片描述" /></p>
+
+<h4 id="4crouter1的路由表">4C、Router1的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-18.jpg" alt="图片描述" /></p>
+
+<h4 id="4drouter2的路由表">4D、Router2的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-19.jpg" alt="图片描述" /></p>
+
+<h4 id="4eswitch1的路由表">4E、Switch1的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-20.jpg" alt="图片描述" /></p>
+
+<h4 id="4fswitch2的路由表">4F、Switch2的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-21.jpg" alt="图片描述" /></p>
+
+<h4 id="4g把router1router2switch1switch2的running-config分别保存到文件s4txt">4G、把Router1、Router2、Switch1、Switch2的Running-Config分别保存到文件s4.txt</h4>
+
+<h5 id="router1-3">Router1</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>show running-config
+Building configuration...
+Current configuration : 1898 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>3b23<span class="o">)</span> Release<span class="o">(</span>176514<span class="o">)(</span>Mon Jul 28 18:19:31 CST 2014 <span class="nt">-ngcf62</span><span class="o">)</span>
+webmaster level 0 username admin password 7 0121474e3e16
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+diffserv domain default
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+cwmp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+control-plane
+<span class="o">!</span>
+control-plane protocol
+ no acpp
+<span class="o">!</span>
+control-plane manage
+ no port-filter
+ no arp-car
+ no acpp
+<span class="o">!</span>
+control-plane data
+ no glean-car
+ no acpp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="nb">enable </span>service web-server http
+<span class="nb">enable </span>service web-server https
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface Serial 2/0
+ encapsulation HDLC
+ clock rate 64000
+<span class="o">!</span>
+interface FastEthernet 1/0
+<span class="o">!</span>
+interface FastEthernet 1/1
+<span class="o">!</span>
+interface FastEthernet 1/2
+<span class="o">!</span>
+interface FastEthernet 1/3
+<span class="o">!</span>
+interface FastEthernet 1/4
+<span class="o">!</span>
+interface FastEthernet 1/5
+<span class="o">!</span>
+interface FastEthernet 1/6
+<span class="o">!</span>
+interface FastEthernet 1/7
+<span class="o">!</span>
+interface FastEthernet 1/8
+<span class="o">!</span>
+interface FastEthernet 1/9
+<span class="o">!</span>
+interface FastEthernet 1/10
+<span class="o">!</span>
+interface FastEthernet 1/11
+<span class="o">!</span>
+interface FastEthernet 1/12
+<span class="o">!</span>
+interface FastEthernet 1/13
+<span class="o">!</span>
+interface FastEthernet 1/14
+<span class="o">!</span>
+interface FastEthernet 1/15
+<span class="o">!</span>
+interface FastEthernet 1/16
+<span class="o">!</span>
+interface FastEthernet 1/17
+<span class="o">!</span>
+interface FastEthernet 1/18
+<span class="o">!</span>
+interface FastEthernet 1/19
+<span class="o">!</span>
+interface FastEthernet 1/20
+<span class="o">!</span>
+interface FastEthernet 1/21
+<span class="o">!</span>
+interface FastEthernet 1/22
+<span class="o">!</span>
+interface FastEthernet 1/23
+<span class="o">!</span>
+interface GigabitEthernet 0/0
+ ip address 192.168.3.2 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ ip address 192.168.2.1 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface VLAN 1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.2.0
+ network 192.168.3.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+ref parameter 75 140
+line con 0
+line aux 0
+line <span class="nb">tty </span>1
+ modem InOut
+line vty 0 4
+ login
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="router2-3">Router2</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>show running-config
+Building configuration...
+Current configuration : 2004 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>3b23<span class="o">)</span> Release<span class="o">(</span>176514<span class="o">)(</span>Mon Jul 28 18:19:31 CST 2014 <span class="nt">-ngcf62</span><span class="o">)</span>
+webmaster level 0 username admin password 7 111323081b44
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+diffserv domain default
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+cwmp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+control-plane
+<span class="o">!</span>
+control-plane protocol
+ no acpp
+<span class="o">!</span>
+control-plane manage
+ no port-filter
+ no arp-car
+ no acpp
+<span class="o">!</span>
+control-plane data
+ no glean-car
+ no acpp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="nb">enable </span>service web-server http
+<span class="nb">enable </span>service web-server https
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface Serial 2/0
+ encapsulation HDLC
+<span class="o">!</span>
+interface Serial 3/0
+ encapsulation HDLC
+ clock rate 64000
+<span class="o">!</span>
+interface FastEthernet 1/0
+<span class="o">!</span>
+interface FastEthernet 1/1
+<span class="o">!</span>
+interface FastEthernet 1/2
+<span class="o">!</span>
+interface FastEthernet 1/3
+<span class="o">!</span>
+interface FastEthernet 1/4
+<span class="o">!</span>
+interface FastEthernet 1/5
+<span class="o">!</span>
+interface FastEthernet 1/6
+<span class="o">!</span>
+interface FastEthernet 1/7
+<span class="o">!</span>
+interface FastEthernet 1/8
+<span class="o">!</span>
+interface FastEthernet 1/9
+<span class="o">!</span>
+interface FastEthernet 1/10
+<span class="o">!</span>
+interface FastEthernet 1/11
+<span class="o">!</span>
+interface FastEthernet 1/12
+<span class="o">!</span>
+interface FastEthernet 1/13
+<span class="o">!</span>
+interface FastEthernet 1/14
+<span class="o">!</span>
+interface FastEthernet 1/15
+<span class="o">!</span>
+interface FastEthernet 1/16
+<span class="o">!</span>
+interface FastEthernet 1/17
+<span class="o">!</span>
+interface FastEthernet 1/18
+<span class="o">!</span>
+interface FastEthernet 1/19
+<span class="o">!</span>
+interface FastEthernet 1/20
+<span class="o">!</span>
+interface FastEthernet 1/21
+<span class="o">!</span>
+interface FastEthernet 1/22
+<span class="o">!</span>
+interface FastEthernet 1/23
+<span class="o">!</span>
+interface GigabitEthernet 0/0
+ ip address 192.168.2.2 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ ip address 192.168.1.129 255.255.255.192
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface Loopback 0
+ ip address 192.168.4.1 255.255.255.0
+<span class="o">!</span>
+interface VLAN 1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+ network 192.168.2.0
+ no auto-summary
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+ref parameter 75 140
+line con 0
+line aux 0
+line vty 0 4
+ login
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="switch1-2">Switch1</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>show running-config
+
+Building configuration...
+Current configuration : 1470 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>2b12<span class="o">)</span>p2 Release<span class="o">(</span>180357<span class="o">)(</span>Mon Dec  1 17:42:40 CST 2014 <span class="nt">-ngcf64</span><span class="o">)</span>
+<span class="nb">hostname </span>19-S5750-1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+nfpp
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.1 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/2
+<span class="o">!</span>
+interface GigabitEthernet 0/3
+<span class="o">!</span>
+interface GigabitEthernet 0/4
+<span class="o">!</span>
+interface GigabitEthernet 0/5
+<span class="o">!</span>
+interface GigabitEthernet 0/6
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.65 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/7
+<span class="o">!</span>
+interface GigabitEthernet 0/8
+<span class="o">!</span>
+interface GigabitEthernet 0/9
+<span class="o">!</span>
+interface GigabitEthernet 0/10
+<span class="o">!</span>
+interface GigabitEthernet 0/11
+<span class="o">!</span>
+interface GigabitEthernet 0/12
+<span class="o">!</span>
+interface GigabitEthernet 0/13
+<span class="o">!</span>
+interface GigabitEthernet 0/14
+<span class="o">!</span>
+interface GigabitEthernet 0/15
+<span class="o">!</span>
+interface GigabitEthernet 0/16
+<span class="o">!</span>
+interface GigabitEthernet 0/17
+<span class="o">!</span>
+interface GigabitEthernet 0/18
+<span class="o">!</span>
+interface GigabitEthernet 0/19
+<span class="o">!</span>
+interface GigabitEthernet 0/20
+<span class="o">!</span>
+interface GigabitEthernet 0/21
+<span class="o">!</span>
+interface GigabitEthernet 0/22
+<span class="o">!</span>
+interface GigabitEthernet 0/23
+<span class="o">!</span>
+interface GigabitEthernet 0/24
+<span class="o">!</span>
+interface GigabitEthernet 0/25
+<span class="o">!</span>
+interface GigabitEthernet 0/26
+<span class="o">!</span>
+interface GigabitEthernet 0/27
+<span class="o">!</span>
+interface GigabitEthernet 0/28
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+line con 0
+line vty 0 4
+ login
+ password b402
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="switch2-2">Switch2</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>show running-config
+
+Building configuration...
+Current configuration : 1567 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>2b12<span class="o">)</span>p2 Release<span class="o">(</span>180357<span class="o">)(</span>Mon Dec  1 17:42:40 CST 2014 <span class="nt">-ngcf64</span><span class="o">)</span>
+<span class="nb">hostname </span>19-S5750-2
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+nfpp
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.193 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/2
+<span class="o">!</span>
+interface GigabitEthernet 0/3
+<span class="o">!</span>
+interface GigabitEthernet 0/4
+<span class="o">!</span>
+interface GigabitEthernet 0/5
+<span class="o">!</span>
+interface GigabitEthernet 0/6
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.66 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/7
+<span class="o">!</span>
+interface GigabitEthernet 0/8
+<span class="o">!</span>
+interface GigabitEthernet 0/9
+<span class="o">!</span>
+interface GigabitEthernet 0/10
+<span class="o">!</span>
+interface GigabitEthernet 0/11
+<span class="o">!</span>
+interface GigabitEthernet 0/12
+<span class="o">!</span>
+interface GigabitEthernet 0/13
+<span class="o">!</span>
+interface GigabitEthernet 0/14
+<span class="o">!</span>
+interface GigabitEthernet 0/15
+<span class="o">!</span>
+interface GigabitEthernet 0/16
+<span class="o">!</span>
+interface GigabitEthernet 0/17
+<span class="o">!</span>
+interface GigabitEthernet 0/18
+<span class="o">!</span>
+interface GigabitEthernet 0/19
+<span class="o">!</span>
+interface GigabitEthernet 0/20
+<span class="o">!</span>
+interface GigabitEthernet 0/21
+<span class="o">!</span>
+interface GigabitEthernet 0/22
+<span class="o">!</span>
+interface GigabitEthernet 0/23
+<span class="o">!</span>
+interface GigabitEthernet 0/24
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.3.1 255.255.255.0
+<span class="o">!</span>
+interface GigabitEthernet 0/25
+<span class="o">!</span>
+interface GigabitEthernet 0/26
+<span class="o">!</span>
+interface GigabitEthernet 0/27
+<span class="o">!</span>
+interface GigabitEthernet 0/28
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+ network 192.168.3.0
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+line con 0
+line vty 0 4
+ login
+ password b402
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h3 id="接上一步在所有路由器或交换机上取消自动汇总对于switch1通往switch2的接口在调试状态下先配置为水平分割默认查看和记录发出的rip-update分组然后再取消水平分割查看和记录发出的rip-update分组分析在这两种情况下rip-update分组差异">接上一步，在所有路由器或交换机上取消自动汇总，对于Switch1通往Switch2的接口，在调试状态下先配置为水平分割(默认)，查看和记录发出的RIP Update分组，然后再取消水平分割，查看和记录发出的RIP Update分组。分析在这两种情况下RIP Update分组差异</h3>
+
+<h4 id="5apc1依次ping-pc2和pc3后截屏">5A、PC1依次ping PC2和PC3后截屏</h4>
+
+<p><img src="/public/image/2019-05-24-22.jpg" alt="图片描述" /></p>
+
+<h4 id="5bpc1依次ping到pc3的路径上的ip地址后截屏">5B、PC1依次ping到PC3的路径上的IP地址后截屏</h4>
+
+<p><img src="/public/image/2019-05-24-23.jpg" alt="图片描述" />
+<img src="/public/image/2019-05-24-24.jpg" alt="图片描述" /></p>
+
+<h4 id="5crouter1的路由表">5C、Router1的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-25.jpg" alt="图片描述" /></p>
+
+<h4 id="5drouter2的路由表">5D、Router2的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-26.jpg" alt="图片描述" /></p>
+
+<h4 id="5eswitch1的路由表">5E、Switch1的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-27.jpg" alt="图片描述" /></p>
+
+<h4 id="5fswitch2的路由表">5F、Switch2的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-28.jpg" alt="图片描述" /></p>
+
+<h4 id="5g有水平分割时的rip-update分组">5G、有水平分割时的RIP Update分组</h4>
+
+<p><img src="/public/image/2019-05-24-29.jpg" alt="图片描述" /></p>
+
+<h4 id="5h取消水平分割时的rip-update分组">5H、取消水平分割时的RIP Update分组</h4>
+
+<p><img src="/public/image/2019-05-24-30.jpg" alt="图片描述" /></p>
+
+<h4 id="5i把router1router2switch1switch2的running-config分别保存到文件s5txt">5I、把Router1、Router2、Switch1、Switch2的Running-Config分别保存到文件s5.txt</h4>
+
+<h5 id="router1-4">Router1</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sh run
+Building configuration...
+Current configuration : 1916 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>3b23<span class="o">)</span> Release<span class="o">(</span>176514<span class="o">)(</span>Mon Jul 28 18:19:31 CST 2014 <span class="nt">-ngcf62</span><span class="o">)</span>
+webmaster level 0 username admin password 7 0121474e3e16
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+diffserv domain default
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+cwmp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+control-plane
+<span class="o">!</span>
+control-plane protocol
+ no acpp
+<span class="o">!</span>
+control-plane manage
+ no port-filter
+ no arp-car
+ no acpp
+<span class="o">!</span>
+control-plane data
+ no glean-car
+ no acpp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="nb">enable </span>service web-server http
+<span class="nb">enable </span>service web-server https
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface Serial 2/0
+ encapsulation HDLC
+ clock rate 64000
+<span class="o">!</span>
+interface FastEthernet 1/0
+<span class="o">!</span>
+interface FastEthernet 1/1
+<span class="o">!</span>
+interface FastEthernet 1/2
+<span class="o">!</span>
+interface FastEthernet 1/3
+<span class="o">!</span>
+interface FastEthernet 1/4
+<span class="o">!</span>
+interface FastEthernet 1/5
+<span class="o">!</span>
+interface FastEthernet 1/6
+<span class="o">!</span>
+interface FastEthernet 1/7
+<span class="o">!</span>
+interface FastEthernet 1/8
+<span class="o">!</span>
+interface FastEthernet 1/9
+<span class="o">!</span>
+interface FastEthernet 1/10
+<span class="o">!</span>
+interface FastEthernet 1/11
+<span class="o">!</span>
+interface FastEthernet 1/12
+<span class="o">!</span>
+interface FastEthernet 1/13
+<span class="o">!</span>
+interface FastEthernet 1/14
+<span class="o">!</span>
+interface FastEthernet 1/15
+<span class="o">!</span>
+interface FastEthernet 1/16
+<span class="o">!</span>
+interface FastEthernet 1/17
+<span class="o">!</span>
+interface FastEthernet 1/18
+<span class="o">!</span>
+interface FastEthernet 1/19
+<span class="o">!</span>
+interface FastEthernet 1/20
+<span class="o">!</span>
+interface FastEthernet 1/21
+<span class="o">!</span>
+interface FastEthernet 1/22
+<span class="o">!</span>
+interface FastEthernet 1/23
+<span class="o">!</span>
+interface GigabitEthernet 0/0
+ ip address 192.168.3.2 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ ip address 192.168.2.1 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface VLAN 1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.2.0
+ network 192.168.3.0
+ no auto-summary
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+ref parameter 75 140
+line con 0
+line aux 0
+line <span class="nb">tty </span>1
+ modem InOut
+line vty 0 4
+ login
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="router2-4">Router2</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sh run
+
+Building configuration...
+Current configuration : 2004 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>3b23<span class="o">)</span> Release<span class="o">(</span>176514<span class="o">)(</span>Mon Jul 28 18:19:31 CST 2014 <span class="nt">-ngcf62</span><span class="o">)</span>
+webmaster level 0 username admin password 7 111323081b44
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+diffserv domain default
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+cwmp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+control-plane
+<span class="o">!</span>
+control-plane protocol
+ no acpp
+<span class="o">!</span>
+control-plane manage
+ no port-filter
+ no arp-car
+ no acpp
+<span class="o">!</span>
+control-plane data
+ no glean-car
+ no acpp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="nb">enable </span>service web-server http
+<span class="nb">enable </span>service web-server https
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface Serial 2/0
+ encapsulation HDLC
+<span class="o">!</span>
+interface Serial 3/0
+ encapsulation HDLC
+ clock rate 64000
+<span class="o">!</span>
+interface FastEthernet 1/0
+<span class="o">!</span>
+interface FastEthernet 1/1
+<span class="o">!</span>
+interface FastEthernet 1/2
+<span class="o">!</span>
+interface FastEthernet 1/3
+<span class="o">!</span>
+interface FastEthernet 1/4
+<span class="o">!</span>
+interface FastEthernet 1/5
+<span class="o">!</span>
+interface FastEthernet 1/6
+<span class="o">!</span>
+interface FastEthernet 1/7
+<span class="o">!</span>
+interface FastEthernet 1/8
+<span class="o">!</span>
+interface FastEthernet 1/9
+<span class="o">!</span>
+interface FastEthernet 1/10
+<span class="o">!</span>
+interface FastEthernet 1/11
+<span class="o">!</span>
+interface FastEthernet 1/12
+<span class="o">!</span>
+interface FastEthernet 1/13
+<span class="o">!</span>
+interface FastEthernet 1/14
+<span class="o">!</span>
+interface FastEthernet 1/15
+<span class="o">!</span>
+interface FastEthernet 1/16
+<span class="o">!</span>
+interface FastEthernet 1/17
+<span class="o">!</span>
+interface FastEthernet 1/18
+<span class="o">!</span>
+interface FastEthernet 1/19
+<span class="o">!</span>
+interface FastEthernet 1/20
+<span class="o">!</span>
+interface FastEthernet 1/21
+<span class="o">!</span>
+interface FastEthernet 1/22
+<span class="o">!</span>
+interface FastEthernet 1/23
+<span class="o">!</span>
+interface GigabitEthernet 0/0
+ ip address 192.168.1.129 255.255.255.192
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ ip address 192.168.2.2 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface Loopback 0
+ ip address 192.168.4.1 255.255.255.0
+<span class="o">!</span>
+interface VLAN 1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+ network 192.168.2.0
+ no auto-summary
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+ref parameter 75 140
+line con 0
+line aux 0
+line vty 0 4
+ login
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="switch1-3">Switch1</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sh run
+Building configuration...
+Current configuration : 1514 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>2b12<span class="o">)</span>p2 Release<span class="o">(</span>180357<span class="o">)(</span>Mon Dec  1 17:42:40 CST 2014 <span class="nt">-ngcf64</span><span class="o">)</span>
+<span class="nb">hostname </span>19-S5750-1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+nfpp
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.1 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/2
+<span class="o">!</span>
+interface GigabitEthernet 0/3
+<span class="o">!</span>
+interface GigabitEthernet 0/4
+<span class="o">!</span>
+interface GigabitEthernet 0/5
+<span class="o">!</span>
+interface GigabitEthernet 0/6
+ no switchport
+ no ip rip split-horizon
+ no ip proxy-arp
+ ip address 192.168.1.65 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/7
+<span class="o">!</span>
+interface GigabitEthernet 0/8
+<span class="o">!</span>
+interface GigabitEthernet 0/9
+<span class="o">!</span>
+interface GigabitEthernet 0/10
+<span class="o">!</span>
+interface GigabitEthernet 0/11
+<span class="o">!</span>
+interface GigabitEthernet 0/12
+<span class="o">!</span>
+interface GigabitEthernet 0/13
+<span class="o">!</span>
+interface GigabitEthernet 0/14
+<span class="o">!</span>
+interface GigabitEthernet 0/15
+<span class="o">!</span>
+interface GigabitEthernet 0/16
+<span class="o">!</span>
+interface GigabitEthernet 0/17
+<span class="o">!</span>
+interface GigabitEthernet 0/18
+<span class="o">!</span>
+interface GigabitEthernet 0/19
+<span class="o">!</span>
+interface GigabitEthernet 0/20
+<span class="o">!</span>
+interface GigabitEthernet 0/21
+<span class="o">!</span>
+interface GigabitEthernet 0/22
+<span class="o">!</span>
+interface GigabitEthernet 0/23
+<span class="o">!</span>
+interface GigabitEthernet 0/24
+<span class="o">!</span>
+interface GigabitEthernet 0/25
+<span class="o">!</span>
+interface GigabitEthernet 0/26
+<span class="o">!</span>
+interface GigabitEthernet 0/27
+<span class="o">!</span>
+interface GigabitEthernet 0/28
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+ no auto-summary
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+line con 0
+line vty 0 4
+ login
+ password b402
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="switch2-3">Switch2</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sh run
+Building configuration...
+Current configuration : 1585 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>2b12<span class="o">)</span>p2 Release<span class="o">(</span>180357<span class="o">)(</span>Mon Dec  1 17:42:40 CST 2014 <span class="nt">-ngcf64</span><span class="o">)</span>
+<span class="nb">hostname </span>19-S5750-2
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+nfpp
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.193 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/2
+<span class="o">!</span>
+interface GigabitEthernet 0/3
+<span class="o">!</span>
+interface GigabitEthernet 0/4
+<span class="o">!</span>
+interface GigabitEthernet 0/5
+<span class="o">!</span>
+interface GigabitEthernet 0/6
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.66 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/7
+<span class="o">!</span>
+interface GigabitEthernet 0/8
+<span class="o">!</span>
+interface GigabitEthernet 0/9
+<span class="o">!</span>
+interface GigabitEthernet 0/10
+<span class="o">!</span>
+interface GigabitEthernet 0/11
+<span class="o">!</span>
+interface GigabitEthernet 0/12
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.3.1 255.255.255.0
+<span class="o">!</span>
+interface GigabitEthernet 0/13
+<span class="o">!</span>
+interface GigabitEthernet 0/14
+<span class="o">!</span>
+interface GigabitEthernet 0/15
+<span class="o">!</span>
+interface GigabitEthernet 0/16
+<span class="o">!</span>
+interface GigabitEthernet 0/17
+<span class="o">!</span>
+interface GigabitEthernet 0/18
+<span class="o">!</span>
+interface GigabitEthernet 0/19
+<span class="o">!</span>
+interface GigabitEthernet 0/20
+<span class="o">!</span>
+interface GigabitEthernet 0/21
+<span class="o">!</span>
+interface GigabitEthernet 0/22
+<span class="o">!</span>
+interface GigabitEthernet 0/23
+<span class="o">!</span>
+interface GigabitEthernet 0/24
+<span class="o">!</span>
+interface GigabitEthernet 0/25
+<span class="o">!</span>
+interface GigabitEthernet 0/26
+<span class="o">!</span>
+interface GigabitEthernet 0/27
+<span class="o">!</span>
+interface GigabitEthernet 0/28
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+ network 192.168.3.0
+ no auto-summary
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+line con 0
+line vty 0 4
+ login
+ password b402
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h3 id="接上一步拔掉switch2接pc2的线查看所有路由器或交换机的路由表的变化">接上一步，拔掉Switch2接PC2的线，查看所有路由器或交换机的路由表的变化</h3>
+
+<h4 id="6arouter1的路由表">6A、Router1的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-31.jpg" alt="图片描述" /></p>
+
+<h4 id="6brouter2的路由表">6B、Router2的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-32.jpg" alt="图片描述" /></p>
+
+<h4 id="6cswitch1的路由表">6C、Switch1的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-33.jpg" alt="图片描述" /></p>
+
+<h4 id="6dswitch2的路由表">6D、Switch2的路由表</h4>
+
+<p><img src="/public/image/2019-05-24-34.jpg" alt="图片描述" /></p>
+
+<h4 id="6e把router1router2switch1switch2的running-config分别保存到文件s6txt">6E、把Router1、Router2、Switch1、Switch2的Running-Config分别保存到文件s6.txt</h4>
+
+<h5 id="route1">Route1</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sh run
+
+Building configuration...
+Current configuration : 1916 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>3b23<span class="o">)</span> Release<span class="o">(</span>176514<span class="o">)(</span>Mon Jul 28 18:19:31 CST 2014 <span class="nt">-ngcf62</span><span class="o">)</span>
+webmaster level 0 username admin password 7 0121474e3e16
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+diffserv domain default
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+cwmp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+control-plane
+<span class="o">!</span>
+control-plane protocol
+ no acpp
+<span class="o">!</span>
+control-plane manage
+ no port-filter
+ no arp-car
+ no acpp
+<span class="o">!</span>
+control-plane data
+ no glean-car
+ no acpp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="nb">enable </span>service web-server http
+<span class="nb">enable </span>service web-server https
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface Serial 2/0
+ encapsulation HDLC
+ clock rate 64000
+<span class="o">!</span>
+interface FastEthernet 1/0
+<span class="o">!</span>
+interface FastEthernet 1/1
+<span class="o">!</span>
+interface FastEthernet 1/2
+<span class="o">!</span>
+interface FastEthernet 1/3
+<span class="o">!</span>
+interface FastEthernet 1/4
+<span class="o">!</span>
+interface FastEthernet 1/5
+<span class="o">!</span>
+interface FastEthernet 1/6
+<span class="o">!</span>
+interface FastEthernet 1/7
+<span class="o">!</span>
+interface FastEthernet 1/8
+<span class="o">!</span>
+interface FastEthernet 1/9
+<span class="o">!</span>
+interface FastEthernet 1/10
+<span class="o">!</span>
+interface FastEthernet 1/11
+<span class="o">!</span>
+interface FastEthernet 1/12
+<span class="o">!</span>
+interface FastEthernet 1/13
+<span class="o">!</span>
+interface FastEthernet 1/14
+<span class="o">!</span>
+interface FastEthernet 1/15
+<span class="o">!</span>
+interface FastEthernet 1/16
+<span class="o">!</span>
+interface FastEthernet 1/17
+<span class="o">!</span>
+interface FastEthernet 1/18
+<span class="o">!</span>
+interface FastEthernet 1/19
+<span class="o">!</span>
+interface FastEthernet 1/20
+<span class="o">!</span>
+interface FastEthernet 1/21
+<span class="o">!</span>
+interface FastEthernet 1/22
+<span class="o">!</span>
+interface FastEthernet 1/23
+<span class="o">!</span>
+interface GigabitEthernet 0/0
+ ip address 192.168.3.2 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ ip address 192.168.2.1 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface VLAN 1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.2.0
+ network 192.168.3.0
+ no auto-summary
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+ref parameter 75 140
+line con 0
+line aux 0
+line <span class="nb">tty </span>1
+ modem InOut
+line vty 0 4
+ login
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="route2">Route2</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sh run
+Building configuration...
+Current configuration : 2004 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>3b23<span class="o">)</span> Release<span class="o">(</span>176514<span class="o">)(</span>Mon Jul 28 18:19:31 CST 2014 <span class="nt">-ngcf62</span><span class="o">)</span>
+webmaster level 0 username admin password 7 111323081b44
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+diffserv domain default
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+cwmp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+control-plane
+<span class="o">!</span>
+control-plane protocol
+ no acpp
+<span class="o">!</span>
+control-plane manage
+ no port-filter
+ no arp-car
+ no acpp
+<span class="o">!</span>
+control-plane data
+ no glean-car
+ no acpp
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="nb">enable </span>service web-server http
+<span class="nb">enable </span>service web-server https
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface Serial 2/0
+ encapsulation HDLC
+<span class="o">!</span>
+interface Serial 3/0
+ encapsulation HDLC
+ clock rate 64000
+<span class="o">!</span>
+interface FastEthernet 1/0
+<span class="o">!</span>
+interface FastEthernet 1/1
+<span class="o">!</span>
+interface FastEthernet 1/2
+<span class="o">!</span>
+interface FastEthernet 1/3
+<span class="o">!</span>
+interface FastEthernet 1/4
+<span class="o">!</span>
+interface FastEthernet 1/5
+<span class="o">!</span>
+interface FastEthernet 1/6
+<span class="o">!</span>
+interface FastEthernet 1/7
+<span class="o">!</span>
+interface FastEthernet 1/8
+<span class="o">!</span>
+interface FastEthernet 1/9
+<span class="o">!</span>
+interface FastEthernet 1/10
+<span class="o">!</span>
+interface FastEthernet 1/11
+<span class="o">!</span>
+interface FastEthernet 1/12
+<span class="o">!</span>
+interface FastEthernet 1/13
+<span class="o">!</span>
+interface FastEthernet 1/14
+<span class="o">!</span>
+interface FastEthernet 1/15
+<span class="o">!</span>
+interface FastEthernet 1/16
+<span class="o">!</span>
+interface FastEthernet 1/17
+<span class="o">!</span>
+interface FastEthernet 1/18
+<span class="o">!</span>
+interface FastEthernet 1/19
+<span class="o">!</span>
+interface FastEthernet 1/20
+<span class="o">!</span>
+interface FastEthernet 1/21
+<span class="o">!</span>
+interface FastEthernet 1/22
+<span class="o">!</span>
+interface FastEthernet 1/23
+<span class="o">!</span>
+interface GigabitEthernet 0/0
+ ip address 192.168.1.129 255.255.255.192
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ ip address 192.168.2.2 255.255.255.0
+ duplex auto
+ speed auto
+<span class="o">!</span>
+interface Loopback 0
+ ip address 192.168.4.1 255.255.255.0
+<span class="o">!</span>
+interface VLAN 1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+ network 192.168.2.0
+ no auto-summary
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+ref parameter 75 140
+line con 0
+line aux 0
+line vty 0 4
+ login
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="switch1-4">Switch1</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sh run
+Building configuration...
+Current configuration : 1514 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>2b12<span class="o">)</span>p2 Release<span class="o">(</span>180357<span class="o">)(</span>Mon Dec  1 17:42:40 CST 2014 <span class="nt">-ngcf64</span><span class="o">)</span>
+<span class="nb">hostname </span>19-S5750-1
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+nfpp
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.1 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/2
+<span class="o">!</span>
+interface GigabitEthernet 0/3
+<span class="o">!</span>
+interface GigabitEthernet 0/4
+<span class="o">!</span>
+interface GigabitEthernet 0/5
+<span class="o">!</span>
+interface GigabitEthernet 0/6
+ no switchport
+ no ip rip split-horizon
+ no ip proxy-arp
+ ip address 192.168.1.65 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/7
+<span class="o">!</span>
+interface GigabitEthernet 0/8
+<span class="o">!</span>
+interface GigabitEthernet 0/9
+<span class="o">!</span>
+interface GigabitEthernet 0/10
+<span class="o">!</span>
+interface GigabitEthernet 0/11
+<span class="o">!</span>
+interface GigabitEthernet 0/12
+<span class="o">!</span>
+interface GigabitEthernet 0/13
+<span class="o">!</span>
+interface GigabitEthernet 0/14
+<span class="o">!</span>
+interface GigabitEthernet 0/15
+<span class="o">!</span>
+interface GigabitEthernet 0/16
+<span class="o">!</span>
+interface GigabitEthernet 0/17
+<span class="o">!</span>
+interface GigabitEthernet 0/18
+<span class="o">!</span>
+interface GigabitEthernet 0/19
+<span class="o">!</span>
+interface GigabitEthernet 0/20
+<span class="o">!</span>
+interface GigabitEthernet 0/21
+<span class="o">!</span>
+interface GigabitEthernet 0/22
+<span class="o">!</span>
+interface GigabitEthernet 0/23
+<span class="o">!</span>
+interface GigabitEthernet 0/24
+<span class="o">!</span>
+interface GigabitEthernet 0/25
+<span class="o">!</span>
+interface GigabitEthernet 0/26
+<span class="o">!</span>
+interface GigabitEthernet 0/27
+<span class="o">!</span>
+interface GigabitEthernet 0/28
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+ no auto-summary
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+line con 0
+line vty 0 4
+ login
+ password b402
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h5 id="switch2-4">Switch2</h5>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sh run
+Building configuration...
+Current configuration : 1585 bytes
+
+<span class="o">!</span>
+version RGOS 10.4<span class="o">(</span>2b12<span class="o">)</span>p2 Release<span class="o">(</span>180357<span class="o">)(</span>Mon Dec  1 17:42:40 CST 2014 <span class="nt">-ngcf64</span><span class="o">)</span>
+<span class="nb">hostname </span>19-S5750-2
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+nfpp
+<span class="o">!</span>
+<span class="o">!</span>
+vlan 1
+<span class="o">!</span>
+<span class="o">!</span>
+no service password-encryption
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+interface GigabitEthernet 0/1
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.193 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/2
+<span class="o">!</span>
+interface GigabitEthernet 0/3
+<span class="o">!</span>
+interface GigabitEthernet 0/4
+<span class="o">!</span>
+interface GigabitEthernet 0/5
+<span class="o">!</span>
+interface GigabitEthernet 0/6
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.1.66 255.255.255.192
+<span class="o">!</span>
+interface GigabitEthernet 0/7
+<span class="o">!</span>
+interface GigabitEthernet 0/8
+<span class="o">!</span>
+interface GigabitEthernet 0/9
+<span class="o">!</span>
+interface GigabitEthernet 0/10
+<span class="o">!</span>
+interface GigabitEthernet 0/11
+<span class="o">!</span>
+interface GigabitEthernet 0/12
+ no switchport
+ no ip proxy-arp
+ ip address 192.168.3.1 255.255.255.0
+<span class="o">!</span>
+interface GigabitEthernet 0/13
+<span class="o">!</span>
+interface GigabitEthernet 0/14
+<span class="o">!</span>
+interface GigabitEthernet 0/15
+<span class="o">!</span>
+interface GigabitEthernet 0/16
+<span class="o">!</span>
+interface GigabitEthernet 0/17
+<span class="o">!</span>
+interface GigabitEthernet 0/18
+<span class="o">!</span>
+interface GigabitEthernet 0/19
+<span class="o">!</span>
+interface GigabitEthernet 0/20
+<span class="o">!</span>
+interface GigabitEthernet 0/21
+<span class="o">!</span>
+interface GigabitEthernet 0/22
+<span class="o">!</span>
+interface GigabitEthernet 0/23
+<span class="o">!</span>
+interface GigabitEthernet 0/24
+<span class="o">!</span>
+interface GigabitEthernet 0/25
+<span class="o">!</span>
+interface GigabitEthernet 0/26
+<span class="o">!</span>
+interface GigabitEthernet 0/27
+<span class="o">!</span>
+interface GigabitEthernet 0/28
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+router rip
+ version 2
+ network 192.168.1.0
+ network 192.168.3.0
+ no auto-summary
+<span class="o">!</span>
+<span class="o">!</span>
+<span class="o">!</span>
+line con 0
+line vty 0 4
+ login
+ password b402
+<span class="o">!</span>
+<span class="o">!</span>
+end
+</code></pre></div></div>
+
+<h2 id="实验分析">实验分析</h2>
+
+<h3 id="通过分析步骤3的路由表解释3b某些ip的ping不通的原因">通过分析步骤[3]的路由表，解释[3B]某些IP的ping不通的原因</h3>
+
+<p>PingPC2可以ping通，pingPC3不通，经检查，到PC3路径上第一个ping不通的ip是192.168.2.1。原因是，Router2路由表中，没有子网1~4的项（在不连续子网的网络边界，路由汇总会引起路由协议的丢失），ping子网3的消息没有办法到达。</p>
+
+<h3 id="把步骤4b和步骤3b所得结果进行对比并进行解释">把步骤[4B]和步骤[3B]所得结果进行对比,并进行解释</h3>
+
+<p>这一步中，PC1到PC3路径上每一个地址都可以ping通了。原因是，Router2关闭自动汇总之后不再收集，因此其路由表中的项没有丢失，就可以ping通。</p>
+
+<h3 id="分析在步骤5g和5h的两种情况下rip-update分组差异">分析在步骤[5G]和[5H]的两种情况下RIP Update分组差异</h3>
+
+<p>在5G-&gt;5H后，GibgabitEthernet 0/6分组下增加了很多项，而这些项也可以在上一个分组里找到。原因是取消水平分割之后，从本节点发送出去的那些路由又被发送了回来。</p>
+
+<h2 id="实验体会">实验体会</h2>
+
+<p>本次实验中，我们在多种情况下配置了RIPv2协议，并探究了自动汇总、水平分割等多种RIP协议的技术的实际效果。在实验的最后，我们还自行探究了毒性反转技术避免计数到无穷问题的实际效果。总之，本次实验帮助我较好地理解了RIP协议的实际效果，还是很有意义的。</p>
+:ET

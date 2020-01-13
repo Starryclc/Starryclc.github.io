@@ -1,0 +1,5481 @@
+I"�m<blockquote>
+  <p>本笔记为合作笔记，各讲内容分别由下述成员完成：</p>
+
+  <ul>
+    <li><a href="https://yorkking.github.io">水唐</a>：一~四讲</li>
+    <li><a href="">swc</a>：五~七讲</li>
+    <li><a href="">KarlSzp</a>：八~九讲</li>
+    <li><a href="https://wu-kan.github.io">WuK</a>：十~十二讲</li>
+    <li><a href="https://shadw3002.github.io">shadw3002</a>：十三~十六讲</li>
+  </ul>
+</blockquote>
+
+<h2 id="第一讲并行计算概览内容要点">第一讲：并行计算概览，内容要点</h2>
+
+<p>并行计算主要研究下面几个方面的内容</p>
+
+<ol>
+  <li>并行架构</li>
+  <li>并行算法</li>
+  <li>并行编程</li>
+  <li>并行性能</li>
+  <li>并行应用</li>
+</ol>
+
+<h3 id="相关基本概念">相关基本概念</h3>
+
+<p>并行计算可以简单定义为同时利用<strong>多个计算资源</strong>解决<strong>一个计算问题</strong></p>
+
+<ul>
+  <li>程序运行在多个CPU上；</li>
+  <li>一个问题被分解成离散可并发解决的小部分；</li>
+  <li>每一小部分被进一步分解成一组指令序列；</li>
+  <li>每一部分的指令在不同的CPU上同时执行；</li>
+  <li>需要一个全局的控制和协调机制；</li>
+</ul>
+
+<h4 id="可并行的计算问题">可并行的计算问题</h4>
+
+<ol>
+  <li>可分解成同时计算的几个离散片段；</li>
+  <li>在任意时刻可同时执行多条指令；</li>
+  <li>多计算资源所花的时间少于单计算资源；</li>
+</ol>
+
+<h4 id="计算资源">计算资源</h4>
+
+<p>一般为：</p>
+
+<ol>
+  <li>具有多处理器／多核的单台主机；</li>
+  <li>通过网络连接的若干数量的主机</li>
+</ol>
+
+<h3 id="并行计算的优势">并行计算的优势</h3>
+
+<ol>
+  <li>在自然界，很多复杂的、交叉发生的事件是同时发生的，但是又在同一个时间序列中；</li>
+  <li>与串行计算相比，并行计算更擅长建模、模拟、理解真实复杂的现象</li>
+  <li>节省时间和花费
+    <ul>
+      <li>理论上，给一个任务投入更多的资源将缩短任务的完成时间，减少潜在的代价；</li>
+      <li>并行计算机可以由多个便宜、通用计算资源构成；</li>
+    </ul>
+  </li>
+  <li>解决更大／更复杂问题：很多问题很复杂，不实际也不可能在单台计算机上解决，例如：Grand Challenges</li>
+  <li>实现并发处理：单台计算机只能做一件事情，而多台计算机却可以同时做几件事情（例如协作网络，来自世界各地的人可以同时工作）</li>
+  <li>利用非本地资源：当本地计算资源稀缺或者不充足时，可以利用甚至是来自互联网的计算资源。
+    <ol>
+      <li>SETI@home (setiathome.berkeley.edu);</li>
+      <li>Folding@home (folding.stanford.edu)</li>
+    </ol>
+  </li>
+  <li>更好地发挥底层并行硬件
+    <ol>
+      <li>现代计算机甚至笔记本都具有多个处理器或者核心；</li>
+      <li>并行软件就是为了针对并行硬件架构出现的；</li>
+      <li>串行程序运行在现代计算机上会浪费计算资源；</li>
+    </ol>
+  </li>
+</ol>
+
+<h3 id="并行计算发展的驱动力">并行计算发展的驱动力</h3>
+
+<h4 id="应用发展趋势">应用发展趋势</h4>
+
+<p>在硬件可达到的性能与应用对性能的需求之间存在正反馈（Positive Feedback Cycle）</p>
+
+<p>大数据时代</p>
+
+<h4 id="架构发展趋势">架构发展趋势</h4>
+
+<h5 id="发展过程">发展过程</h5>
+
+<p>迄今为止，CPU架构技术经历了四代即：电子管（Tube）、晶体管（Transistor）、集成电路（IC）和大规模集成电路（VLSI），这里只关注VLSI。</p>
+
+<p>VLSI最的特色是在于对并行化的利用，不同的VLSI时代具有不同的并行粒度：</p>
+
+<ul>
+  <li>bit级并行</li>
+  <li>指令集并行</li>
+  <li>线程水平的并行</li>
+</ul>
+
+<p>其中，有摩尔定律支持芯片行业的发展：<strong>“芯片上的集成晶体管数量每18个月增加一倍”</strong>。</p>
+
+<h5 id="发展趋势的变化">发展趋势的变化</h5>
+
+<p>发展趋势不再是高速的CPU主频，而是“多核”。（摩尔定律失效的原因之一）</p>
+
+<h4 id="如何提高cpu的处理速度">如何提高CPU的处理速度</h4>
+
+<h5 id="1990年之前的解决方式">1990年之前的解决方式</h5>
+
+<ol>
+  <li>增加时钟频率（扩频）
+    <ol>
+      <li>深化流水线（采用更多／更短的流水阶段）</li>
+      <li>芯片的工作温度会过高</li>
+    </ol>
+  </li>
+  <li>推测超标量（Speculative Superscalar, SS）
+ 多条指令同时执行（指令级的并行，ILP）：
+    <ol>
+      <li>硬件自动找出串行程序中的能够同时执行的独立指令集合；</li>
+      <li>硬件预测分支指令；在分支指令实际发生之前先推测执行；</li>
+    </ol>
+  </li>
+</ol>
+
+<p>局限：最终出现“收益下降（diminishing returns）”
+<strong>这种解决方法的优点：程序员并不需要知道这些过程的细节</strong></p>
+
+<h5 id="2000年之后的解决方式">2000年之后的解决方式</h5>
+
+<ol>
+  <li>时钟频率很难增加；</li>
+  <li>SS触到天花板出现“收益下降”；</li>
+  <li>利用额外的额外的晶体管在芯片上构建更多／更简单的处理器；</li>
+</ol>
+
+<p>后来发展，延申出了并行计算机和并行计算集群。</p>
+
+<h3 id="并行计算机">并行计算机</h3>
+
+<p>从硬件角度来讲，今天的单个计算机都是并行计算机，主要体现为：</p>
+
+<ul>
+  <li>多个功能单元（L1 Cache、L2 Cache、Branch、Prefetch、GPU等）；</li>
+  <li>多个执行单元或者核心</li>
+  <li>多个硬件线程</li>
+</ul>
+
+<h3 id="并行计算集群">并行计算集群</h3>
+
+<p>多个单独的计算机通过网络连接起来形成计算集群</p>
+
+<p>LLNL并行计算集群</p>
+
+<ul>
+  <li>每个节点都是一个多处理器并行机；</li>
+  <li>多个计算节点通过Infiniband网络连接；</li>
+</ul>
+
+<h4 id="moores-law新解">Moore’s law新解</h4>
+
+<ol>
+  <li>每两年芯片上的核心数目会翻倍；</li>
+  <li>时钟频率不再增加，甚至是降低；</li>
+  <li>需要处理具有很多并发线程的系统；</li>
+  <li>需要处理芯片内并行和芯片之间的并行;</li>
+  <li>需要处理异构和各种规范（不是所有的核都相同）；</li>
+</ol>
+
+<p>最后得出结论，需要程序员学会并行编程。</p>
+
+<h3 id="amdahls-law">Amdahl’s Law</h3>
+
+<p>用于度量并行程序的加速效果
+<script type="math/tex">Speedup = \frac{1thread\, execution \, time }{n\, thread \, execution \, time}\\
+Speedup = \frac{1}{(1-p)+p/n}\\</script>
+其中，p表示程序可并发的部分占整个程序的比例。</p>
+
+<h2 id="第二讲并行架构">第二讲：并行架构</h2>
+
+<h2 id="并行架构">并行架构</h2>
+
+<h3 id="flynns-taxonomy分类法">Flynn’s Taxonomy（分类法）</h3>
+
+<h4 id="定义一种并行架构的分类方法">定义：一种并行架构的分类方法</h4>
+
+<p>A classification of computer architectures based on the number of streams of instructions and data</p>
+
+<p><img src="assets/1561360604887.png" alt="1561360604887" /></p>
+
+<h5 id="sisd-architecture">SISD Architecture</h5>
+
+<p><img src="assets/1561360717822.png" alt="1561360717822" /></p>
+
+<p>例如：单核计算机</p>
+
+<h5 id="simd-architecture单指令多数据流">SIMD Architecture:单指令多数据流</h5>
+
+<p><img src="assets/1561360792439.png" alt="1561360792439" /></p>
+
+<p>例子：vector processor,GPUs</p>
+
+<p><img src="assets/1561360831768.png" alt="1561360831768" /></p>
+
+<p>延申：SPMD,对称多处理器</p>
+
+<h5 id="misd-architecture">MISD Architecture</h5>
+
+<p>多指令单数据流</p>
+
+<p><img src="assets/1561360975918.png" alt="1561360975918" /></p>
+
+<h5 id="mimd-architecture-多指令多数据流">MIMD Architecture 多指令多数据流</h5>
+
+<p><img src="assets/1561361015494.png" alt="1561361015494" /></p>
+
+<h3 id="单处理器并行uniprocessor-parallelism">单处理器并行(Uniprocessor Parallelism)</h3>
+
+<h4 id="引入">引入</h4>
+
+<p>How do uniprocessor computer architectures extract parallelism?</p>
+
+<ul>
+  <li>By finding parallelism within instruction stream</li>
+  <li>Called “Instruction Level Parallelism” (ILP) 指令级并行</li>
+  <li>The theory: hide parallelism from programmer</li>
+</ul>
+
+<h4 id="早期的目标">早期的目标</h4>
+
+<p>Goal of Computer Architects until about 2002:</p>
+
+<ul>
+  <li>Hide Underlying Parallelism from everyone: OS, Compiler,Programmer</li>
+</ul>
+
+<h3 id="examples-of-ilp-techniques-指令级并行的技术">Examples of ILP techniques 指令级并行的技术</h3>
+
+<ul>
+  <li>（流水线）Pipelining: Overlapping individual parts of instructions</li>
+  <li>（超标量执行）Superscalar execution: Do multiple things at same time</li>
+  <li>VLIW: Let compiler specify which operations can run in parallel</li>
+  <li>（向量处理）Vector Processing: Specify groups of similar (independent) operations</li>
+  <li>（乱序执行） Out of Order Execution (OOO): Allow long operations to happen</li>
+</ul>
+
+<h4 id="流水线技术">流水线技术</h4>
+
+<p><strong>Limits to Pipelining</strong></p>
+
+<ol>
+  <li>Overhead prevents arbitrary division (最小可划分部分的时间)
+    <ul>
+      <li>Cost of latches (between stages) limits what can do within stage</li>
+      <li>Sets minimum amount of work/stage</li>
+    </ul>
+  </li>
+  <li>Hazards prevent next instruction from executing during its designated clock cycle（冒险）
+    <ul>
+      <li>结构冒险 Structural hazards: Attempt to use the same hardware to do two different things at once</li>
+      <li>数据冒险 Data hazards: Instruction depends on result of prior instruction still in the pipeline</li>
+      <li>控制冒险 Control hazards: Caused by delay between the fetching of instructions and decisions about changes in control flow (branches and jumps)</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="乱序执行out-of-order-ooo-execution">乱序执行Out-of-Order (OOO) Execution</h4>
+
+<h4 id="预测执行">预测执行</h4>
+
+<p>最后得知结论，并行需要暴露给程序员，让软件来实现。</p>
+
+<h4 id="向量处理vector-processingsimd">向量处理：VECTOR PROCESSING/SIMD</h4>
+
+<h5 id="1-向量编程模型图解">1. 向量编程模型图解</h5>
+
+<p><img src="assets/1561362873614.png" alt="1561362873614" /></p>
+
+<h5 id="2-simd-架构示意图">2. SIMD 架构示意图</h5>
+
+<p><img src="assets/1561362907979.png" alt="1561362907979" /></p>
+
+<ul>
+  <li>中央控制器广播指令给处理单元：Central controller broadcasts instructions to multiple processing elements (PEs)
+    <ul>
+      <li>只需一个中央控制器 Only requires one controller for whole array</li>
+      <li>只需要内存存程序的一份代码 Only requires storage for one copy of program</li>
+      <li>计算异步All computations are fully synchronized</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="多线程技术multithreadingincluding-pthreads">多线程技术MULTITHREADING:INCLUDING PTHREADS</h4>
+
+<h5 id="相关概念">相关概念</h5>
+
+<p>Thread Level Parallelism (TLP) :线程级并行</p>
+
+<p>Concurrency vs Parallelism：并发和并行</p>
+
+<h5 id="介绍-posix-threads">介绍 POSIX Threads</h5>
+
+<p><strong>定义</strong>POSIX: Portable Operating System Interface for UNIX</p>
+
+<p><strong>特点</strong>：共享堆，不共享栈</p>
+
+<p>**线程调度：Thread Scheduling **</p>
+
+<p><strong>调度实现方式</strong>：</p>
+
+<ul>
+  <li>
+    <p>多道程序设计Multitasking operating system</p>
+  </li>
+  <li>硬件多线程</li>
+  <li>切换线程的时机</li>
+</ul>
+
+<p><u>ILP与TLP关系是什么意思？没看懂</u></p>
+
+<p><strong>超线程“Simultaneous Multithreading”</strong></p>
+
+<p><strong>定义</strong>：既有多线程，又有指令级的并行</p>
+
+<p>超线程，可以更好的占用处理器资源</p>
+
+<h4 id="内存系统-uniprocessor-memory-systems">内存系统 UNIPROCESSOR MEMORY SYSTEMS</h4>
+
+<h5 id="内存的限制">内存的限制</h5>
+
+<ul>
+  <li>Memory system, and not processor speed, is often the bottleneck for many applications.</li>
+  <li>Memory system performance is largely captured by two parameters, <strong>latency **and **bandwidth</strong>.</li>
+  <li><strong>Latency</strong> is the time from the issue of a memory request to the time the data is available at the processor.</li>
+  <li><strong>Bandwidth</strong> is the rate at which data can be pumped to the processor by the memory system</li>
+</ul>
+
+<h5 id="内存墙的问题">内存墙的问题</h5>
+
+<p><img src="assets/1561365381115.png" alt="1561365381115" /></p>
+
+<h5 id="局部性原理-principle-of-locality">局部性原理 Principle of Locality</h5>
+
+<h6 id="定义">定义：</h6>
+
+<p>Program access a relatively small portion of the address space at any instant of time</p>
+
+<ul>
+  <li>
+    <p>时间局部性</p>
+  </li>
+  <li>
+    <p>空间局部性</p>
+  </li>
+</ul>
+
+<h5 id="分级存储memory-hierarchy">分级存储Memory Hierarchy</h5>
+
+<p>命中率，内存延迟</p>
+
+<h3 id="多核多处理器multicore-chips">多核、多处理器MULTICORE CHIPS</h3>
+
+<h3 id="并行架构what-is-parallel-architecture">并行架构？WHAT IS PARALLEL ARCHITECTURE</h3>
+<ul>
+  <li>Machines with multiple processors</li>
+  <li>
+    <p>A parallel computer is a collection of processing elements that cooperate to solve large problems fast Some broad issues</p>
+  </li>
+  <li>Resource Allocation</li>
+  <li>Data access, Communication and Synchronization</li>
+  <li>Performance and Scalability（性能和可伸缩性）</li>
+</ul>
+
+<h3 id="并行领域a-parallel-zoo-of-architectures">并行领域：A PARALLEL ZOO OF ARCHITECTURES</h3>
+<h4 id="mimd-machines">MIMD Machines</h4>
+
+<ol>
+  <li>
+    <p>定义：Multiple Instruction, Multiple Data (MIMD)</p>
+  </li>
+  <li>
+    <p>通信方式：</p>
+
+    <ul>
+      <li>
+        <p>Shared memory: Communication through Memory</p>
+      </li>
+      <li>
+        <p>Message passing: Communication through Messages</p>
+      </li>
+    </ul>
+  </li>
+</ol>
+
+<p>For most machines, shared memory built on top of message passing network</p>
+
+<h4 id="举例">举例</h4>
+
+<p>Symmetric Multiprocessor</p>
+
+<ul>
+  <li>Multiple processors in box with shared memory communication</li>
+  <li>Current MultiCore chips like this</li>
+  <li>Every processor runs copy of OS</li>
+</ul>
+
+<h3 id="1-flynns并行架构分类">1. Flynn’s并行架构分类</h3>
+
+<ul>
+  <li>基于指令流和数据流数量的计算机体系结构分类</li>
+</ul>
+
+<blockquote>
+  <p><img src="./1.png" alt="2.1" />
+SISD架构：单核计算机
+SIMD架构：向量处理器，GPUs
+MISD架构：（没有符合的知名系统。。）
+MIMD架构：现代并行系统</p>
+</blockquote>
+
+<h3 id="2-什么是pipeline">2. 什么是pipeline</h3>
+
+<ul>
+  <li>Pipelining</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>流水线有助于带宽而不是延迟</li>
+    <li>带宽受限于最慢的流水线阶段</li>
+    <li>加速潜力 = 流水线级数</li>
+    <li>MIPS流水线的5个阶段：Fetch-&gt;Decode-&gt;Execute-&gt;Memory-&gt;Write Back</li>
+    <li>流水线CPI &lt; 1</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>流水线的限制</li>
+</ul>
+
+<blockquote>
+  <p>开销防止任意划分</p>
+
+  <blockquote>
+    <ol>
+      <li>阶段之间锁存器的成本限制了阶段内能做什么</li>
+      <li>设置最小数量的阶段</li>
+    </ol>
+  </blockquote>
+
+  <p>冒险阻止下一条指令在其指定的时钟周期内执行</p>
+
+  <blockquote>
+    <ol>
+      <li>结构冒险：尝试同时使用相同的硬件执行两个不同的操作</li>
+      <li>数据冒险：指令取决于仍在流水线中先前指令的结果</li>
+      <li>控制冒险：由于控制流程（分支和跳跃）中的指令和决策获取之间的延迟而造成的</li>
+    </ol>
+  </blockquote>
+
+  <p>超标量增加的冒险的发生</p>
+  <blockquote>
+    <p>更多冲突的指令（时钟周期）</p>
+  </blockquote>
+</blockquote>
+
+<h3 id="3-有哪些形式的指令级并行">3. 有哪些形式的指令级并行</h3>
+
+<ul>
+  <li>单处理器计算机体系结构如何提取并行性?</li>
+</ul>
+
+<blockquote>
+  <p>通过在指令流中查找并行性，称为“指令级并行”，向程序员隐藏并行性。</p>
+</blockquote>
+
+<ul>
+  <li>指令级并行的例子</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>流水线：指令的各个部分重叠</li>
+    <li>超标量执行：同时执行多个操作</li>
+    <li>VLIW（极长指令字）：让编译器指定哪些操作可以并行运行</li>
+    <li>向量处理：指定相似的操作组</li>
+    <li>乱序执行：允许长时间操作</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>现代指令级并行的特点</li>
+</ul>
+
+<blockquote>
+  <p>动态调度，乱序执行</p>
+
+  <blockquote>
+    <ol>
+      <li>获取一堆指令，确定它们的依赖性并尽可能消除其依赖性，将它们全部扔到执行单元中，向前移动指令以消除指令间的依赖性。</li>
+      <li>如同按顺序执行</li>
+    </ol>
+  </blockquote>
+
+  <p>投机执行</p>
+
+  <blockquote>
+    <ol>
+      <li>猜测分支的结果，若猜测错误必须能够撤销结果</li>
+      <li>猜测的准确性随着流水线中同时运行的指令数量增加而降低</li>
+    </ol>
+  </blockquote>
+
+  <p>巨大的复杂性</p>
+  <blockquote>
+    <p>许多组件的复杂性按n²来衡量</p>
+  </blockquote>
+</blockquote>
+
+<h3 id="4-什么是pthreads">4. 什么是Pthreads</h3>
+
+<ul>
+  <li>线程级并行</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>指令级并行利用循环或直线代码段内的隐式并行操作</li>
+    <li>线程级并行显式地表示为利用多个本质上是并行的线程执行</li>
+    <li>线程可被用于单处理器或多处理器上</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>并发和并行</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>并发性是指两个任务可以在重叠的时间段内启动、运行和完成。不一定意味着他们两个都会在同一时刻运行.例如在单线程机器上执行多任务。</li>
+    <li>并行性是指任务同时运行，例如多核处理器。</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>POSIX线程概述</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>POSIX: Portable Operating System Interface for UNIX</li>
+    <li>Pthread: The POSIX threading interface</li>
+    <li>Pthread 包括支持创建并行性、同步，不显式支持通信，因为共享内存是隐式的；指向共享数据的指针传递给线程。</li>
+    <li>只有堆上的数据可共享，栈上的数据不可共享。</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>数据共享和线程</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>在main之外声明的变量是共享的</li>
+    <li>可以共享堆上分配的对象（如果指针被传递）</li>
+    <li>栈上的变量是私有的，将指向这些变量的指针传递给其他线程可能会导致问题</li>
+    <li>通常通过创建一个大的“线程数据”结构体来完成，该结构体作为参数传递到所有线程中</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>ILP和TLP的联系</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>在为ILP设计的数据路径中，由于代码中的阻塞或依赖关系，功能单元通常处于空闲状态。</li>
+    <li>TLP用作独立指令的来源，在暂停期间可能会使处理器繁忙。</li>
+    <li>当ILP不足时，TLP被用于占用可能闲置的功能单元。</li>
+  </ol>
+</blockquote>
+
+<h3 id="5-内存局部性原则有哪些">5. 内存局部性原则有哪些</h3>
+
+<ul>
+  <li>内存系统性能的限制</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>内存系统，而不是处理器速度，往往是许多应用程序的瓶颈。</li>
+    <li>内存系统性能主要由两个参数（延迟和带宽）影响。</li>
+    <li>延迟（Latency）是指从发出内存请求到处理器提供数据的时间。</li>
+    <li>带宽（Bandwidth）是存储系统将数据泵送到处理器的速率。</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>局部性原则</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>程序在任何时刻访问相对较小的地址空间。</li>
+    <li>时间局部性：如果一个项被引用，它很快就会再次被引用（例如循环、重用）。</li>
+    <li>空间局部性：如果引用了某个项，则其地址接近的项很快就会被引用（例如，直线代码、数组访问）。</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>局部性原则的优点</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>以最便宜的技术呈现尽可能多的内存。</li>
+    <li>以最快的技术提供的速度提供访问。</li>
+  </ol>
+</blockquote>
+
+<h3 id="6-内存分层">6. 内存分层</h3>
+
+<p><img src="./2.png" alt="2" /></p>
+
+<h3 id="7-caches在内存分层结构中的重要作用">7. Caches在内存分层结构中的重要作用</h3>
+
+<blockquote>
+  <ol>
+    <li>缓存是处理器和DRAM之间的小型快速内存元素。作为低延迟高带宽存储，如果重复使用一条数据，缓存可以减少该内存系统的有效延迟。</li>
+    <li>缓存满足的数据引用部分称为缓存命中率。由存储系统上的代码实现的缓存命中率通常决定其性能。</li>
+  </ol>
+</blockquote>
+
+<h3 id="8-新型存储系统的构成">8. 新型存储系统的构成</h3>
+
+<p><img src="./3.png" alt="3" /></p>
+
+<h3 id="9-什么是并行架构">9. 什么是并行架构</h3>
+
+<blockquote>
+  <ol>
+    <li>并行结构一般是指并行体系结构和软件架构采取并行编程。主要目的是使更多任务或数据同时运行。并行体系结构是指许多指令能同时进行的体系结构；并行编程一般有以下模式：共享内存模式；消息传递模式；数据并行模式。</li>
+    <li>并行计算机是一组处理元素的集合，它们协同快速地解决一些大问题。</li>
+  </ol>
+</blockquote>
+
+<h3 id="10-mimd的并行架构包括哪些实现类型">10. MIMD的并行架构包括哪些实现类型</h3>
+
+<blockquote>
+  <ol>
+    <li>对称多处理器：内置多个处理器，共享内存通信，每个处理器运行操作系统的拷贝，例如现在的多核芯片。</li>
+    <li>通过主机的独立I/O的非统一共享内存：多处理器，每个都有本地内存，通用可扩展网络，节点上非常轻的OS提供简单的服务，调度/同步，用于I/O的网络可访问主机。</li>
+    <li>集群：多台独立机接入通用网络，通过消息沟通。</li>
+  </ol>
+</blockquote>
+
+<h3 id="11-mpp架构的典型例子及主要构成">11. MPP架构的典型例子及主要构成</h3>
+
+<p><img src="./4.png" alt="4" /></p>
+
+<h2 id="第三讲并行编程模型">第三讲：并行编程模型</h2>
+
+<h3 id="引入-1">引入</h3>
+
+<p>开头举了许多并行编程的模型的例子：计算$\pi$</p>
+
+<h3 id="历史">历史</h3>
+
+<ol>
+  <li>
+    <p>1970s – early 1990s，并行机由它的并行模型和语言唯一决定。</p>
+
+    <p>Historically (1970s – early 1990s), each parallel machine was unique, along with its programming model and language。</p>
+
+    <ul>
+      <li>架构（Architecture） = 编程模型（prog. model ）+ 通信抽象 （comm. abstraction） + 机器（machine）;</li>
+      <li>并行架构依附于编程模型（parallel architectures tied to programming models）;</li>
+    </ul>
+  </li>
+  <li>
+    <p>并行架构发展迅猛：</p>
+
+    <p><img src="assets/1561646967726.png" alt="1561646967726" /></p>
+  </li>
+</ol>
+
+<h3 id="并行编程模型概述">并行编程模型概述</h3>
+
+<p>从并行机器架构中分理出<strong>并行编程模型</strong></p>
+
+<h4 id="什么是并行编程模型感觉ppt上没有明确定义">什么是并行编程模型（感觉ppt上没有明确定义）</h4>
+
+<ul>
+  <li>程序员在编码应用程序中所使用的（What programmer uses in coding applications）</li>
+  <li>
+    <p>具体化的通信和同步机制（Specifies communication and synchronization）</p>
+  </li>
+  <li><a href="https://python-parallel-programmning-cookbook.readthedocs.io/zh_CN/latest/chapter1/04_Parallel_programming_models.html">并行编程模型是作为对硬件和内存架构的抽象而存在的。</a></li>
+</ul>
+
+<h4 id="并行编程模型的主要包括哪些类型">并行编程模型的主要包括哪些类型</h4>
+
+<ul>
+  <li>
+    <p>主要的：</p>
+
+    <ul>
+      <li>
+        <p>共享内存（shared address space）: openMP</p>
+
+        <ul>
+          <li>Independent tasks encapsulating local data</li>
+          <li>Tasks interact by exchanging messages</li>
+        </ul>
+      </li>
+      <li>
+        <p>消息传递（message passing）: MPI</p>
+
+        <ul>
+          <li>Tasks share a common address space</li>
+        </ul>
+
+        <p>-
+  任务通过异步读取和写入此空间进行交互（Tasks interact by reading and writing this space asynchronously）</p>
+      </li>
+      <li>
+        <p>数据并行（data parallel）：eg: GPU</p>
+
+        <ul>
+          <li>Tasks execute a sequence of independent operations</li>
+        </ul>
+      </li>
+      <li>
+        <p>Data usually evenly partitioned across tasks</p>
+        <ul>
+          <li>Also referred to as “embarrassingly parallel”</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>其他：</p>
+
+    <ul>
+      <li>数据流（data flow）：eg: tensorflow</li>
+      <li>(<em>?收缩阵列</em>) systolic arrays</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="并行编程模型主要包括哪几部分">并行编程模型主要包括哪几部分</h4>
+
+<p><strong>1. Control</strong> 控制</p>
+
+<ul>
+  <li>How is parallelism created?</li>
+  <li>In what order should operations take place?</li>
+  <li>How are different threads of control synchronized?</li>
+</ul>
+
+<p><strong>2. Naming</strong> 变量声明</p>
+
+<ul>
+  <li>What data is private vs. shared?</li>
+  <li>How is shared data accessed?</li>
+</ul>
+
+<p><strong>3. Operations</strong> 操作</p>
+
+<ul>
+  <li>What operations are atomic?</li>
+</ul>
+
+<p><strong>4. Cost</strong> 开销</p>
+
+<ul>
+  <li>How do we account for the cost of operations?</li>
+</ul>
+
+<h3 id="共享内存模型有哪些实现">共享内存模型有哪些实现</h3>
+
+<h4 id="1共享内存的定义">1.共享内存的定义</h4>
+
+<p>Any processor can directly reference any memory location</p>
+
+<ul>
+  <li>Communication occurs implicitly as result of loads and stores</li>
+</ul>
+
+<h4 id="2-特点">2. 特点</h4>
+
+<ul>
+  <li>
+    <p>便捷性：Convenient</p>
+
+    <ul>
+      <li>Location transparency（位置透明）</li>
+    </ul>
+
+    <p>-
+  类似的编程模型，以便在单处理器上进行时间共享</p>
+
+    <p>（Similar programming model to time-sharing on uniprocessors）</p>
+
+    <ul>
+      <li>Except processes run on different processors</li>
+      <li>Good throughput on multiprogrammed workloads</li>
+    </ul>
+  </li>
+  <li>
+    <p>一般利用进程和线程来是实现</p>
+
+    <ul>
+      <li>
+        <p>读写异步</p>
+
+        <p>tasks share a common address space, which they read and write asynchronously。</p>
+      </li>
+      <li>
+        <p>Various mechanisms such as locks / semaphores may be used to control access to the shared memory</p>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="3-优缺点相对于程序员而言">3. 优缺点（相对于程序员而言）</h4>
+
+<ul>
+  <li>
+    <p>优点</p>
+
+    <ul>
+      <li>
+        <p>An advantage of this model from the programmer’s point of view is that the notion of data “ownership” is lacking, so there is no need to specify explicitly the communication of data between tasks。</p>
+      </li>
+      <li>
+        <p>Program development can often be simplified。</p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>缺点</p>
+
+    <ul>
+      <li>存在数据竞争，难以理解数据的局部性</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="4-实现的两种方式">4. 实现的两种方式</h4>
+
+<ul>
+  <li>
+    <p>单机上，依赖编译器和硬件将程序变量转换成实物理地址，即全局地址。</p>
+
+    <p>Native compilers and/or hardware translate user program variables into actual memory addresses, which are global。</p>
+  </li>
+  <li>
+    <p>在分布式系统中，内存物理上分布在同一网络不同机器上，但是通过软件和硬件转换成全局地址。</p>
+
+    <p>On distributed shared memory machines, such as the SGI Origin, memory is physically distributed across a network of machines, but made global through specialized hardware and software。</p>
+  </li>
+</ul>
+
+<h4 id="5-实现的典型架构举例">5. 实现的典型架构举例</h4>
+
+<ul>
+  <li>
+    <p>SAS Machine Architecture</p>
+
+    <ul>
+      <li>
+        <p>其中的典型架构：对称多处理器 One representative architecture: SMP</p>
+
+        <p>下面是实现原理</p>
+
+        <ul>
+          <li>
+            <p>Used to mean Symmetric MultiProcessor：</p>
+
+            <p>All CPUs had equal capabilities in every area, e.g., in terms of I/O
+as well as memory access</p>
+          </li>
+          <li>
+            <p>Evolved(发展) to mean Shared Memory Processor：</p>
+
+            <p>Non-message-passing machines (included <u>crossbar</u> as well as
+<u>bus based systems 系统总线</u>)</p>
+          </li>
+          <li>
+            <p>Now it tends to refer to bus-based shared memory machines：</p>
+
+            <p>Small scale: &lt; 32 processors typically</p>
+
+            <p><img src="assets/1561687071192.png" alt="1561687071192" /></p>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>上面的架构在规模一大会出现问题（左图是有问题的初始架构，右边是改进的）</p>
+  </li>
+</ul>
+
+<p><img src="assets/1561687499864.png" alt="1561687499864" /> <img src="assets/1561687518616.png" alt="1561687518616" /></p>
+
+<ul>
+  <li>
+    <p>左边的问题：</p>
+
+    <ul>
+      <li>
+        <p>互连的总线等成本问题 （Problem is interconnect）：</p>
+
+        <p>cost (crossbar) or bandwidth (bus)</p>
+      </li>
+      <li>
+        <p>带宽不会提升（Dance-hall: bandwidth is not scalable, but lower cost than crossbar）</p>
+
+        <ul>
+          <li>Latencies to memory uniform, but uniformly large</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>改进成右边：</p>
+
+    <ul>
+      <li>
+        <p>Distributed memory or non-uniform memory access (NUMA)：</p>
+
+        <p>Construct shared address space out of simple message transactions across a general-purpose network (e.g. read-request, read-response)。</p>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="共享内存之线程模型">共享内存之线程模型</h3>
+
+<h4 id="1-概述">1. 概述</h4>
+
+<ul>
+  <li>最典型的共享内存编程模型</li>
+  <li>单进程可以有多个并发的执行路径</li>
+</ul>
+
+<h4 id="2-线程的特点">2. 线程的特点</h4>
+
+<p>呃……操作系统也学了，不说了</p>
+
+<p>算了还是说一下：</p>
+
+<ul>
+  <li>含私有变量（栈上的）</li>
+  <li>共享变量（堆上的，静态变量等等）</li>
+</ul>
+
+<p><img src="assets/1561688227205.png" alt="1561688227205" /></p>
+
+<h4 id="1-插入内容造成并行编程模型不能达到理想加速比">&gt;1 插入内容：造成并行编程模型不能达到理想加速比</h4>
+
+<ul>
+  <li>
+    <p>利用Amdahl’s Law定律，分析如下：有的部分不能并行</p>
+
+    <p><img src="assets/1561688503566.png" alt="1561688503566" /></p>
+  </li>
+  <li>
+    <p>还有其他的问题：</p>
+
+    <p>问题出在，一图便知：</p>
+
+    <ol>
+      <li>线程创建需要开销。</li>
+      <li>数据划分会出现不均衡（负载不均衡）。</li>
+      <li>共享数据会出现RC问题、死锁问题：加锁、解锁影响性能。</li>
+    </ol>
+
+    <p><img src="assets/1561688596756.png" alt="1561688596756" /></p>
+  </li>
+</ul>
+
+<h4 id="2-插入内容decomposition解耦">&gt;2. 插入内容：Decomposition（解耦）</h4>
+
+<p>有下列两种含义：</p>
+
+<ul>
+  <li>（数据解耦）Data decomposition
+    <ul>
+      <li>Break the entire dataset into smaller, discrete portions, then process
+them in parallel</li>
+      <li>Folks eat up a cake</li>
+    </ul>
+  </li>
+  <li>（任务解耦）Task decomposition
+    <ul>
+      <li>Divide the whole task based on natural set of independent sub-tasks</li>
+      <li>Folks play a symphony</li>
+    </ul>
+  </li>
+</ul>
+
+<p>注意事项：Considerations</p>
+
+<ul>
+  <li>Cause less or no share data</li>
+  <li>Avoid the dependency among sub-tasks, otherwise become
+pipeline</li>
+</ul>
+
+<h4 id="3-任务task和线程thread之间的关系">3. 任务（Task）和线程（Thread）之间的关系</h4>
+
+<h5 id="任务的特点">任务的特点：</h5>
+
+<ul>
+  <li>
+    <p>任务包含数据和它的进程，任务被调度到线程上进行执行（A task consists the data and its process, and task scheduler will attach it to a thread to be executed）。</p>
+  </li>
+  <li>任务比线程更轻量级 （Task operation is much cheaper than threading operation）。</li>
+  <li>线程之间可以通过任务的steal达到负载均衡的目的（Ease to balance workload among threads by stealing）。</li>
+  <li>任务适合多种数据结构：Suit for list, tree, map data structure</li>
+</ul>
+
+<p><img src="assets/1561689552306.png" alt="1561689552306" /></p>
+
+<p>任务有静态调度和动态调度。</p>
+
+<h4 id="4-什么是线程竞争如何解决">4. 什么是线程竞争？如何解决</h4>
+
+<p>额…RC问题，还不知道吗？那操作系统挂定了…</p>
+
+<h5 id="rc问题">RC问题</h5>
+
+<ul>
+  <li>
+    <p>定义：</p>
+
+    <p>一般来说，指的是多个线程在<strong>同一时间</strong>访问<strong>同样的内存位置</strong>，其中至少<strong>有一个线程</strong>进行<strong>写操作</strong>。</p>
+  </li>
+  <li>
+    <p>解决：</p>
+    <ul>
+      <li>设置临界区：（Control shared access with critical regions）
+        <ul>
+          <li>Mutual exclusion and synchronization, critical session, atomic</li>
+        </ul>
+      </li>
+      <li>把全局变量变成线程的局部变量（ Scope variables to be local to threads）
+        <ul>
+          <li>Have a local copy for shared data</li>
+          <li>Allocate variables on thread stack</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="死锁">死锁</h5>
+
+<ul>
+  <li>
+    <p>定义：</p>
+
+    <p>2 or more threads wait for each other to release a resource。</p>
+  </li>
+  <li>
+    <p>解决：</p>
+
+    <ul>
+      <li>Always lock and un-lock in the same order, and avoid hierarchies if
+possible</li>
+      <li>Use atomic</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="1-什么是并行编程模型">1. 什么是并行编程模型</h3>
+
+<ul>
+  <li>并行编程模型是并行计算机体系架构的一种抽象，它便于编程人员在程序中编写算法及其组合。（百度）</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>历史上（70年代至90年代初），每台并行机都是独一无二的，其编程模型和语言也是独一无二的。架构=程序模型+通信抽象+机器，并行架构与编程模型相关。</li>
+    <li>现在，我们将编程模型与底层的并行机器体系结构分离开来。</li>
+    <li>主要编程模型有：共享地址空间、消息传递、数据并行；其他类型有：数据流、收缩阵列。</li>
+    <li>通过扩展“计算机体系结构”以支持通信与合作。旧：指令集架构；新：通信架构。</li>
+    <li>定义：关键抽象、边界和接口；实现接口的组织结构。</li>
+    <li>编译器、库和操作系统是重要的桥梁。</li>
+  </ol>
+</blockquote>
+
+<h3 id="2-并行编程模型主要包括哪些类型主要特点是什么">2. 并行编程模型主要包括哪些类型，主要特点是什么</h3>
+
+<ul>
+  <li>程序员在编码应用程序中使用什么来指定通信和同步</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>多道程序设计：无通信或同步，在程序级别</li>
+    <li>共享地址空间：如公告板</li>
+    <li>消息传递：如信件或电话，明确的点到点</li>
+    <li>数据并行：对数据进行更严格的全局操作，使用共享地址空间或消息传递实现</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>并行编程模型及特点</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>消息传递（message passing）：封装本地数据的独立任务，任务通过交换消息进行交互。</li>
+    <li>共享内存（shared memroy）：任务共享公用地址空间，任务通过异步读写此空间进行交互。</li>
+    <li>数据并行化（data parallelization）：任务执行一系列独立的操作，数据通常在任务之间均匀分区，也被称为“令人尴尬的并行”。</li>
+  </ol>
+</blockquote>
+
+<h3 id="3-并行编程模型主要包括哪几部分">3. 并行编程模型主要包括哪几部分</h3>
+
+<blockquote>
+  <ol>
+    <li>控制：如何创建并行性；应按什么顺序进行操作；不同的控制线程是如何同步的</li>
+    <li>命名：什么数据是私有的还是共享的；如何访问共享数据</li>
+    <li>操作：什么操作是原子操作</li>
+    <li>成本：我们如何计算运营成本</li>
+  </ol>
+</blockquote>
+
+<h3 id="4-共享内存模型有哪些实现">4. 共享内存模型有哪些实现</h3>
+
+<ul>
+  <li>共享内存模型</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>任何处理器都可以直接引用任何内存位置，由于加载和存储而隐式发生通信；方便；位置透明度；与单处理器时间共享类似的编程模型。</li>
+    <li>在这个编程模型中，任务共享一个公共地址空间，它们异步读写。可以使用各种机制，如锁/信号灯来控制对共享内存的访问。从程序员的角度来看，该模型的一个优点是缺乏数据“所有权”的概念，因此无需明确规定任务之间的数据通信。程序开发通常可以简化。在性能方面的一个重要缺点是，越来越难以理解和管理数据位置。将数据保持在处理器的本地，这样可以节省在多个处理器使用相同数据时发生的内存访问、缓存刷新和总线流量。不幸的是，控制数据位置很难理解，并且超出了普通用户的控制范围。</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>实现</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>SAS Machine Architecture</li>
+    <li>Scaling Up</li>
+  </ol>
+</blockquote>
+
+<h3 id="5-造成并行编程模型不能达到理想加速比的原因">5. 造成并行编程模型不能达到理想加速比的原因</h3>
+
+<p><img src="./5.png" alt="5" /></p>
+
+<h3 id="6-任务和线程之间的关系">6. 任务和线程之间的关系</h3>
+
+<ul>
+  <li>分解</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>数据分解：将整个数据集分解为更小、离散的部分，然后并行处理它们</li>
+    <li>任务分解：根据独立子任务的自然集合划分整个任务</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>任务和线程</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>任务由数据及其进程组成，任务调度程序会将其附加到要执行的线程上。</li>
+    <li>任务操作比线程操作便宜得多。</li>
+    <li>通过窃取轻松平衡线程之间的工作量。</li>
+    <li>任务适合列表、树、地图数据结构</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>注意事项</li>
+</ul>
+
+<blockquote>
+  <p>任务比线程多</p>
+
+  <blockquote>
+    <ol>
+      <li>更灵活地安排任务</li>
+      <li>轻松平衡工作量</li>
+    </ol>
+  </blockquote>
+
+  <p>任务中的计算量必须足够大，以抵消管理任务和线程的开销。</p>
+
+  <p>静态调度</p>
+  <blockquote>
+    <p>任务是独立函数调用的集合，或者是循环迭代</p>
+  </blockquote>
+
+  <p>动态调度</p>
+  <blockquote>
+    <p>任务执行长度可变且不可预测
+可能需要一个额外的线程来管理共享结构以保存所有任务</p>
+  </blockquote>
+</blockquote>
+
+<h3 id="7-什么是线程竞争如何解决">7. 什么是线程竞争，如何解决</h3>
+
+<ul>
+  <li>竞争</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>线程之间“竞争”以获取资源；执行令被假定，但不能保证;存储冲突最常见；多个线程并发访问同一内存位置，至少有一个线程正在写入；可能在任何时候都不明显</li>
+    <li>注意事项：互斥和同步、临界区、原子操作</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>死锁</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>两个或多个线程等待彼此释放资源；一个线程等待一个永远不会发生的事件，比如挂起的锁。</li>
+    <li>注意事项：始终按相同顺序锁定和解除锁定，并尽可能避免层次结构；使用原子操作</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>线程安全例程/库</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>它在多个线程同时执行期间正常工作。</li>
+    <li>非线程安全标志
+  访问全局/静态变量或堆
+  分配/重新分配/释放具有全局范围（文件）的资源
+  通过句柄和指针间接访问</li>
+    <li>注意事项</li>
+  </ol>
+
+  <blockquote>
+    <p>任何更改的变量必须是每个线程的本地变量
+例程可以使用互斥来避免与其他线程冲突</p>
+  </blockquote>
+</blockquote>
+
+<ul>
+  <li>工作量不平衡</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>所有线程以相同的方式处理数据，但一个线程分配了更多的工作，因此需要更多的时间来完成它并影响整体性能。</li>
+    <li>注意事项</li>
+  </ol>
+
+  <p>使内环平行</p>
+  <blockquote>
+    <p>向细粒倾斜
+选择合适的算法
+分而治之，master and work, work-stealing</p>
+  </blockquote>
+</blockquote>
+
+<ul>
+  <li>粒度</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>较大实体的细分程度，粗粒意味着越来越少的成分，细粒度意味着越来越小的成分</li>
+    <li>注意事项：细粒度将增加任务调度程序的工作量；粗粒度可能导致工作负载不平衡；设定适当粒度的基准</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>锁和等待</li>
+</ul>
+
+<blockquote>
+  <ol>
+    <li>保护共享数据并确保任务按正确顺序执行，使用不当会产生副作用</li>
+    <li>注意事项</li>
+  </ol>
+
+  <blockquote>
+    <p>选择适当的同步原语
+使用非锁定锁
+降低锁粒度
+不要做一个锁中心
+为共享数据引入并发容器</p>
+  </blockquote>
+</blockquote>
+
+<h2 id="第四讲并行编程方法论">第四讲：并行编程方法论</h2>
+
+<h3 id="什么是增量式并行化">什么是增量式并行化</h3>
+
+<ul>
+  <li>Study a sequential program (or code segment)</li>
+  <li>Look for bottlenecks &amp; opportunities for parallelism</li>
+  <li>Try to keep all processors busy doing useful work</li>
+</ul>
+
+<h3 id="culler并行设计流程">Culler并行设计流程</h3>
+
+<p>主要分四个步骤：(Decomposition)解耦、(Assignment)分派、（Orchestration）配置、(mapping)映射。</p>
+
+<p>图解如下：</p>
+
+<p><img src="assets/1561854072547.png" alt="1561854072547" /></p>
+
+<h4 id="1-decomposition">1. Decomposition</h4>
+
+<h5 id="定义-1">定义</h5>
+
+<p>Break up problem into tasks that can be carried out in parallel.</p>
+
+<ul>
+  <li>Decomposition need not happen statically</li>
+  <li>New tasks can be identified as program executes</li>
+</ul>
+
+<h5 id="核心思想目的">核心思想、目的</h5>
+
+<p>创建最少任务且使得所有的机器上的执行单元都处于忙碌状态</p>
+
+<h5 id="关键方面">关键方面</h5>
+
+<p>识别出依赖部分。（identifying dependencies）</p>
+
+<h5 id="负责的对象">负责的对象</h5>
+
+<p>一般是程序员来做这件事情。</p>
+
+<h4 id="2-assignment">2. Assignment</h4>
+
+<h5 id="定义-2">定义</h5>
+
+<p>分发任务给线程。</p>
+
+<h5 id="目标">目标</h5>
+
+<p>负载均衡，减少通信开销。</p>
+
+<h5 id="特点">特点</h5>
+
+<p>静态动态皆可，一般需要程序员来负责，也有非常多语言可以自动对此负责。</p>
+
+<h4 id="3-orchestration配置">3. Orchestration(配置)</h4>
+
+<h5 id="定义-3">定义</h5>
+
+<ul>
+  <li>结构化通信（Structuring communication）</li>
+  <li>增加同步来保证必要的依赖性（Adding synchronization to preserve dependencies if necessary)</li>
+  <li>在内存中组织数据结构</li>
+  <li>调度任务</li>
+</ul>
+
+<h5 id="目的">目的</h5>
+
+<p>减少通信和同步的开销，保护数据的局部性，减少额外开销(overhead).</p>
+
+<h4 id="4-mapping">4. Mapping</h4>
+
+<h5 id="定义-4">定义</h5>
+
+<p>Mapping “threads” to hardware execution units.</p>
+
+<h5 id="执行对象">执行对象</h5>
+
+<ul>
+  <li>OS</li>
+  <li>compiler</li>
+  <li>hardware</li>
+</ul>
+
+<h3 id="foster并行设计流程">Foster并行设计流程</h3>
+
+<p>分为四个部分：</p>
+
+<ul>
+  <li>Partitioning</li>
+  <li>Communication</li>
+  <li>Agglomeration (归并、组合)</li>
+  <li>Mapping。</li>
+</ul>
+
+<p>图解：</p>
+
+<p><img src="assets/1561857076709.png" alt="1561857076709" /></p>
+
+<h4 id="1-分解">1. 分解</h4>
+
+<h5 id="定义-5">定义</h5>
+
+<p>Dividing computation and data into pieces</p>
+
+<h5 id="三种不同实现方式及目的">三种不同实现方式及目的</h5>
+
+<h6 id="exploit-data-parallelism实现数据并行">Exploit data parallelism（实现数据并行）</h6>
+
+<ul>
+  <li>(Data/domain partitioning/decomposition)</li>
+  <li>Divide data into pieces</li>
+  <li>Determine how to associate computations with the data</li>
+</ul>
+
+<h6 id="exploit-task-parallelism实现任务并行">Exploit task parallelism（实现任务并行）</h6>
+
+<ul>
+  <li>(Task/functional partitioning/decomposition)</li>
+  <li>Divide computation into pieces</li>
+  <li>Determine how to associate data with the computations</li>
+</ul>
+
+<h6 id="exploit-pipeline-parallelism实现流水并行">Exploit pipeline parallelism（实现流水并行）</h6>
+
+<h5 id="方式之一-domain-partitioning-按域--数据分解">方式之一： Domain Partitioning （按域 / 数据分解）</h5>
+
+<h6 id="过程">过程</h6>
+
+<ul>
+  <li>（数据如何划分给处理器）First, decide how data elements should be divided among processors</li>
+  <li>（每个处理器如何执行任务）Second, decide which tasks each processor should be doing</li>
+</ul>
+
+<h6 id="举例-1">举例</h6>
+
+<ul>
+  <li>Find the largest element of an array.</li>
+  <li><img src="assets/1561859071581.png" alt="1561859071581" /></li>
+</ul>
+
+<h5 id="方式之二functional-task-decomposition">方式之二：Functional (Task) Decomposition</h5>
+
+<h6 id="过程-1">过程</h6>
+
+<ul>
+  <li>（划分任务给处理器）First, divide tasks among processors</li>
+  <li>（再确定数据的获取）Second, decide which data elements are going to be accessed (read and/or written) by which processor</li>
+</ul>
+
+<h6 id="举例-2">举例</h6>
+
+<ul>
+  <li>
+    <p>event-handler for GUI</p>
+
+    <p><img src="assets/1561859278952.png" alt="1561859278952" /></p>
+  </li>
+  <li>
+    <p>another eg:</p>
+
+    <p><img src="assets/1561859370405.png" alt="1561859370405" /></p>
+  </li>
+</ul>
+
+<h5 id="方式之三pipelining">方式之三：Pipelining</h5>
+
+<h6 id="过程-2">过程</h6>
+
+<ul>
+  <li>Special kind of task decomposition</li>
+  <li>“Assembly line” parallelism</li>
+</ul>
+
+<h6 id="举例-3">举例</h6>
+
+<ul>
+  <li>
+    <p>3D rendering in computer graphics</p>
+
+    <p><img src="assets/1561859463830.png" alt="1561859463830" /></p>
+  </li>
+</ul>
+
+<h5 id="分解注意的问题">分解注意的问题</h5>
+
+<ul>
+  <li>At least 10x more primitive tasks than processors in target computer
+    <ul>
+      <li>If not, later design options may be too constrained</li>
+    </ul>
+  </li>
+  <li>Minimize redundant computations and redundant data storage
+    <ul>
+      <li>If not, the design may not work well when the size of the problem increases</li>
+    </ul>
+  </li>
+  <li>Primitive tasks roughly the same size
+    <ul>
+      <li>If not, it may be hard to balance work among the processors</li>
+    </ul>
+  </li>
+  <li>Number of tasks is an increasing function of problem size
+    <ul>
+      <li>If not, it may be impossible to use more processors to solve large
+problem instances</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="2-通信-communication">2. 通信 Communication</h4>
+
+<p>定义：</p>
+
+<p>Determine values passed among tasks</p>
+
+<ul>
+  <li>Task-channel graph（任务数据依赖图）</li>
+</ul>
+
+<p>分类：</p>
+
+<ul>
+  <li>（局部通信）Local communication
+    <ul>
+      <li>Task needs values from a small number of other tasks</li>
+      <li>Create channels illustrating data flow</li>
+    </ul>
+  </li>
+  <li>（全局通信）Global communication
+    <ul>
+      <li>Significant number of tasks contribute data to perform a computation</li>
+      <li>Don’t create channels for them early in design</li>
+    </ul>
+  </li>
+</ul>
+
+<h5 id="注意事项">注意事项</h5>
+
+<ul>
+  <li>Communication is the overhead of a parallel algorithm, we need to minimize it</li>
+  <li>Communication operations balanced among tasks</li>
+  <li>Each task communicates with only small group of neighbors</li>
+  <li>Tasks can perform communications concurrently</li>
+  <li>Task can perform computations concurrently</li>
+</ul>
+
+<h4 id="3-agglomeration-整合归并">3. Agglomeration (整合、归并)</h4>
+
+<h5 id="定义-6">定义</h5>
+
+<p>Grouping tasks into larger tasks（小任务变大任务）</p>
+
+<h5 id="目标和意义">目标和意义</h5>
+
+<ul>
+  <li>
+    <p>（提升性能）Improve performance：</p>
+
+    <ul>
+      <li>（减少通信）Eliminate communication between primitive tasks agglomerated into consolidated task.</li>
+      <li>比如：Combine groups of sending and receiving tasks</li>
+    </ul>
+  </li>
+  <li>
+    <p>（保持问题的可并行性）Maintain scalability of program：</p>
+
+    <p>举例：</p>
+
+    <ul>
+      <li>Suppose we want to develop a parallel program that manipulates a 3D matrix of size 8 x 128 x 256.</li>
+      <li>If we agglomerate the second and third dimensions, we will not be able to port the program to a parallel computer with more than 8 CPUs.</li>
+    </ul>
+  </li>
+  <li>
+    <p>（简化编程）Simplify programming (reduce software engineering costs)：</p>
+
+    <ul>
+      <li>If we are parallelizing a sequential program, one agglomeration may allow us to make greater use of the existing sequential code, reducing the time and expense of developing the parallel program.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>在消息传递型的编程模型中：In message-passing programming, goal often to create one agglomerated task per processor.</p>
+
+<h4 id="4--mapping映射">4.  Mapping（映射）</h4>
+
+<h5 id="定义-7">定义</h5>
+
+<p>把任务分配到处理器上的过程：Process of assigning tasks to processors</p>
+
+<ul>
+  <li>Centralized multiprocessor（中心多处理器系统）: mapping done by operating system</li>
+  <li>Distributed memory system（分布式系统）: mapping done by user</li>
+</ul>
+
+<h5 id="目标矛盾">目标矛盾</h5>
+
+<ul>
+  <li>Maximize processor utilization（最大化处理器利用率）</li>
+  <li>Minimize interprocessor communication（最小化通信）</li>
+</ul>
+
+<h5 id="决策树">决策(树)</h5>
+
+<p>分两种情况：静态任务和动态任务</p>
+
+<ul>
+  <li>
+    <p>静态任务(Static number of tasks)</p>
+
+    <ul>
+      <li>
+        <p>Structured communication（有解构的通信）</p>
+
+        <ul>
+          <li>
+            <p>Constant computation time per task</p>
+
+            <p>(a) Agglomerate tasks to minimize communication
+(b) Create one task per processor</p>
+          </li>
+          <li>
+            <p>Variable computation time per task</p>
+
+            <p>(a) Cyclically map tasks to processors</p>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p>Unstructured communication（无结构的通信）</p>
+
+        <ul>
+          <li>使用动态负载均衡算法 Use a static load balancing algorithm</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>动态任务(Dynamic number of tasks)</p>
+
+    <ul>
+      <li>Frequent communications between tasks
+        <ul>
+          <li>动态负载均衡算法 Use a dynamic load balancing algorithm</li>
+        </ul>
+      </li>
+      <li>Many short-lived tasks
+        <ul>
+          <li>运行时调度算法 Use a runtime task-scheduling algorithm</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>决策树如下：</p>
+
+<p><img src="assets/1561861259361.png" alt="1561861259361" /></p>
+
+<h3 id="并行设计举例边界值-散热问题">并行设计举例——边界值-散热问题</h3>
+
+<h2 id="第四讲并行编程方法论内容要点">第四讲：并行编程方法论，内容要点</h2>
+
+<ol>
+  <li>
+    <p>什么是增量式并行化？
+Study a sequential program (or code segment)
+研究串行程序（代码段）
+Look for bottlenecks &amp; opportunities for parallelism
+寻找并行性的瓶颈和机会
+Try to keep all processors busy doing useful work
+尽量让所有的处理器做有用的工作</p>
+  </li>
+  <li>
+    <p>Culler并行设计流程？</p>
+  </li>
+  <li>
+    <p>Foster并行设计流程？
+Partitioning（划分）
+communication（通信）
+Agglomeration(归并，组合)
+mapping(聚合)</p>
+  </li>
+  <li>
+    <p>按数据分解和按任务分解的特点？
+ Exploit data parallelism
+ 利用数据并行性
+ (Data/domain partitioning/decomposition)
+  Divide data into pieces
+  将数据分成几部分
+  Determine how to associate computations with the data
+  确定如何将计算与数据相关联</p>
+
+    <p>Exploit task parallelism
+利用任务并行性
+(Task/functional partitioning/decomposition)  Divide computation into pieces
+将计算任务分成几部分
+Determine how to associate data with the computations
+确定如何将数据与计算关联</p>
+  </li>
+  <li>
+    <p>并行任务分解过程中应该注意的问题有哪些？
+First, divide tasks among processors
+Second, decide which data elements are going to be accessed (read and/or written) by which processor</p>
+  </li>
+  <li>
+    <p>整合的意义是什么？
+ Improve performance
+ 提高性能
+ Maintain scalability of program
+ 保持程序的可扩展性
+ Simplify programming (reduce soft ware engineering costs)
+ 简化编程（降低软件成本）</p>
+  </li>
+  <li>Mapping（映射）如何决策？</li>
+  <li>熟悉一些并行设计的例子。</li>
+</ol>
+
+<h2 id="第五讲openmp并行编程模型内容要点">第五讲：OpenMP并行编程模型，内容要点</h2>
+
+<h3 id="什么是openmp">什么是OpenMP</h3>
+
+<ul>
+  <li>提供针对共享式内存并行编程的API</li>
+  <li>简化了并行编程在fortran、C、C++等环境下</li>
+</ul>
+
+<p>short version:Open Multi-Processing
+开放多处理过程
+long version: Open specifications for Multi-Processing via collaborative work between interested parties from the hardware and software industry, government and academia</p>
+
+<p>OpenMP is an explicit (not automatic) programming model, offering the programmer full control over parallelization
+一种显式（非自动）编程模型，为程序员提供对并行化程序的控制</p>
+
+<h3 id="openmp的主要特点是什么">OpenMP的主要特点是什么</h3>
+
+<ul>
+  <li>OpenMP通过完全使用线程来实现并行</li>
+  <li>共享内存的编程模型，线程通信主要通过共享内存变量</li>
+  <li>也是因为共享变量可能会导致数据竞争，循环依赖等</li>
+</ul>
+
+<p>OpenMP programs accomplish parallelism exclusively （仅仅） through the use of threads
+通过对线程的使用来完成程序的并行化</p>
+
+<h3 id="熟悉openmp的关键指令">熟悉OpenMP的关键指令</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#pragma omp parallel // 表明之后的结构化代码块被多个线程处理
+#pragma omp parallel num_threads(thread_count) // 可自定义线程数量
+</span><span class="n">omp_get_thread_num</span>
+<span class="n">omp_get_num_threads</span>
+<span class="cp">#pragma omp critical // 只有一个线程能够执行对应代码块,并且第一个线程完成操作前，没有其他的线程能够开始执行这段代码
+#pragma omp parallel for // parallel for 指令生成一组线程来执行后面的结构化代码块（必须是for循环）。
+</span></code></pre></div></div>
+
+<ul>
+  <li>一些OpenMP常用函数
+    <ul>
+      <li>omp_get_thread_num()  获取当前线程编号</li>
+      <li>omp_get_num_threads() 获取当前线程组的线程数量</li>
+      <li>omp_set_num_threads() 设置线程数量</li>
+    </ul>
+  </li>
+  <li>所有的OpenMP指令都有#pragma omp <directive-name> [clause, ...]这种形式
+</directive-name>    <ul>
+      <li>#pragma omp parallel
+        <ul>
+          <li>最基本的parallel指令，这条OpenMP指令后的一段代码将被并行化，线程数量将由系统自行决定，当然我们可以指定线程数量只需要在parallel之后加上子句限定即可，num_threads子句</li>
+        </ul>
+      </li>
+      <li>#paragm omp parallel num_threads                    (thread_count)，指定我们的并行化代码将由thread_count个线程来进行执行
+        <ul>
+          <li>介绍一下这个程序运行到这个子句之后的操作，首先程序本身只含有一个线程，在遇到该指令之后，原来的线程继续执行，另外的thread_count – 1个线程被启动，这thread_count个线程称为一个线程组，原始线程为主线程，额外的thread_count – 1个线程为从线程，在并行化代码块的末尾存在一个隐式路障，所有线程都到达隐式路障后从线程结束，主线程继续执行。也就是下图所示的fork-join过程<img src="fork_join.png" alt="fork-join" /></li>
+        </ul>
+      </li>
+      <li>#pragma omp parallel for
+        <ul>
+          <li>parallel for指令，用于并行化for循环，这个指令存在以下限制：
+            <ol>
+              <li>不能并行化while等其他循环。</li>
+              <li>循环变量必须在循环开始执行前就已经明确，不能为无限循环。</li>
+              <li>不能存在其他循环出口，即不能存在break、exit、return等中途跳出循环的语句。
+                <ul>
+                  <li>在程序执行到该指令时，系统分配一定数量的线程，每个线程拥有自己的循环变量，互不影响，即使在代码中循环变量被声明为共享变量，在该指令中，编译过程仍然会为每一个线程创建一个私有副本这样防止循环变量出现数据依赖，跟在这条指令之后的代码块的末尾存在隐式路障。</li>
+                </ul>
+              </li>
+            </ol>
+          </li>
+        </ul>
+      </li>
+      <li>private
+        <ul>
+          <li>
+            <p>private子句可以解决私有变量的问题，一些共享变量在循环中，如果每个线程都可以访问的话，可能会出错，该子句就是为每个线程创建一个共享变量的私有副本解决循环依赖，如下所示。注private的括号中可以放置多个变量，逗号分隔</p>
+
+            <ul>
+              <li>
+                <h4 id="private_emaxplec">private_emaxple.c</h4>
+                <pre><code class="language-C">  #pragma omp  parallel for private (x)
+  for (i = 0; i &lt;= 10;i++) {
+  x = i;
+  printf("Thread number: %d    x: %d\n",omp_get_thread_num(),x);
+  }
+</code></pre>
+              </li>
+              <li>关于私有变量还有一下几点
+                <ol>
+                  <li>每一个线程都含有自己的私有变量副本</li>
+                  <li>所有线程在for循环中不能访问最开始定义的那个全局变量，它们操作的都是自己的私有副本</li>
+                </ol>
+              </li>
+            </ul>
+          </li>
+          <li>firstprivate
+            <ul>
+              <li>告诉编译器，每个线程的私有副本初始化为共享变量的值，只是在每个线程开始执行并行代码块时就分配给私有副本的而不是每次循环迭代分配一次</li>
+              <li>
+                <h4 id="firstprivetec">firstprivete.c</h4>
+                <pre><code class="language-C">  int x = 44;
+  #pragma omp  parallel for firstprivate (x)
+  for (i=0;i&lt;=1;i++) {
+  //x = i;
+  printf("Thread number: %d  x: %d\n",omp_get_thread_num(),x);
+  }
+  printf("x is %d\n", x);
+</code></pre>
+                <p><img src="firstprivate.png" alt="first" /></p>
+              </li>
+            </ul>
+          </li>
+          <li>lastprivate
+            <ul>
+              <li>
+                <p>告诉编译器，将最后一个离开并行化块的线程的最后一次循环迭代的私有副本赋值给原先的共享变量</p>
+              </li>
+              <li>
+                <h4 id="lastprivatec">lastprivate.c</h4>
+                <pre><code class="language-C">  int x = 44;
+  #pragma omp  parallel for lastprivate (x)
+  for (i = 0;i &lt;= 1;i++) {
+  x = i;
+  printf("Thread number: %d    x: %d\n",omp_get_thread_num(),x);
+  }
+  printf("x is %d\n", x);
+</code></pre>
+                <p><img src="lastprivate.png" alt="last" /></p>
+              </li>
+            </ul>
+          </li>
+          <li>single
+            <ul>
+              <li>最先到达的线程执行该子句后面的代码块，其余不执行这个代码块的线程会在代码块的末尾被阻塞（隐式barriers），等待所有的线程执行到该位置后，继续向后执行，如果在single后加上nowait指令，则不执行这个代码块的线程不需要等待，继续向后执行</li>
+            </ul>
+          </li>
+          <li>master
+            <ul>
+              <li>该子句仅有主线程执行后面的代码块，其他线程直接跳过该子句后面的代码块，且不存在隐式barriers</li>
+            </ul>
+          </li>
+          <li>sections
+            <ul>
+              <li>#pragma omp sections 在这条指令后的代码块进行串行执行</li>
+              <li>
+                <p>#pragma omp parallel sections在这条指令后的代码块才是进行并行执行，里面每一个section都只需要一个线程去执行，当然如果一个线程足够快允许实现，他可以执行多个section</p>
+              </li>
+              <li>
+                <h4 id="sectionsc">sections.c</h4>
+                <pre><code class="language-C"> #pragma omp  sections
+  {
+      #pragma omp section
+      {
+          printf("section0,threadid=%d\n",omp_get_thread_num());
+          sleep(1);
+      }
+      #pragma omp section
+      {
+          printf("section1,threadid=%d\n",omp_get_thread_num());
+          sleep(1);
+      }
+      #pragma omp section
+      {
+          printf("section2,threadid=%d\n",omp_get_thread_num());
+          sleep(1);
+      }
+  }
+
+  #pragma omp parallel sections num_threads(4)
+  {
+      #pragma omp section
+      {
+          printf("section3,threadid=%d\n",omp_get_thread_num());
+          sleep(1);
+      }
+      #pragma omp section
+      {
+          printf("section4,threadid=%d\n",omp_get_thread_num());
+          sleep(1);
+      }
+      #pragma omp section
+      {
+          printf("section5,threadid=%d\n",omp_get_thread_num());
+          sleep(1);
+      }
+  }
+</code></pre>
+                <p><img src="sections.png" alt="sections" /></p>
+              </li>
+            </ul>
+          </li>
+          <li>reduction
+            <ul>
+              <li>规约子句
+                <pre><code class="language-C">  #pragma omp ……reduction&lt;opreation : variable list&gt;
+</code></pre>
+              </li>
+              <li>
+                <p>opreation +、-、* 、&amp; 、| 、&amp;&amp; 、|| 、^
+  将每个线程中的变量进行规约操作例如
+  #pragma omp ……reduction&lt;+ : total&gt;就是将每个线程中的result变量的值相加，最后在所有从线程结束后，放入共享变量中，其实这也可以看作是private子句的升级版，下面的例子，最后共享的total中存入就是正确的值(浮点数数组数字之和)，其他操作符的情况可以类比得到</p>
+              </li>
+              <li>
+                <h4 id="reductionc">reduction.c</h4>
+                <p>```C
+  float total = 0.;</p>
+              </li>
+            </ul>
+
+            <p>#pragma omp parallel for reduction(+:total)
+  for (size_t i = 0; i &lt; n; i++) {
+      total += a[i];
+  }
+  return total;
+  ```</p>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="熟悉openmp关键指令的执行过程">熟悉OpenMP关键指令的执行过程</h3>
+
+<ul>
+  <li>观察下图中的执行顺序<img src="exe_first.png" alt="exe_first" /></li>
+  <li>图中的虚线路障是parallel for模块所带的隐式路障<img src="exe_second.png" alt="exe_second" /></li>
+</ul>
+
+<h2 id="第六讲openmp中的竞争和同步内容要点">第六讲：OpenMP中的竞争和同步，内容要点</h2>
+
+<h3 id="openmp中为了保证程序正确性而采用哪些机制">OpenMP中为了保证程序正确性而采用哪些机制</h3>
+
+<p>barriers(障碍，屏障)
+memory fence(内存屏障)
+mutual exclusion(互斥)</p>
+
+<h3 id="什么是同步同步的主要方式有哪些">什么是同步，同步的主要方式有哪些</h3>
+
+<p>The process of managing shared resources so that reads and writes occur in the correct order regardless of how the threads are scheduled
+用户进程共享资源让读和写的操作以正确的顺序发生，无论线程是如何安排。</p>
+
+<p>barriers
+mutual exclusion pthread_mutex_lock</p>
+
+<ul>
+  <li>管理共享资源的过程，不论线程调度顺序如何，读取和写入资源都可以按照正确的发生</li>
+  <li>方法：barrier、互斥锁、信号量</li>
+</ul>
+
+<h3 id="openmp--barrier的执行原理">OpenMP  Barrier的执行原理</h3>
+
+<p>A synchronization point at which every member in a team of threads must arrive before any member can proceed</p>
+
+<ul>
+  <li>⼀个同步点，线程团队中的每个成员必须在任何成员继续之前到达该同步点，也就是在还有其他线程未到达时，每个线程都将被阻塞</li>
+  <li>注：parallel for和single都有隐式的barriers，在它们的代码块结尾的地方，可使用nowait禁用掉这个隐式的barriers</li>
+</ul>
+
+<h3 id="openmp中竞争的例子">OpenMP中竞争的例子</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">double</span> <span class="n">area</span><span class="p">,</span> <span class="n">pni</span><span class="p">,</span> <span class="n">x</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">;</span>
+<span class="n">area</span> <span class="o">=</span> <span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">0</span><span class="p">.</span><span class="mi">5</span><span class="p">)</span><span class="o">/</span><span class="n">n</span><span class="p">;</span>
+<span class="n">area</span> <span class="o">+=</span> <span class="mi">4</span><span class="p">.</span><span class="mi">0</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span> <span class="o">+</span> <span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">pi</span> <span class="o">=</span> <span class="n">area</span> <span class="o">/</span> <span class="n">n</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>如果两个线程同时执行area += 4.0/(1.0 + x*x);可能会在一个线程更新area的值之前另一个线程就对area进行读操作</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- 这个for循环的并行会导致竞争的发生，原因是因为多个线程对同一个共享变量访问时间的非确定性导致结果可能出错，多个线程访问area += 4.0 / (1.0 + x*x)就可能导致竞争
+```C
+    double area, pni, x;
+    int i, n;
+    ...
+    area = 0.0;
+    #pragma omp for
+    for (i = 0; i &lt;n; i++) {
+        x = (i + 0.5)/n;
+        area += 4.0/(1.0 + x*x);
+    }
+    pi = area / n;
+```
+</code></pre></div></div>
+
+<h3 id="openmp中避免数据竞争的方式有哪些">OpenMP中避免数据竞争的方式有哪些</h3>
+
+<p>Scope variables to be private to threads
+ 设置线程专用的范围变量
+ 如：
+  Use OpenMPprivate clause
+  使用openmpprivate子句
+  Variables declared within threaded functions
+  在线程函数中申明变量
+  Allocate on thread’s stack (pass as parameter)
+在线程堆栈上分配（作为参数传递）</p>
+
+<p>Control shared access with critical region
+  控制关键区域的共享访问
+  如：
+  Mutual exclusion and synchronization
+  互斥和同步</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- 1. 变量私有化
+    - 使用OpenMP的private子句将变量变为私有
+    - 在线程函数内声明变量，这样变量将属于这个线程
+    - 在线程堆栈上进行分配
+
+- 2、将共享变量放置进入临界区
+
+-   3、互斥访问
+    - 信号量
+    - 互斥锁机制
+</code></pre></div></div>
+
+<h3 id="openmp-critical-与atomic的主要区别是什么">OpenMP Critical 与Atomic的主要区别是什么</h3>
+
+<p>Critical确保一次只有一个线程执行结构化代码。
+atomic只能用在形如x<op> = <expression>、x++、x--之类的临界区中，他比普通的临界区执行速度快。</expression></op></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- #pragma omp critical该指令保护了
+    1、WorkOne(i)的调用过程，也就是在WorkOne(i)函数内部也是临界区
+    2、从内存中找到index[i]值的过程
+    3、将WorkOne(i)的值加到index[i]的过程
+    4、将内存中index[i]更新的过程
+    后面跟的语句相当于串行执行
+    ```C
+    #pragma omp parallel for
+    {
+        for(int i = 0; i &lt; n; i++) {
+            #pragma omp critical
+            x[index[i]] += WorkOne(i);
+            y[i] += WorkTwo(i);
+        }
+    }
+    ```
+
+- Atomic指令只对一条指令形成临界区，而且语句的格式收到限制
+    1、将WorkOne(i)的值加到index[i]
+    2、更新内存中index[i]的值
+    只将单一一条语句设置为临界区
+    如果不同线程的index[i]非冲突的话仍然可以并行完成
+    只有当两个线程的index[i]相等时才会触发使得这两个线程排队执行这条语句
+    ```C
+    #pragma omp parallel for
+    {
+        for(int i = 0; i &lt; n; i++) {
+            #pragma omp atomic
+            x[index[i]] += WorkOne(i);
+            y[i] += WorkTwo(i);
+        }
+    }
+    ```
+</code></pre></div></div>
+
+<h2 id="第七讲openmp性能优化内容要点">第七讲：OpenMP性能优化，内容要点</h2>
+
+<h3 id="什么是计算效率">什么是计算效率</h3>
+
+<p>核心利用率的衡量标准，计算公式为加速比/核心数</p>
+
+<p>加速比：Speedup = 串行执行时间/并行执行时间</p>
+
+<h4 id="efficiency效率">Efficiency（效率）</h4>
+
+<ul>
+  <li>A measure of core utilization</li>
+  <li>Speedup divided by the number of cores<br />
+核心利用率的一种度量</li>
+  <li>Efficiency = Speedup/nums of cores</li>
+</ul>
+
+<h3 id="调整后的amdahl定律如何理解">调整后的Amdahl定律如何理解</h3>
+
+<h4 id="--原来的amdahl定律过于乐观">- 原来的Amdahl定律过于乐观</h4>
+
+<ol>
+  <li>忽略了并行处理的开销，如创建/终止线程。而并行处理开销一般是关于线程数（核心   数）的增函数。</li>
+  <li>忽略了计算量难以均衡地分配到每个核心上，负载不均衡以及核心等待时间都是一种开销。</li>
+</ol>
+
+<h4 id="--改进后的amdahl定律">- 改进后的Amdahl定律</h4>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    n       问题规模
+    p       核心数
+    S(n,p)  问题的加速比
+    Ts(n)   串行部分的时间花费
+    Tp(n)   并行部分的时间花费
+    Tr(n,p) 并行开销
+
+    S(n,p)&lt;=( Ts(n)+Tp(n) )/( Ts(n)+Tp(n)/p+Tr(n,p) )
+
+    最大加速比：
+    Tp(n)/p：假设并行计算部分可以在核心完美分配
+    Tr(n,p)趋向于0
+
+    加速比是关于问题规模的递增函数
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- Amdahl太过乐观，很多并行处理开销并没有考虑
+    1. 创建和终止线程所花费的时间，这是多线程并行的必须开销。
+    2. 工作量在核心之间平均分配，但是在实际运行时，这并不成立，先执行完任务的核心等待时间是另一种形式的开销，即所谓的负载不均衡。
+
+- 所以进行Amdahl公式的改进，加上线程开销部分,  为了获得最大的加速比，我们就需要将并行开销尽可能减小，同时使用更多的核,改进后的公式如下所示
+$\psi(n,p) \leq \frac{\sigma(n) + \varphi(n)}{\sigma(n) + \frac{\varphi(n)}{p} + \kappa(n,p)}$
+n - 问题规模
+p - 核心数
+$\psi(n,p)$ - 在问题规模为n核心数为p的情况下并行的加速比
+$\sigma(n)$ - 代码串行部分执行时间
+$\varphi(n)$ - 代码并行部分执行时间
+$\kappa(n,p)$ - 并行开销
+
+
+- 如下图表示当我们的问题规模达到一定程度后，并行程序的加速比主要由并行部分来决定，因为随着问题规模的增加，程序串行部分也会逐渐较少，同时并行部分将占据主要时间，可以忽略掉串行时间的影响，加速比主要由并行部分决定
+![figure1](figure1.png)
+![figure2](figure2.png)
+</code></pre></div></div>
+
+<h3 id="openmp中loop调度的几种方式执行过程">OpenMP中Loop调度的几种方式，执行过程</h3>
+
+<h4 id="1-static-schedule">1. Static schedule</h4>
+
+<ul>
+  <li>循环执行前把迭代分配给线程</li>
+  <li>
+    <p>schedule (static [, chunk])</p>
+
+    <ul>
+      <li>Blocks of iterations of size “chunk” to threads<br />
+每个分配给线程的迭代块的计算量“大致相当”\</li>
+      <li>Round robin distribution<br />
+轮循分配    T1,T2,T3,T1,T2,T3……</li>
+      <li>Low overhead, may cause load imbalance<br />
+低开销，但可能会负载不平衡</li>
+    </ul>
+  </li>
+  <li>适用于可预见和简单的循环</li>
+</ul>
+
+<h4 id="2-dynamic-schedule">2. Dynamic schedule</h4>
+
+<ul>
+  <li>循环的执行期间把迭代分配给线程</li>
+  <li>schedule (dynamic [, chunk])
+    <ul>
+      <li>Threads grab “chunk” iterations<br />
+线程获取任务块</li>
+      <li>When done with iterations, thread requests next set<br />
+当迭代完成后，请求下一组任务</li>
+      <li>Higher threading overhead, can reduce load imbalance<br />
+较高的线程开销，但可以做到负载均衡</li>
+    </ul>
+  </li>
+  <li>适用于不可预知或高度可变的循环</li>
+</ul>
+
+<h4 id="3-guided-schedule">3. Guided schedule</h4>
+
+<ul>
+  <li>调度顺序以及任务块大小，如:T1(1 block),T2(0.5 block),T3(0.25 Block),T3(0.125 block)……</li>
+  <li>schedule (guided [, chunk])
+    <ul>
+      <li>Dynamic schedule starting with large block<br />
+以较大的任务块开始动态调度</li>
+      <li>Size of the blocks shrink; no smaller than “chunk” <br />
+任务块大小减小，但任务块大小有下界</li>
+      <li>The initial block is proportional to <br />
+开始时块大小
+        <ul>
+          <li>number_of_iterations / number_of_threads <br />
+总任务/线程数</li>
+        </ul>
+      </li>
+      <li>Subsequent blocks are proportional to <br />
+后续块大小
+        <ul>
+          <li>number_of_iterations_remaining / number_of_threads<br />
+当前任务/线程数</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>最好用作动态的特殊情况，以在计算越来越耗时的情况下减少调度开销</p>
+
+    <ul>
+      <li>
+        <p>OpenMP的调度方案，影响着循环迭代映射到线程的方式
+  动态调度：在执行循环期间分配线程的迭代次数
+  静态调度：在执行循环前分配线程的迭代次数</p>
+      </li>
+      <li>
+        <p>shedule(type[ , chunksize])子句是进行循环调度的指令</p>
+        <ol>
+          <li>shedule(static [, chunksize])</li>
+        </ol>
+        <ul>
+          <li>这是静态调度，每个线程都将分到chunksize个循环迭代，可能存在负载不均衡
+            <pre><code class="language-C">  #pragma omp parallel for shedule(static, 2)
+  for(int i = 0; i &lt; 12; i++) {
+  for(int j = 0; j &lt;= i; j++) {
+  a[i][j] = ......
+  }
+  }
+</code></pre>
+            <p>其具体分配如下，同一种颜色代表分配给同一个线程的任务
+  <img src="shedule1.png" alt="shedule1" /></p>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <ol>
+      <li>shedule(dynamic [, chunksize])
+        <ul>
+          <li>这是动态调度方案，每个循环开始都将分到一份chunksize个循环迭代的块，之后执行完这个块后的线程请求另外一块chunksize大小的迭代继续执行，这个调度方案就可以解决负载不均衡的问题，适用于不可预测和变化较大的工作
+            <pre><code class="language-C"> #pragma omp parallel for shedule(dynamic, 2)
+ for(int i = 0; i &lt; 12; i++) {
+  for(int j = 0; j &lt;= i; j++) {
+  a[i][j] = ......
+  }
+ }
+</code></pre>
+            <p><img src="shedule2.png" alt="shedule2" /></p>
+          </li>
+        </ul>
+      </li>
+      <li>shedule(guided [, chunksize])
+        <ul>
+          <li>guided调度和dynamic调度很相似，唯一不同之处就是块的大小在不断的进行变化，每次需要分配时都重新计算需要划分的循环迭代的数目，公式为  剩余的循环迭代总数 / 线程总数（取整）</li>
+          <li>该种调度方式最好⽤作动态的特殊情况，以便在计算逐渐耗费时间时减少调度开销</li>
+        </ul>
+
+        <pre><code class="language-C"> #pragma omp parallel for shedule(guided)
+ for(int i = 0; i &lt; 12; i++) {
+     for(int j = 0; j &lt;= i; j++) {
+     a[i][j] = ......
+     }
+ }
+</code></pre>
+        <p><img src="shedule3.png" alt="shedule3" /></p>
+      </li>
+    </ol>
+  </li>
+</ul>
+
+<h3 id="openmp中loop转换的方式包括哪几种熟练掌握">OpenMP中Loop转换的方式包括哪几种？熟练掌握</h3>
+
+<h4 id="1-loop-fission循环拆分">1. Loop fission——循环拆分</h4>
+
+<ul>
+  <li>Begin with single loop having loop-carried dependence<br />
+从具有循环依赖的单循环开始</li>
+  <li>Split loop into two or more loops<br />
+把循环拆成两个或多个循环</li>
+  <li>New loops can be executed in parallel<br />
+新的循环可以并行执行</li>
+</ul>
+
+<h4 id="2-loop-fusion循环合并">2. Loop fusion——循环合并</h4>
+
+<ul>
+  <li>The opposite of loop fission<br />
+与循环拆分相反</li>
+  <li>Combine loops increase grain size<br />
+合并循环以增加粒度</li>
+  <li>Loop Fusion with Replicated Work<br />
+循环合并和操作转换（改变操作使得结果相同但更简单)
+    <ul>
+      <li>Every thread iteration has a cost<br />
+每个线程的迭代是有开销的</li>
+      <li>Example: Barrier synchronization<br />
+比如：同步时使用的barrier</li>
+      <li>Sometimes it’s faster for threads to replicate work than to go through a barrier synchronization<br />
+有时候，改变操作以避免barrier是要执行得更快</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="3-loop-exchangeinversion循环交换反转">3. Loop exchange(Inversion)——循环交换(反转)</h4>
+
+<ul>
+  <li>Nested for loops may have data dependences that prevent parallelization<br />
+嵌套for循环可能具有阻止并行化的数据依赖关系</li>
+  <li>Exchanging the nesting of for loops may<br />
+交换的嵌套for循环可以
+    <ul>
+      <li>Expose a parallelizable loop<br />
+使循环可以并行</li>
+      <li>Increase grain size<br />
+提高操作粒度</li>
+      <li>
+        <p>Improve parallel program’s locality<br />
+提高并行程序的局部性</p>
+
+        <ul>
+          <li>Loop fission
+            <ul>
+              <li>将原来存在循环依赖的循环进行划分，划分成两个或者多个可以完全并行执行的循环</li>
+              <li>划分前
+                <pre><code class="language-C">  float *a, *b;
+  ......
+  for(int i = 0; i &lt; N; i++) {
+  //perfectly parallel
+  if(b[i] &gt; 0.0) a[i] = 2.0;
+  else a[i] = 2.0 * fabs(b[i]);
+  //loop-carried dependence
+  b[i] = a[i - 1];
+  }
+</code></pre>
+              </li>
+              <li>划分后
+                <pre><code class="language-C">  float *a, *b;
+  ......
+  #pragma omp parallel
+  {
+  #pragma omp for
+  for(int i = 0; i &lt; N; i++) {
+  //perfectly parallel
+  if(b[i] &gt; 0.0) a[i] = 2.0;
+  else a[i] = 2.0 * fabs(b[i]);
+  //loop-carried dependence
+  }
+  #pragma omp for
+  for(int i = 0; i &lt; N; i++) b[i] = a[i - 1];
+  }
+</code></pre>
+              </li>
+            </ul>
+          </li>
+          <li>Loop fusion
+            <ul>
+              <li>将不存在循环依赖的循环融合在一起，进行并行化，这样减少了线程通过的屏障数目，即barrier同步，如果两个循环分别进行并行化那么我们需要barrier同步两次（每个循环结尾的地方同步一次），这个代价比我们将两个线程工作融合之和仅同步一次的代价可能要大，这是我们进行循环融合的原因之一</li>
+              <li>串行代码
+                <pre><code class="language-C">  float *a, *b, x, y;
+  ......
+  for(int i = 0; i &lt; N; i++) a[i] = foo(i);
+  x = a[N - 1] - a[0];
+
+  for(int j = 0; j &lt; N; j++) b[i] = bar(a[i]);
+  y = x * b[0] / b[N - 1];
+</code></pre>
+              </li>
+              <li>Loop fusion融合代码
+                <pre><code class="language-C">  float *a, *b, x, y;
+  ......
+  #pragma omp parallel for
+  for(int i = 0; i &lt; N; i++) {
+      a[i] = foo(i);
+      b[i] = bar(a[i]);
+  }
+  x = a[N - 1] - a[0];
+  y = x * b[0] / b[N - 1];
+</code></pre>
+              </li>
+              <li>对每一个循环进行一次并行，也就是出现两次barrier同步（循环末尾），对于本例而言，等待在barrier处的开销更大，损失更严重，建议使用Loop fusion进行优化，下面是我们对每个循环分别并行化的代码，其缺陷便是隐式路障过多，导致并行开销增大</li>
+            </ul>
+
+            <pre><code class="language-C">     float *a, *b, x, y;
+      ......
+  #pragma omp parallel
+  {
+
+  #pragma omp for //末尾存在隐式路障
+      for(int i = 0; i &lt; N; i++) a[i] = foo(i);
+  #pragma omp single
+      x = a[N - 1] - a[0];
+  #pragma omp for //末尾存在隐式路障
+      for(int j = 0; j &lt; N; j++) b[i] = bar(a[i]);
+      y = x * b[0] / b[N - 1];
+
+  }
+</code></pre>
+          </li>
+          <li>Loop exchange
+            <ul>
+              <li>
+                <p>嵌套for循环交换循环顺序可能可以产生新的可并行化循环，或者可能增加并行循环的粒度</p>
+              </li>
+              <li>串行代码
+                <pre><code class="language-C">  for (int j =1; j &lt; n; j++)
+      for (int i = 0; i &lt; m; i++)
+          a[i][j] = 2 * a[i][j-1];
+</code></pre>
+              </li>
+              <li>直接并行
+                <pre><code class="language-C">  for (int j =1; j &lt; n; j++)
+  #pragma omp parallel for
+      for (int i = 0; i &lt; m; i++)
+          a[i][j] = 2 * a[i][j-1];
+</code></pre>
+                <p>并行结果如下，数组每一列数据交给线程组进行并行化，一个线程一次得到的任务只有数组中一个元素，频繁的进行划分可能导致并行开销增大
+  <img src="Loopchange1.png" alt="Loopchange1" /></p>
+              </li>
+              <li>Loop exchange后并行
+                <pre><code class="language-C">  #pragma omp parallel for
+  for (int i =1; i &lt; n; i++)
+      for (int j= 0; j &lt; m; j++)
+          a[i][j] = 2 * a[i][j-1];
+</code></pre>
+                <p>并行结果如下，直接将整个数组按行划分给线程，一个线程一次得到的任务有一行的，并行循环粒度较高
+  <img src="Loopchange2.png" alt="Loopchange2" /></p>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="第八讲mpi编程模型内容要点">第八讲：MPI编程模型，内容要点</h2>
+
+<h3 id="1-什么是mpi编程模型">1. 什么是MPI编程模型？</h3>
+
+<p>每个独立的处理器（processor）都有独立私有的内存，通过互联网络连接起来的分布式内存系统，利用消息传递来编程的模型。</p>
+
+<h3 id="2-消息传递性并行编程模型的主要原则是什么">2. 消息传递性并行编程模型的主要原则是什么？</h3>
+
+<h4 id="1-the-logical-view-of-a-machine-supporting-the-message-passing-paradigm-consists-of-p-processes-each-with-its-own-exclusive-address-space">1. The logical view of a machine supporting the message passing paradigm consists of p processes, each with its own exclusive address space</h4>
+
+<p>支持消息传递模型的系统的逻辑由p个处理器组成，每个处理器都有自己专用的地址空间</p>
+
+<h4 id="2-constraints限制">2. CONSTRAINTS（限制）</h4>
+
+<ul>
+  <li>Each data element must belong to one of the partitions of the space; hence, data must be explicitly partitioned and placed<br />
+每个数据元素必须属于某一个处理器的内存空间；因此，必须显式分区和放置数据。</li>
+  <li>All interactions (read-only or read/write) require cooperation of two processes the process that has the data and the process that wants to access the data<br />
+拥有数据的进程和想要访问数据的进程的所有交互（只读或读/写）都需要两个进程的协作</li>
+</ul>
+
+<h4 id="3-these-two-constraints-while-onerous-繁重-make-underlying-costs-very-explicit-to-the-programmer">3. These two constraints, while onerous (繁重), make underlying costs very explicit to the programmer</h4>
+
+<p>这两个约束虽然很繁重，但却使底层成本对程序员非常明确。</p>
+
+<h4 id="4-message-passing-programs-are-often-written-using-the-asynchronous-or-loosely-synchronous-paradigms">4. Message-passing programs are often written using the asynchronous or loosely synchronous paradigms</h4>
+
+<p>消息传递程序通常使用异步或松散同步的范例编写。</p>
+
+<ul>
+  <li>In the asynchronous paradigm, all concurrent tasks execute asynchronously\</li>
+</ul>
+
+<p>在异步模式中，所有并发任务都是异步执行的。</p>
+
+<ul>
+  <li>In the loosely synchronous model, tasks or subsets of tasks synchronize to perform interactions. Between these interactions, tasks execute completely asynchronously\</li>
+</ul>
+
+<p>在松散同步模型中，任务或任务子集同步以执行交互。在这些交互之间，任务完全异步执行</p>
+
+<h4 id="5-most-message-passing-programs-are-written-using-the-single-program-multiple-data-spmd-model">5. Most message-passing programs are written using the single program multiple data (SPMD) model</h4>
+
+<p>大多数消息传递程序是使用单程序多数据（SPMD）模型编写的。</p>
+
+<h3 id="3-mpi中的几种send和receive操作包括原理和应用场景">3. MPI中的几种Send和Receive操作包括原理和应用场景。</h3>
+
+<h4 id="1-non-buffered-blocking">1. Non-buffered blocking</h4>
+
+<ul>
+  <li>A simple method for forcing （强制）send/receive semantics is for the
+send operation to return only when it is safe to  do so<br />
+强制send/recv语句的一个简单方法是send操作仅在安全时返回</li>
+  <li>In the non-buffered blocking send, the operation does not return until
+the matching receive has been encountered at the receiving process<br />
+在非缓冲阻塞send中，知道在传输过程中遇上匹配的recv，操作返回</li>
+  <li>Idling and deadlocks are major issues with nonbuffered blocking sends<br />
+空等、死锁问题存在</li>
+</ul>
+
+<h4 id="2-buffered-blocking">2. Buffered blocking</h4>
+
+<p>Non-buffered blocking =&gt; Buffered blocking</p>
+
+<ul>
+  <li>In buffered blocking sends, the sender simply copies the data into the
+designated buffer and returns after the copy operation has been completed. The data is copied at a buffer at the receiving end as well.<br />
+在缓冲块发送中，发送方只需将数据复制到指定的缓冲区中，并在复制操作完成后返回。数据也被复制到接收端的缓冲区中。</li>
+  <li>Buffering alleviates idling at the expense of copying overheads<br />
+缓冲减少了空转的开销，而增加了复制开销。</li>
+</ul>
+
+<p>Buffered blocking的操作</p>
+
+<ul>
+  <li>In buffered blocking sends, the sender simply copies the data into the
+designated buffer and returns after the copy operation has been
+completed.<br />
+在缓冲块send中，发送方只需要把数据复制到指定缓冲区中，并在复制操作完成后返回</li>
+  <li>The data is copied at a buffer at the receiving end as well<br />
+也在接收端的缓冲区复制数据</li>
+  <li>Buffering trades off idling overhead for buffer copying overhead<br />
+在空闲时缓冲区交换数据已抵消通信数据传输的开销</li>
+</ul>
+
+<p>注意：\</p>
+<blockquote>
+  <p>a、缓冲区大小可能对性能影响显著<br />
+b、由于接受操作块（send-recv）的存在，使用缓冲块仍然可能出现死锁</p>
+</blockquote>
+
+<h4 id="3-non-blocking-非阻塞">3. Non-blocking (非阻塞)</h4>
+
+<ul>
+  <li>The programmer must ensure semantics of the send and receive.<br />
+程序员必须确保发送和接收的语义正确。</li>
+  <li>This class of non-blocking protocols returns from the send or receive operation before it is semantically safe to do so.<br />
+这类非阻塞协议在语义上安全之前从发送或接收操作返回。</li>
+  <li>Non-blocking operations are generally accompanied by a check-status operation.<br />
+非阻塞操作通常伴随检查状态操作。</li>
+  <li>When used correctly, these primitives are capable of overlapping communication overheads with useful computations.<br />
+如果使用正确，这些原语的通信开销可以与计算开销重叠起来</li>
+  <li>Message passing libraries typically provide both blocking and non-blocking
+primitives.<br />
+消息传递库通常同时提供阻塞原语和非阻塞原语。</li>
+</ul>
+
+<h4 id="4-mpi的send">4. MPI的send</h4>
+
+<ul>
+  <li>MPI_Send（标准模式）有缓存使用缓存，无缓存显式等待
+    <ul>
+      <li>Will not return until you can use the send buffer (Non-local)<br />
+不会返回，直到可以使用缓存</li>
+    </ul>
+  </li>
+  <li>MPI_Bsend(缓冲模式)
+    <ul>
+      <li>Returns immediately and you can use the send buffer<br />
+立即返回和可以使用发送缓冲</li>
+      <li>Related: MPI_buffer_attach(), MPI_buffer_detach()</li>
+    </ul>
+  </li>
+  <li>MPI_Ssend（同步模式）需要多次握手
+    <ul>
+      <li>Will not return until matching receive posted<br />
+不会返回，直到匹配上recv</li>
+      <li>Send + synchronous communication semantics<br />
+发送+同步通信语义</li>
+    </ul>
+  </li>
+  <li>MPI_Rsend（就绪模式）减少通信信息
+    <ul>
+      <li>May be used ONLY if matching receive already ready<br />
+当且仅当匹配的recv已经准备好了则可以使用</li>
+      <li>The sender provides additional information to the system that can save some overhead<br />
+发送者提供了额外的信息系统，可以节省部分开销</li>
+    </ul>
+  </li>
+  <li>MPI_Isend（非阻塞标准模式）
+    <ul>
+      <li>Nonblocking send, but you can NOT reuse the send buffer immediately<br />
+不能立即重用send缓冲区</li>
+      <li>Related: MPI_Wait(),  MPI_Test()</li>
+    </ul>
+  </li>
+  <li>MPI_Ibsend</li>
+  <li>MPI_Issend</li>
+  <li>MPI_Irsend</li>
+</ul>
+
+<h4 id="5-sending-and-receiving-messages">5. Sending and Receiving Messages</h4>
+
+<ul>
+  <li>int MPI_Send(void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm) int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status)</li>
+  <li>MPI allows specification of wildcard arguments for both source and tag.<br />
+MPI允许为源和标记指定通配符参数。</li>
+  <li>If source is set to MPI_ANY_SOURCE , then any process of the communication domain can be the source of the message.<br />
+如果source设置为MPI_ANY_SOURCE，则通信域的任何进程都可以是消息的源。</li>
+  <li>If tag is set to MPI_ANY_TAG , then messages with any tag are accepted.<br />
+如果标记设置为MPI_ANY_TAG标记，则接受带有任何标记的消息。</li>
+  <li>On the receive side, the message must be of length equal to or less than the length field specified.<br />
+在接收端，消息的长度必须等于或小于指定的长度字段。</li>
+  <li>On the receiving end, the status variable can be used to get information
+about the MPI_Recv operation.<br />
+在接收端，状态变量可用于获取有关MPI_recv操作的信息。</li>
+  <li>The corresponding data structure contains:\</li>
+</ul>
+
+<p>相应的数据结构包含</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="n">MPI_Status</span> <span class="p">{</span>\
+<span class="kt">int</span> <span class="n">MPI_SOURCE</span><span class="p">;</span>\
+<span class="kt">int</span> <span class="n">MPI_TAG</span><span class="p">;</span>\
+<span class="kt">int</span> <span class="n">MPI_ERROR</span><span class="p">;</span> <span class="p">};</span>
+</code></pre></div></div>
+
+<ul>
+  <li>The MPI_Get_count function returns the precise count of data items received<br />
+函数返回接收到的数据项的精确计数。</li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>int MPI_Get_count(MPI_Status *status, MPI_Datatype datatype, int *count)
+</code></pre></div></div>
+
+<h3 id="4-mpi中的关键编程接口">4. MPI中的关键编程接口</h3>
+
+<ul>
+  <li>MPI_Init（int<em>argc,char</em>**argv）:函数，初始化</li>
+  <li>MPI_Finalize（）：函数，结束时释放资源</li>
+  <li>MPI_Comm_size：变量，定义processes的个数</li>
+  <li>MPI_Comm_rank：变量，定义当前进程的序号</li>
+  <li>MPI_Send（）：函数</li>
+  <li>MPI_Recv（）：函数</li>
+  <li>一般以“MPI_”为前缀</li>
+  <li>相关进程形成进程组</li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">MPI_Group_incl</span><span class="p">()</span><span class="o">:</span><span class="err">进程集形成一个进程组</span>\
+<span class="n">MPI_Comm_create</span><span class="p">()</span><span class="o">:</span><span class="err">为新的进程组创建一个通信子</span>\
+<span class="n">MPI_Comm_rank</span><span class="p">()</span><span class="o">:</span><span class="err">为新的进程组定义序号</span>\
+<span class="n">MPI_Comm_free</span><span class="p">()</span><span class="o">:</span><span class="err">释放进程组的资源</span>\
+<span class="n">MPI_Group_free</span><span class="p">()</span><span class="o">:</span><span class="err">解进程组</span>
+</code></pre></div></div>
+
+<h3 id="5-什么是通信子">5. 什么是通信子？</h3>
+
+<ul>
+  <li>A communicator defines a communication domain - a set of processes that are allowed to communicate with each other<br />
+通信子定义了一个通信域-允许彼此通信的一组进程。</li>
+  <li>Information about communication domains is stored in variables of type
+MPI_Comm<br />
+有关通信域的信息存储在MPI_Comm类型的变量中</li>
+  <li>Communicators are used as arguments to all message transfer MPI routines<br />
+通信子被用作所有消息传输MPI例程的参数。</li>
+  <li>A process can belong to many different (possibly overlapping) communication domains<br />
+一个进程可以属于许多不同的（可能重叠的）通信域</li>
+  <li>MPI defines a default communicator called MPI_COMM_WORLD which includes all the processes<br />
+MPI定义了一个名为MPI_COMM_WORLD的默认通讯子，其中包括所有进程</li>
+</ul>
+
+<h3 id="6-mpi中解决死锁的方式有哪些">6. MPI中解决死锁的方式有哪些</h3>
+
+<ul>
+  <li>Using non-blocking operations remove most deadlocks.<br />
+使用非阻塞操作可以避免大多数死锁</li>
+  <li>In order to overlap communication with computation,  MPI provides a pair of functions for performing non-blocking send and receive operations.<br />
+为了与计算重叠通信，MPI提供了一对执行非阻塞发送和接收操作的函数
+    <blockquote>
+      <blockquote>
+        <blockquote>
+          <p>MPI_Isend() 和 MPI_Irecv()</p>
+        </blockquote>
+      </blockquote>
+    </blockquote>
+  </li>
+  <li>可以打断循环等待以避免死锁</li>
+  <li>同时send和recv：MPI_Sendrecv（）；</li>
+</ul>
+
+<h3 id="7-mpi中的集群通信操作子有哪些原理是什么">7. MPI中的集群通信操作子有哪些？原理是什么？</h3>
+
+<ul>
+  <li>
+    <p>MPI provides an extensive set of functions for performing common collective communication operations.<br />
+MPI提供了一套广泛的函数来执行公共的集体通信操作</p>
+  </li>
+  <li>
+    <p>Each of these operations is defined over a group corresponding to the
+communicator.<br />
+这些操作都是在通信子对应的一个进程组上定义的</p>
+  </li>
+  <li>
+    <p>All processors in a communicator must call these operations.<br />
+在同一个通信子中的处理器必须调用这些操作</p>
+  </li>
+  <li>
+    <p>The barrier synchronization operation is performed in MPI using:</p>
+  </li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">MPI_Barrier</span><span class="p">(</span><span class="n">MPI_Comm</span> <span class="n">comm</span><span class="p">)</span> <span class="err">（阻塞到所有进程完成调用</span><span class="p">)</span>
+</code></pre></div></div>
+
+<blockquote>
+  <blockquote>
+    <p>The one-to-all broadcast operation is:</p>
+  </blockquote>
+</blockquote>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">MPI_Bcast</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">,</span> <span class="n">MPI_Datatype</span> <span class="n">datatype</span><span class="p">,</span>
+<span class="kt">int</span> <span class="n">source</span><span class="p">,</span> <span class="n">MPI_Comm</span> <span class="n">comm</span><span class="p">)</span> <span class="err"></span> <span class="n">The</span> <span class="n">all</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">one</span> <span class="n">reduction</span> <span class="n">operation</span> <span class="n">is</span><span class="o">:</span>
+<span class="kt">int</span> <span class="n">MPI_Reduce</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">sendbuf</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">recvbuf</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">,</span>
+<span class="n">MPI_Datatype</span> <span class="n">datatype</span><span class="p">,</span> <span class="n">MPI_Op</span> <span class="n">op</span><span class="p">,</span> <span class="kt">int</span> <span class="n">target</span><span class="p">,</span>
+<span class="n">MPI_Comm</span> <span class="n">comm</span><span class="p">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>The all-to-one reduction operation is:</li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">MPI_Reduce</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">sendbuf</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">recvbuf</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">,</span>
+<span class="n">MPI_Datatype</span> <span class="n">datatype</span><span class="p">,</span> <span class="n">MPI_Op</span> <span class="n">op</span><span class="p">,</span> <span class="kt">int</span> <span class="n">target</span><span class="p">,</span>
+<span class="n">MPI_Comm</span> <span class="n">comm</span><span class="p">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>Collective Commumication Operations</p>
+
+    <ul>
+      <li>If the result of the reduction operation is needed by all processes, MPI provides:</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="o">&gt;&gt;&gt;</span><span class="kt">int</span> <span class="n">MPI_Allreduce</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">sendbuf</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">recvbuf</span><span class="p">,</span>
+  <span class="o">&gt;&gt;&gt;</span><span class="kt">int</span> <span class="n">count</span><span class="p">,</span> <span class="n">MPI_Datatype</span> <span class="n">datatype</span><span class="p">,</span> <span class="n">MPI_Op</span> <span class="n">op</span><span class="p">,</span> <span class="n">MPI_Comm</span>
+<span class="n">comm</span><span class="p">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>To compute prefix-sums, MPI provides:
+    <blockquote>
+      <blockquote>
+        <blockquote>
+          <p>int MPI_Scan(void *sendbuf, void *recvbuf, int count,
+MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)</p>
+        </blockquote>
+      </blockquote>
+    </blockquote>
+  </li>
+  <li>The gather operation is performed in MPI using:
+    <blockquote>
+      <blockquote>
+        <blockquote>
+          <p>int MPI_Gather(void *sendbuf, int sendcount, MPI_Datatype senddatatype, void *recvbuf, int recvcount, MPI_Datatype recvdatatype, int target, MPI_Comm comm)</p>
+        </blockquote>
+      </blockquote>
+    </blockquote>
+  </li>
+  <li>MPI also provides the MPI_Allgather function in which the data are gathered at all the processes.</li>
+</ul>
+
+<blockquote>
+  <blockquote>
+    <blockquote>
+      <p>int MPI_Allgather(void *sendbuf, int sendcount, MPI_Datatype senddatatype, void *recvbuf, int recvcount, MPI_Datatype recvdatatype，MPI_Comm comm)</p>
+    </blockquote>
+  </blockquote>
+</blockquote>
+
+<ul>
+  <li>The corresponding scatter operation is:
+    <blockquote>
+      <blockquote>
+        <blockquote>
+          <p>int MPI_Scatter(void *sendbuf, int sendcount, MPI_Datatype senddatatype, void *recvbuf, int recvcount, MPI_Datatype recvdatatype, int source, MPI_Comm comm)</p>
+        </blockquote>
+      </blockquote>
+    </blockquote>
+  </li>
+</ul>
+
+<h3 id="8---mpi编程模型">8 - MPI编程模型</h3>
+
+<p>​	* 可参考文件 <code class="highlighter-rouge">MPI.md</code></p>
+
+<ol>
+  <li>
+    <p><strong>什么是MPI编程模型</strong></p>
+
+    <blockquote>
+      <p>MPI - the Message Passing Interface</p>
+
+      <p>* 参考老师PPT，加粗部分即为重点内容。</p>
+
+      <p><strong>MPI是一个跨语言（编程语言如C, Fortran等）的通讯协议</strong>，用于编写并行计算机。支持点对点和广播。MPI是一个<strong>信息传递应用程序接口</strong>，包括<strong>协议和和语义说明</strong>，他们指明其如何在各种实现中发挥其特性。MPI的目标是高性能，大规模性，和可移植性。MPI在今天仍为高性能计算的主要模型。与OpenMP并行程序不同，MPI是一种基于信息传递的并行编程技术。<strong>消息传递接口是一种编程接口标准，而不是一种具体的编程语言</strong>。简而言之，MPI标准定义了一组具有可移植性的编程接口。</p>
+    </blockquote>
+  </li>
+  <li>
+    <p>消息传递并行编程模型的主要原则</p>
+
+    <blockquote>
+      <p>* CH-8 p6</p>
+
+      <ul>
+        <li>支持消息传递并行编程模型的设备，运行的多个进程应有<strong>自己独立的地址空间</strong>。</li>
+        <li><strong>限制</strong>
+          <ul>
+            <li>每个数据单元<strong>必须</strong>归属于某一片划分好的地址空间，因此，必须<strong>显式划分并分配</strong>（place）数据。</li>
+            <li>无论是只读操作还是读写操作，都需要两个进程进行配合：拥有数据的进程以及操作发起的进程。</li>
+          </ul>
+        </li>
+        <li>消息传递程序常常是<strong>异步</strong>或者<strong>松弛同步（loosely synchronous）</strong>的。
+          <ul>
+            <li>松弛同步：任务之间的交互同步进行，此外各个任务异步进行。</li>
+          </ul>
+        </li>
+        <li>绝大多数的消息传递程序是由 <strong><code class="highlighter-rouge">single program multiple data - SPMD</code>（单程序多数据流）</strong> 模型写的。</li>
+      </ul>
+    </blockquote>
+  </li>
+  <li>
+    <p><strong>MPI中的几种Send和Receive操作，包括原理和应用场景。</strong></p>
+
+    <blockquote>
+      <p>* CH-8 p9</p>
+
+      <p>Send和Receive操作可分为以下三大类：</p>
+
+      <ol>
+        <li>
+          <p><strong>Non-buffered blocking 无缓冲阻塞</strong></p>
+
+          <p>为保证传输安全，需要实现类似于“握手”的操作才能开始发送数据，容易导致<strong>空转和死锁</strong>。</p>
+
+          <p><img src="./pics/1.png" alt="1561710519522" /></p>
+        </li>
+        <li>
+          <p><strong>Buffered blocking 缓冲阻塞</strong></p>
+
+          <p>为了减轻<strong>空转和死锁</strong>现象，引入缓冲区。</p>
+
+          <p><img src="./pics/2.png" alt="图片描述" /></p>
+
+          <p><strong>有通信硬件</strong>支持下：发送端不会中断接收方。</p>
+
+          <p><strong>无通信硬件</strong>支持下：发送端中断接收方，将数据存入接收端缓冲区。</p>
+        </li>
+        <li>
+          <p><strong>Non-blocking 非阻塞</strong></p>
+
+          <ul>
+            <li>
+              <p>非阻塞的协议是不安全的。</p>
+            </li>
+            <li>
+              <p>通常，非阻塞协议需要与<strong>状态检查操作（check-status operation）</strong>同步使用。</p>
+
+              <p>参见 <code class="highlighter-rouge">MPI_Get_count(), MPI_Status </code></p>
+
+              <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="n">MPI_Status</span> <span class="p">{</span>
+<span class="kt">int</span> <span class="n">MPI_SOURCE</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">MPI_TAG</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">MPI_ERROR</span><span class="p">;</span> <span class="p">};</span>
+
+<span class="kt">int</span> <span class="n">MPI_Get_count</span><span class="p">(</span><span class="n">MPI_Status</span> <span class="o">*</span><span class="n">status</span><span class="p">,</span>
+                  <span class="n">MPI_Datatype</span> <span class="n">datatype</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">count</span><span class="p">)</span>
+</code></pre></div>              </div>
+            </li>
+            <li>
+              <p>若使用得当，<strong>非阻塞的原语能够将通信与有效计算重叠进行。</strong>（When used correctly, these primitives are capable of overlapping communication overheads with useful computations.）</p>
+            </li>
+          </ul>
+
+          <p><img src="./pics/3.png" alt="1561711363625" /></p>
+        </li>
+      </ol>
+
+      <p><strong>总体比较：</strong></p>
+
+      <p><img src="./pics/4.png" alt="1561711504715" /></p>
+    </blockquote>
+  </li>
+  <li>
+    <p><strong>MPI中的关键编程接口</strong></p>
+
+    <blockquote>
+      <p>参见 <code class="highlighter-rouge">MPI.md - $2 MPI基本函数</code></p>
+    </blockquote>
+  </li>
+  <li>
+    <p><strong>什么是通信子</strong></p>
+
+    <blockquote>
+      <p>参见 <code class="highlighter-rouge">MPI.md - $4 MPI集群通信 - $4.0 组 &amp; 通信子 </code></p>
+    </blockquote>
+  </li>
+  <li>
+    <p><strong>MPI中解决死锁的方式有哪些？</strong></p>
+
+    <blockquote>
+      <ol>
+        <li>重排代码，避免死锁。</li>
+        <li>在发送时，添加<strong>接收缓冲区</strong>。</li>
+        <li>将<strong>自己（发送端）的地址空间</strong>作为发送缓冲区。</li>
+        <li>使用非阻塞的send/receive方法。</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>
+    <p><strong>MPI中的集群（群组）通信操作子有哪些？原理是什么？</strong></p>
+
+    <blockquote>
+      <p>MPI定义了一系列扩展函数以实现集群通信操作，这些操作都是<strong>基于一个与通信子关联的群组定义</strong>的。通信子中的所有处理器<strong>必须调用</strong>这些操作。</p>
+
+      <p>参见 <code class="highlighter-rouge">MPI.md - $4 MPI集群通信</code></p>
+    </blockquote>
+  </li>
+</ol>
+
+<h3 id="9---mpi-与-openmp联合编程">9 - MPI 与 OpenMP联合编程（*）</h3>
+
+<ol>
+  <li>
+    <p><strong>如何利用MPI实现Matrix-Vector乘积</strong></p>
+
+    <blockquote>
+      <p>对算式 $Ab=c$，有：</p>
+
+      <ol>
+        <li>
+          <p>串行算法</p>
+
+          <p>略</p>
+        </li>
+        <li>
+          <p>三种并行算法</p>
+
+          <ul>
+            <li>
+              <p><strong>Row-wise block striped</strong></p>
+
+              <ol>
+                <li>将$A$各<strong>行</strong>拆分，$b$不动，各个进程完成两个向量的內积得到$c_i$.</li>
+                <li>调用 <code class="highlighter-rouge">MPI_Allgatherv(...)</code>聚合计算结果。</li>
+                <li><code class="highlighter-rouge">MPI_Allgatherv(...)</code>参见 <code class="highlighter-rouge">MPI.md - $4 MPI集群通信 - $4.3 多对多通信</code></li>
+              </ol>
+
+              <p><img src="./pics/8.png" alt="1561798268629" /></p>
+            </li>
+            <li>
+              <p><strong>Column-wise block striped</strong></p>
+
+              <ol>
+                <li>
+                  <p>将$A，b$各<strong>列</strong>拆分，各个进程按图示工作。</p>
+
+                  <p><img src="pics/1561798901989.png" alt="1561798901989" /></p>
+                </li>
+                <li>
+                  <p>调用 <code class="highlighter-rouge">MPI_Alltoall(...)</code>传送计算结果。其中每个进程完成计算后得到上图中$c_{0j},c_{1j}，c_{2j}，c_{3j},c_{4j}$。最后分组加和。</p>
+                </li>
+                <li>
+                  <p><code class="highlighter-rouge">MPI_Alltoall(...)</code>参见 <code class="highlighter-rouge">MPI.md - $4 MPI集群通信 - $4.3 多对多通信</code></p>
+                </li>
+              </ol>
+
+              <p><img src="pics/1561799613528.png" alt="1561799613528" /></p>
+            </li>
+            <li>
+              <p><strong>Checkerboard block</strong></p>
+
+              <ol>
+                <li>
+                  <p>将$A$<strong>棋盘化</strong>分块，按照<strong>行划分</strong>同样对b进行分段。</p>
+
+                  <p><img src="pics/1561800068796.png" alt="1561800068796" /></p>
+                </li>
+                <li>
+                  <p>需要注意，进程数p是否为完全平方数影响b分块的过程。</p>
+                </li>
+                <li>
+                  <p>使用 <code class="highlighter-rouge">MPI_Dims_create(...)</code> 以及 <code class="highlighter-rouge">MPI_Cart_create(...)</code> 新建<strong>拓扑关系通信子</strong>。</p>
+                </li>
+                <li>
+                  <p><code class="highlighter-rouge">MPI_Dims_create(...)</code>，<code class="highlighter-rouge">MPI_Cart_create(...) </code>参见 <code class="highlighter-rouge">MPI.md - $5 MPI 逻辑分划</code></p>
+                </li>
+                <li>
+                  <p>规约计算。</p>
+                </li>
+              </ol>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <p>三种算法的性能比较</p>
+
+          <p><img src="./pics/7.png" alt="1561791325876" /></p>
+        </li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>
+    <p><strong>MPI和OpenMP结合的优势是什么？</strong></p>
+
+    <blockquote>
+      <p><img src="./pics/5.png" alt="1561788889804" /></p>
+
+      <ol>
+        <li>
+          <p><strong>运行较只使用MPI快。</strong></p>
+
+          <ul>
+            <li>只使用MPI时，消息在<strong>m*k个进程间</strong>传递；</li>
+            <li>联合编程时，消息在<strong>m个含有k个线程的进程间</strong>传递，代价较低。</li>
+          </ul>
+
+          <p><img src="./pics/6.png" alt="1561789520822" /></p>
+
+          <ul>
+            <li>
+              <p>特别地，考虑<strong>不同处理器数量</strong>的情况：</p>
+
+              <ul>
+                <li>
+                  <p>2,4CPUs：MPI + OpenMP较慢</p>
+
+                  <p>MPI + OpenMP是共享<strong>内存带宽（memory bandwidth）</strong>的，MPI-only不是。</p>
+                </li>
+                <li>
+                  <p>6,8CPUs：MPI + OpenMP较快</p>
+
+                  <p>更低的通信开销。</p>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <p><strong>程序的更多部分可以并行实现。</strong></p>
+
+          <p>只使用MPI时，不涉及消息传递的并行过程无法实现。</p>
+        </li>
+        <li>
+          <p><strong>允许更多通信与有效计算的叠加（overlap）。</strong></p>
+        </li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>
+    <p><strong>如何利用MPI+OpenMP实现高斯消元法</strong></p>
+
+    <blockquote>
+      <p>* CH - 9 p53</p>
+
+      <p><strong>0 - 简介</strong></p>
+
+      <ol>
+        <li>
+          <p><strong>高斯消元法（Gaussian Elimination ）</strong></p>
+
+          <ul>
+            <li>用于求解系数矩阵$A$是<strong>稠密(dense)矩阵</strong>的方程$Ax=b$</li>
+            <li>化简得到三角矩阵系统$Tx=c$，$T$为三角矩阵</li>
+            <li>回代求解$x$</li>
+          </ul>
+        </li>
+        <li>
+          <p><strong>稀疏矩阵系统（sparse system）</strong></p>
+
+          <ul>
+            <li>高斯消元法对稀疏系统的适应性不好。</li>
+            <li>高斯消元法使得稀疏矩阵新添很多非0元素
+              <ul>
+                <li>增加了存储需求</li>
+                <li>增加了操作次数</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <p><strong>迭代方法（Iterative Methods）</strong></p>
+
+          <ul>
+            <li>存储需求较高斯消元法更小。</li>
+            <li>含有0元素的计算会被忽略，大大减少了计算量。</li>
+          </ul>
+        </li>
+        <li>
+          <p><strong>雅各比方法（Jacobi Method）</strong></p>
+
+          <p><img src="pics/1561808109540.png" alt="1561808109540" /></p>
+        </li>
+        <li>
+          <p>收敛性（Convergence）</p>
+
+          <ul>
+            <li>一般只能达到较慢的收敛速度，很难实际应用。</li>
+          </ul>
+        </li>
+      </ol>
+
+      <p><strong>1 - 新方案思想</strong></p>
+
+      <ul>
+        <li>对MPI进行概要分析（？Profile execution of MPI program）。</li>
+        <li>致力于在<strong>计算密集型的函数或代码段处</strong>加入OpenMP指令。</li>
+      </ul>
+
+      <p><strong>2 - 串行代码</strong></p>
+
+      <ul>
+        <li>
+          <p><code class="highlighter-rouge">find_steady_state()</code></p>
+
+          <p><img src="pics/1561809331250.png" alt="1561809331250" /></p>
+        </li>
+        <li>
+          <p><strong>无法并行执行最外层 for 循环的原因</strong></p>
+
+          <ul>
+            <li><code class="highlighter-rouge">for</code>循环并不是规范形式（canonical form）</li>
+            <li>包含 <code class="highlighter-rouge">break</code> 语句</li>
+            <li>包含MPI功能函数</li>
+            <li>迭代之间存在<strong>数据依赖</strong>。</li>
+          </ul>
+        </li>
+        <li>
+          <p><strong>并行化本段for循环</strong></p>
+
+          <p><img src="pics/1561809619336.png" alt="1561809619336" /></p>
+
+          <ul>
+            <li>处理<code class="highlighter-rouge">diff</code>的更新（upadte）与检测（test）
+              <ul>
+                <li>若考虑将<code class="highlighter-rouge">if</code>语句置入<strong>临界区（critical section）</strong>，会<strong>增加额外开销并且降低加速比</strong>。（Putting if statement in a critical section would increase overhead and lower speedup.）</li>
+                <li>考虑引入私有变量 <code class="highlighter-rouge">tdiff</code></li>
+              </ul>
+            </li>
+            <li>在进行<code class="highlighter-rouge">MPI_Allreduce()</code>规约之前，检测<code class="highlighter-rouge">tdiff</code>代替之前检测<code class="highlighter-rouge">diff</code>的步骤。</li>
+          </ul>
+        </li>
+      </ul>
+
+      <p><strong>3 - 并行化代码</strong></p>
+
+      <p><img src="pics/1561810275605.png" alt="1561810275605" /></p>
+
+      <p><strong>4 - 基准化测试</strong></p>
+
+      <p>考虑以下环境：</p>
+
+      <p>系统：包含4个双核处理器节点的商业集群。</p>
+
+      <ul>
+        <li>C+MPI 在 1,2, … ,8进程上运行</li>
+        <li>C+MPI+OpenMP在 1,2,3,4进程上运行
+          <ul>
+            <li>每个进程包含2个线程</li>
+            <li>包含2,4,6,8线程</li>
+          </ul>
+        </li>
+      </ul>
+
+      <p>结果示意：</p>
+
+      <p><img src="pics/1561810989683.png" alt="1561810989683" /></p>
+
+      <p><strong>总结分析</strong>：</p>
+
+      <ol>
+        <li>
+          <p>Hybrid C+MPI+OpenMP program uniformly faster than C+MPI program.</p>
+
+          <p>混合编程在速度上显著快于MPI编程。</p>
+        </li>
+        <li>
+          <p>Computation/communication ratio of hybrid program is superior.</p>
+
+          <p>混合编程的“计算通信比”更胜一筹。理解为单位通信次数/时间内有效计算量更大。</p>
+        </li>
+        <li>
+          <p>Number of mesh points per element communicated is twice as high per node for the hybrid program.</p>
+
+          <p>混合编程内每个通信元素的网格点数是程序节点数的两倍。</p>
+        </li>
+        <li>
+          <p>Lower communication overhead leads to 19% better speedup on 8 CPU.</p>
+
+          <p>混合编程在8CPU下通过减少通信开销实现了19%的加速。</p>
+        </li>
+      </ol>
+    </blockquote>
+  </li>
+</ol>
+
+<h2 id="第九讲mpi与openmp联合编程内容要点">第九讲：MPI与OpenMP联合编程，内容要点</h2>
+
+<h3 id="1-如何利用mpi实现matrix-vector乘积不同实现的特点是什么">1. 如何利用MPI实现Matrix-vector乘积？不同实现的特点是什么？</h3>
+<p>假设运算为A*b=c，其中A为矩阵，b、c为向量</p>
+<h4 id="1-rowwise-block-striped-matrix--行分块条形矩阵">1. Rowwise Block Striped Matrix —— 行分块条形矩阵</h4>
+<ul>
+  <li>
+    <p>Partitioning through domain decomposition<br />
+通过域分解划分</p>
+  </li>
+  <li>Primitive task associated with<br />
+原始任务关联
+    <ul>
+      <li>Row of matrix<br />
+矩阵的行</li>
+      <li>Entire vector<br />
+整个向量</li>
+    </ul>
+  </li>
+  <li>此时为A的第i行乘以b得到c[i],在All-gather communication得到结果</li>
+  <li>
+    <p>有时会出现每个进程的结果个数不一样，所以不能使用MPI_gather（因为要求每个进程的传输个数一样），所以使用MPI_Allgatherv。</p>
+  </li>
+  <li>Agglomeration and Mapping 合并与映射
+    <ul>
+      <li>Static number of tasks<br />
+任务数量为静态划分</li>
+      <li>Regular communication pattern (all-gather)<br />
+规则化通信</li>
+      <li>Computation time per task is constant<br />
+每个任务的执行时间为常量</li>
+      <li>Strategy:
+        <ul>
+          <li>Agglomerate groups of rows<br />
+多行合并为一个子任务 —— 减少通信</li>
+          <li>Create one task per MPI process<br />
+为每个MPI进程创建一个任务，分配子任务</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="2-columnwise-block-striped-matrix--列分块条形矩阵">2. Columnwise Block Striped Matrix —— 列分块条形矩阵</h4>
+<ul>
+  <li>
+    <p>Partitioning through domain decomposition<br />
+通过域分解进行划分</p>
+  </li>
+  <li>Task associated with<br />
+原始任务关联
+    <ul>
+      <li>Column of matrix<br />
+矩阵的列</li>
+      <li>Vector element<br />
+矢量元素</li>
+    </ul>
+  </li>
+  <li>
+    <p>此时为A的第i列乘以b[i]。<br />
+一般的做法为行列转置，即把结果部分c[i]由不连续存储的列元素变成连续存储的行形式表示，再统计获得最终结果。图在PPT的16页。</p>
+  </li>
+  <li>Agglomeration and Mapping
+    <ul>
+      <li>Static number of tasks<br />
+任务数固定</li>
+      <li>Regular communication pattern (all-to-all)<br />
+规则化通信</li>
+      <li>Computation time per task is constant<br />
+计算时间恒定</li>
+      <li>Strategy:
+        <ul>
+          <li>Agglomerate groups of columns<br />
+把部分列元素作为一个子任务</li>
+          <li>Create one task per MPI process<br />
+为每个MPI进程创建一个任务，分配子任务</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="3-checkerboard-block-decomposition--块划分">3. Checkerboard Block Decomposition —— 块划分</h4>
+<ul>
+  <li>Associate primitive task with each element of the  matrix A<br />
+将原始任务与矩阵A的每个元素关联起来</li>
+  <li>Each primitive task performs one multiply<br />
+每个基本任务执行一次乘法</li>
+  <li>Agglomerate primitive tasks into rectangular blocks<br />
+将原始任务聚合成矩形块</li>
+  <li>Processes form a 2-D grid<br />
+流程形成二维网格</li>
+  <li>
+    <p>Vector b distributed by blocks among processes in first column of grid<br />
+矢量B在网格第一列的进程之间按块分布</p>
+  </li>
+  <li>
+    <p>注意PPT中第20页和第21页的图。</p>
+  </li>
+  <li>Redistributing Vector b<br />
+再分配向量b
+    <ul>
+      <li>Step 1: Move b from processes in first row to processes in first column<br />
+步骤1：将B从第一行的流程移到第一列的流程
+        <ul>
+          <li>If p square<br />
+如果矩阵A的行数=列数
+            <ul>
+              <li>First column/first row processes send/receive portions of b<br />
+直接第i部分的向量b对应矩阵的第一行的第i部分</li>
+            </ul>
+          </li>
+          <li>If p not square<br />
+如果矩阵A的行数！=列数
+            <ul>
+              <li>Gather b on process 0, 0<br />
+先把b聚合到process[0,0]的位置</li>
+              <li>Process 0, 0 broadcasts to first row procs<br />
+再把b尽量平均地分配到第一行的各个部分</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>Step 2: First row processes scatter b within columns<br />
+步骤2：把第一行映射到其他行</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="2-mpi和openmp结合的优势是什么">2. MPI和OpenMP结合的优势是什么？</h3>
+<p>MPI + OpenMP 可以执行的更快</p>
+<ul>
+  <li>Lower communication overhead<br />
+更低的通讯开销
+    <ul>
+      <li>Message passing with mk processes, versus</li>
+      <li>Message passing with m processes with k threads each</li>
+    </ul>
+  </li>
+  <li>More portions of program may be practical to parallelize<br />
+更多的部分可以并行</li>
+  <li>May allow more overlap of communications with computations<br />
+通讯开销与计算开销重合的部分更多</li>
+  <li>Hybrid Light-Weight Threads &amp; Heavier-Weight Processes<br />
+混合了轻量级线程和重量级进程</li>
+</ul>
+
+<h3 id="3-如何利用mpiopenmp实现高斯消元">3. 如何利用MPI+OpenMP实现高斯消元？</h3>
+<ul>
+  <li>Sparse Systems<br />
+稀疏系统
+    <ul>
+      <li>Gaussian elimination not well-suited for sparse systems<br />
+高斯消元发并不适用与稀疏系统</li>
+      <li>Coefficient matrix gradually fills with nonzero elements<br />
+系数矩阵逐渐填充非零元素
+        <ul>
+          <li>Increases storage requirements<br />
+增加存储要求</li>
+          <li>Increases total operation count<br />
+增加总操作数</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Iterative Methods<br />
+迭代法
+    <ul>
+      <li>Iterative method: algorithm that generates a series of approximations to solution’s value<br />
+迭代法：生成一系列近似解值的算法</li>
+      <li>Require less storage than direct methods<br />
+需要的存储量比直接方法少</li>
+      <li>Since they avoid computations on zero elements, they can save a lot of computations<br />
+由于它们避免了零元素的计算，因此可以节省大量的计算。</li>
+    </ul>
+  </li>
+  <li>Methodology<br />
+方法
+    <ul>
+      <li>Profile execution of MPI program<br />
+MPI执行配置操作的指令</li>
+      <li>Focus on adding OpenMP directives to most compute-intensive function<br />
+专注于将OpenMP指令添加到大多数计算密集型功能中</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="第十讲gpgpucuda和opencl编程模型内容要点">第十讲：GPGPU、CUDA和OpenCL编程模型，内容要点</h2>
+
+<ul>
+  <li>The CUDA Programming Model provides a general approach to organizing Data Parallel programs for heterogeneous, hierarchical platforms</li>
+  <li>Currently, the only production-quality implementation is CUDA for C/C++ on Nvidia’s GPUs</li>
+  <li>But CUDA notions of “Scalar Threads”, “Warps”, “Blocks”, and “Grids” can be mapped to other platforms as well</li>
+  <li>A simple “Homogenous SPMD” approach to CUDA programming is useful, especially in early stages of implementation and debugging</li>
+  <li>
+    <p>But achieving high efficiency requires careful consideration of the mapping from computations to processors, data to memories, and data access patterns</p>
+  </li>
+  <li>CUDA编程模型提供了一种为异构、分层平台组织数据并行程序的通用方法。</li>
+  <li>目前，唯一的产品质量实现是在NVIDIA的GPU上实现用于C/C++的CUDA。</li>
+  <li>但CUDA的“标量线程”、“扭曲”、“块”和“网格”等概念也可以映射到其他平台。</li>
+  <li>对于CUDA编程，一种简单的“同质SPMD”方法是有用的，特别是在实施和调试的早期阶段。</li>
+  <li>但是要实现高效率，需要仔细考虑从计算到处理器、从数据到存储器和数据访问模式的映射。</li>
+</ul>
+
+<h3 id="cuda的含义是什么">CUDA的含义是什么</h3>
+
+<p>CUDA: Compute Unified Device Architecture</p>
+
+<p>CUDA：计算统一设备架构</p>
+
+<h3 id="cuda的设计目标是什么与传统的多线程设计有什么不同">CUDA的设计目标是什么，与传统的多线程设计有什么不同</h3>
+
+<p>Provide an inherently scalable environment for Data-Parallel programming across a wide range of processors (Nvidia only makes GPUs, however)</p>
+
+<p>为跨多种处理器的数据并行编程提供内在可扩展的环境(不过，NVIDIA只制造GPU)。</p>
+
+<p>Make SIMD hardware accessible to general-purpose programmers. Otherwise, large fractions of the available execution hardware are wasted!</p>
+
+<p>使SIMD硬件对通用程序员可访问。否则，大部分可用的执行硬件都会被浪费掉！</p>
+
+<p>PPT上没找到很多与传统多线程设计的区别，但我觉得其实就很类似SIMD和MIMD的区别？（hhh）</p>
+
+<ul>
+  <li>GPU programs (kernels) written using the Single Program Multiple Data (SPMD) programming model
+    <ul>
+      <li>SPMD executes multiple instances of the same program independently, where each program works on a different portion of the data</li>
+    </ul>
+  </li>
+  <li>For data-parallel scientific and engineering applications, combining SPMD with loop strip mining is a very common parallel programming technique
+    <ul>
+      <li>Message Passing Interface (MPI) is used to run SPMD on a distributed cluster</li>
+      <li>POSIX threads (pthreads) are used to run SPMD on a shared memory system</li>
+      <li>Kernels run SPMD within a GPU</li>
+    </ul>
+  </li>
+  <li>In the vector addition example, each chunk of data could be executed as an independent thread</li>
+  <li>On modern CPUs, the overhead of creating threads is so high that the chunks need to be large
+    <ul>
+      <li>In practice, usually a few threads (about as many as the number of CPU cores) and each is given a large amount of work to do</li>
+    </ul>
+  </li>
+  <li>
+    <p>For GPU programming, there is low overhead for thread creation, so we can create one thread per loop iteration</p>
+  </li>
+  <li>使用单程序多数据(SPMD)编程模型编写的GPU程序(内核)。
+    <ul>
+      <li>SPMD独立执行同一程序的多个实例，其中每个程序处理数据的不同部分。</li>
+    </ul>
+  </li>
+  <li>对于数据并行的科学和工程应用，将SPMD与循环条带挖掘相结合是一种非常常见的并行编程技术。
+    <ul>
+      <li>消息传递接口(MPI)用于在分布式集群上运行SPMD。</li>
+      <li>POSIX线程(p线程)用于在共享内存系统上运行SPMD。</li>
+      <li>内核在GPU中运行SPMD</li>
+    </ul>
+  </li>
+  <li>在向量相加的示例中，每个数据块都可以作为一个独立的线程执行。</li>
+  <li>在现代CPU上，创建线程的开销是如此之高，以至于块需要很大。
+    <ul>
+      <li>在实践中，通常有几个线程(大约相当于CPU核心的数量)，每个线程都有大量的工作要做。</li>
+    </ul>
+  </li>
+  <li>对于GPU编程，线程创建的开销较低，因此我们可以在每次循环迭代中创建一个线程。</li>
+</ul>
+
+<h4 id="scalability扩展性">Scalability（扩展性）</h4>
+
+<ul>
+  <li>Cuda expresses many independent blocks of computation that can be run in any order;</li>
+  <li>Much of the inherent scalability of the Cuda Programming model stems from batched execution of “Thread Blocks“;</li>
+  <li>
+    <p>Between GPUs of the same generation, many programs achieve linear speedup on GPUs with more “Cores”; (线性加速比)</p>
+  </li>
+  <li>CUDA表示许多独立的计算模块，可以按任何顺序运行；</li>
+  <li>CUDA编程模型的许多固有可伸缩性源于“线程块”的成批执行；</li>
+  <li>在同一代图形处理器之间，许多程序在具有更多“核心”的图形处理器上实现线性加速；(线性加速比)</li>
+</ul>
+
+<h4 id="simd-programming">SIMD Programming</h4>
+
+<ul>
+  <li>Hardware architects love SIMD, since it permits a very space and energy-efficient implementation</li>
+  <li>However, standard SIMD instructions on CPUs are inflexible, and difficult to use, difficult for a compiler to target</li>
+  <li>
+    <p>The Cuda Thread abstraction will provide programmability at the cost of additional hardware</p>
+  </li>
+  <li>硬件架构师喜欢SIMD，因为它支持非常节省空间和节能的实施。</li>
+  <li>然而，CPU上的标准SIMD指令是不灵活的，很难使用，编译器很难找到目标。</li>
+  <li>CUDA线程抽象将以额外硬件为代价提供可编程性</li>
+</ul>
+
+<h4 id="什么是cuda-kernel">什么是CUDA kernel</h4>
+
+<p>我个人的理解就是运行在设备上的SPMD核函数。</p>
+
+<p>一个kernel结构如下：<code class="highlighter-rouge">Kernel&lt;&lt;&lt;Dg, Db, Ns, S&gt;&gt;&gt;(param1, param2, ...)</code></p>
+
+<ul>
+  <li>Dg：grid的尺寸，说明一个grid含有多少个block，为dim3类型，一个grid最多含有65535<em>65535</em>65535个block，Dg.x，Dg.y，Dg.z最大值为65535；</li>
+  <li>Db：block的尺寸，说明一个block含有多上个thread，为dim3类型，一个block最多含有1024(cuda2.x版本)个threads，Db.x和Db.y最大值为1024，Db.z最大值64；
+（举个例子，一个block的尺寸可以是：<code class="highlighter-rouge">1024*1*1 | 256*2*2 | 1*1024*1 | 2*8*64 | 4*4*64</code>等）</li>
+  <li>Ns：可选参数，如果kernel中由动态分配内存的shared memory，需要在此指定大小，以字节为单位；</li>
+  <li>S：可选参数，表示该kernel处在哪个流当中。</li>
+</ul>
+
+<h3 id="cuda的编程样例">CUDA的编程样例</h3>
+
+<p>自己补充：CUDA的操作概括来说包含5个步骤：</p>
+
+<ol>
+  <li>CPU在GPU上分配内存：cudaMalloc；</li>
+  <li>CPU把数据发送到GPU：cudaMemcpy；</li>
+  <li>CPU在GPU上启动内核（kernel），它是自己写的一段程序，在每个线程上运行；</li>
+  <li>CPU把数据从GPU取回：cudaMemcpy；</li>
+  <li>CPU释放GPU上的内存：cudaFree。</li>
+</ol>
+
+<p>其中关键是第3步，能否写出合适的kernel，决定了能否正确解决问题和能否高效的解决问题。</p>
+
+<h3 id="cuda的线程分层结构">CUDA的线程分层结构</h3>
+
+<p>Cuda对线程做了合适的规划，引入了grid和block的概念，block由线程组成，grid由block组成，一般说blocksize指一个block放了多少thread；gridsize指一个grid放了多少个block。</p>
+
+<p>Parallelism in the Cuda Programming Model is expressed as a 4-level Hierarchy</p>
+
+<ul>
+  <li>A Stream is a list of Grid sthat execute in-order. Fermi GPUs execute multiple Streams in parallel</li>
+  <li>A Grid is a set of up to 232 thread Blocks executing the same kernel</li>
+  <li>A Thread Block is a set of up to 1024 [512 pre-Fermi] Cuda Threads</li>
+  <li>Each Cuda Thread is an independent, lightweight, scalar execution context</li>
+  <li>Groups of 32 threads form Warps that execute in lockstep SIMD</li>
+</ul>
+
+<p>Cuda编程模型中的并行性被表示为一个4层的层次结构。</p>
+
+<ul>
+  <li>流(Stream)是按顺序执行的Grid列表。Fermi GPU并行执行多个流。</li>
+  <li>网格(Grid)是一组最多232个执行同一内核的线程块。</li>
+  <li>线程块是一组最多1024(512预费米)Cuda线程。</li>
+  <li>每个cuda线程都是一个独立的、轻量级的标量执行上下文。</li>
+  <li>32个线程组成的组形成在lockStepSIMD中执行的扭曲。</li>
+</ul>
+
+<h4 id="cuda-thread">CUDA Thread</h4>
+
+<ul>
+  <li>Logically, each CUDA  Thread :
+– Has its own control flow and PC, register file, call stack, …
+– Can access any GPU global memory address at any time
+– Identifiable uniquely within a grid by the five integers: threadIdx.{x,y,z}, blockIdx.{x,y}</li>
+  <li>
+    <p>Very fine granularity: do not expect any single thread to do a substantial fraction of an expensive computation
+– At full occupancy, each Thread has 21 32‐bit registers
+– … 1,536 Threads share a 64 KB L1 Cache / <strong>shared</strong> mem
+– GPU has no operand bypassing networks: functional unit latencies must   be hidden by multithreading or ILP (e.g. from loop unrolling)</p>
+  </li>
+  <li>逻辑上，每个CUDA线程：</li>
+  <li>有自己的控制流程和PC，注册文件，调用堆栈，.。</li>
+  <li>可以随时访问任何GPU全局内存地址。</li>
+  <li>可通过以下五个整数在网格中唯一标识：线程标识。{x，y，z}，块标识。{x，y}。</li>
+  <li>非常精细的粒度：不要指望任何一个线程都能完成昂贵的计算中的很大一部分。</li>
+  <li>在完全占用时，每个线程有21个32位寄存器。</li>
+  <li>.1，536个线程共享64 KB L1缓存/_SHARED_mem。</li>
+  <li>GPU没有操作数绕过网络：功能单元延迟必须通过多线程或ILP隐藏(例如，从循环展开)</li>
+</ul>
+
+<h4 id="cuda-warp">CUDA Warp</h4>
+
+<ul>
+  <li>The Logical SIMD Execution width of the CUDA processor</li>
+  <li>A group of 32 CUDA Threads that execute simultaneously
+– Execution hardware is most efficiently utilized when all threads in a warp execute instructions from the same PC.
+– If threads in a warp diverge (execute different PCs), then some execution pipelines go unused (predication)
+– If threads in a warp access aligned, contiguous blocks of DRAM, the accesses are coalesced  ( 合并 ) into a single high bandwidth access
+– Identifiable uniquely by dividing the Thread Index by 32</li>
+  <li>
+    <p>Technically, warp size could change in future architectures
+– But many existing programs would break</p>
+  </li>
+  <li>CUDA处理器的逻辑SIMD执行宽度。</li>
+  <li>一组同时执行的32个CUDA线程。
+    <ul>
+      <li>当扭曲中的所有线程从同一台PC执行指令时，执行硬件的使用效率最高。</li>
+      <li>如果扭曲中的线程发散(执行不同的PC)，则某些执行管道将未使用(预测)。</li>
+      <li>如果扭曲访问中的线程对齐了DRAM的连续块，则将访问合并(合并)为单个高带宽访问。</li>
+      <li>通过将线程索引除以32来唯一标识。</li>
+    </ul>
+  </li>
+  <li>从技术上讲，Warp的大小在未来的体系结构中可能会发生变化
+    <ul>
+      <li>但许多现有的程序将会中断。</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="cuda-thread-block">Cuda Thread Block</h4>
+
+<ul>
+  <li>A Thread Block is a virtualized multi-threaded core
+    <ul>
+      <li>Number of scalar threads, registers, and __shared memory are configured dynamically at kernel-call time</li>
+      <li>Consists of a number (1-1024) of Cuda Threads, who all share the integer identifiers blocladx. {x, y}</li>
+    </ul>
+  </li>
+  <li>…executing a data parallel task of moderate granularity
+    <ul>
+      <li>The cacheable working-set should fit into the 128 KB (64 KB, pre-Fermi) Register File and the 64 KB (16 KB) Li</li>
+      <li>Non-cacheable working set limited by GPU DRAM capacity</li>
+      <li>All threads in a block share a (small) instruction cache</li>
+    </ul>
+  </li>
+  <li>
+    <p>Threads within a block synchronize via barrier-intrinsics and communicate via fast, on-chip shared memory</p>
+  </li>
+  <li>线程块是虚拟化的多线程内核。
+    <ul>
+      <li>在内核调用时动态配置标量线程、寄存器和_共享内存的数量。</li>
+      <li>由CudaThread的一个数字(1-1024)组成，这些线程共享整数标识符blocladx。{x，y}。</li>
+    </ul>
+  </li>
+  <li>…。执行中等粒度的数据并行任务。
+    <ul>
+      <li>可缓存工作集应适合128KB(64KB，Pre-Fermi)注册表文件和64KB(16KB)LI。</li>
+      <li>受GPU DRAM容量限制的不可缓存工作集。</li>
+      <li>块中的所有线程共享(小型)指令缓存。</li>
+    </ul>
+  </li>
+  <li>块中的线程通过屏障-内部同步，并通过快速的片上共享内存进行通信</li>
+</ul>
+
+<h4 id="cuda-grid">Cuda Grid</h4>
+
+<ul>
+  <li>A set of Thread Blocks performing related computations
+    <ul>
+      <li>All threads in a single kernel call have the same entry point and function arguments, initially differing only in blockIdx. {x,y}</li>
+      <li>Thread blocks in a grid may execute any code they want, e.g. switch (blockIdx.x) incurs no extra penalty</li>
+    </ul>
+  </li>
+  <li>Performance portability/scalability requires many blocks per grid: 1-8 blocks execute on each SM</li>
+  <li>Thread blocks of a kernel call must be parallel sub-tasks
+    <ul>
+      <li>Program must be valid for any interleaving of block executions</li>
+      <li>The flexibility of the memory system technically allows Thread Blocks to communicate and synchronize in arbitrary ways</li>
+      <li>E.G. Shared Queue index: OK! Producer-Consumer: RISKY!</li>
+    </ul>
+  </li>
+  <li>一组执行相关计算的线程块。
+    <ul>
+      <li>单个内核调用中的所有线程都具有相同的入口点和函数参数，最初仅在block Idx中有所不同。{x，y}。</li>
+      <li>网格中的线程块可以执行它们想要的任何代码，例如Switch(block Idx.x)不会受到额外的惩罚。</li>
+    </ul>
+  </li>
+  <li>性能、可移植性/可扩展性要求每个网格有多个数据块：在每个SM上执行1-8个数据块。</li>
+  <li>内核调用的线程块必须是并行子任务。
+    <ul>
+      <li>程序必须对块执行的任何交错有效。</li>
+      <li>内存系统的灵活性在技术上允许线程块以任意方式进行通信和同步。</li>
+      <li>共享队列索引：好的！生产者-消费者：风险！</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="cuda-stream">Cuda Stream</h4>
+
+<ul>
+  <li>A sequence of commands (kernel calls, memory transfers)  that execute in order.</li>
+  <li>For multiple kernel calls or memory transfers to execute concurrently, the application must specify multiple streams.
+– Concurrent Kernel execution will only happen on Fermi and later
+– On pre‐Fermi devices, Memory transfers will execute  concurrently with Kernels.</li>
+</ul>
+
+<h3 id="cuda的内存分层结构">CUDA的内存分层结构</h3>
+
+<ul>
+  <li>Each CUDA Thread has private access to a configurable number of registers – The 128 KB (64 KB) SM register file is partitioned among all resident threads – Registers, stack spill into (cached, on Fermi) “local” DRAM if necessary</li>
+  <li>Each Thread Block has private access to a configurable amount of scratchpad memory – The Fermi SM’s 64 KB SRAM can be configured as 16 KB L1 cache + 48 KB scratchpad (暂存器), or vice‐versa* – Pre‐Fermi SM’s have 16 KB scratchpad only – The available scratchpad space is partitioned among resident thread blocks, providing another concurrency‐state tradeoff</li>
+  <li>Thread blocks in all Grids share access to a large pool of “Global” memory, separate from the Host CPU’s memory. – Global memory holds the application’s persistent state, while the thread‐local and block‐local memories are temporary – Global memory is much more expensive than on‐chip memories: O(100)x latency, O(1/50)x (aggregate) bandwidth</li>
+  <li>On Fermi, Global Memory is cached in a 768KB shared L2</li>
+  <li>There are other read-only components of the Memory Hierarchy that exist due to the Graphics heritage of Cuda</li>
+  <li>The 64 KB Cuda Constant Memory resides in the same DRAM as global memory, but is accessed via special read-only 8 KB per-SM caches</li>
+  <li>The Cuda Texture Memory also resides in DRAM and is accessed via small per-SM read-only caches, but also includes interpolation hardware</li>
+  <li>This hardware is crucial for graphics performance, but only occasionally is useful for general-purpose workloads</li>
+  <li>The behaviors of these caches are highly optimized for their roles in graphics workloads  ？</li>
+  <li>Each CUDA device in the system has its own Global memory, separate from the Host CPU memory – Allocated via cudaMalloc()/cudaFree() and friends</li>
+  <li>Host   &lt;-&gt;   Device memory transfers are via cudaMemcpy() over PCI‐E, and are extremely expensive – microsecond latency, ~GB/s bandwidth</li>
+  <li>
+    <p>Multiple Devices managed via multiple CPU threads</p>
+  </li>
+  <li>每个CUDA线程都可以私有地访问可配置的寄存器数量-128KB(64KB)SM寄存器文件在所有驻留线程中进行分区-寄存器、堆栈溢出到(缓存的，在Fermi上)“本地”DRAM(如有必要)。</li>
+  <li>每个线程块都可以私有地访问可配置数量的暂存盘内存-费米SM的64KB内存可以配置为16KB L1缓存+48KB暂存板(暂存器)，反之亦然*-Pre-FermiSM仅有16KB暂存板-可用暂存板空间在常驻线程块之间进行分区，从而提供另一个并发状态权衡。</li>
+  <li>所有网格中的线程块共享对大型“全局”内存池的访问权限，这些内存池与主机CPU的内存分开。-全局内存保存应用程序的持久状态，而线程本地和块本地内存是临时的-全局内存比片上内存昂贵得多：O(100)x延迟，O(1/50)x(聚合)带宽。</li>
+  <li>在Fermi上，全局内存缓存在768KB共享L2中。</li>
+  <li>由于CUDA的图形遗产，内存层次结构中存在其他只读组件。</li>
+  <li>64 KB cuda常量内存与全局内存驻留在同一DRAM中，但通过特殊的只读8 KB/SM缓存进行访问。</li>
+  <li>cuda纹理内存也驻留在dram中，可以通过小的per-sm只读缓存进行访问，但也包括插值硬件。</li>
+  <li>此硬件对于图形性能至关重要，但仅偶尔对通用工作负载有用。</li>
+  <li>这些缓存的行为是否针对其在图形工作负载中的角色进行了高度优化？</li>
+  <li>系统中的每个CUDA设备都有自己的全局内存，独立于主机CPU内存-通过cudaMalloc()/cudafree()和Friend()分配。</li>
+  <li>主机&lt;-&gt;设备内存传输是通过cudaMemcpy()通过PCI-E进行的，并且是非常昂贵的-微秒延迟，~Gb/s带宽。</li>
+  <li>通过多个CPU线程管理多个设备</li>
+</ul>
+
+<h3 id="cuda中的内存访问冲突">CUDA中的内存访问冲突</h3>
+
+<h4 id="using-per-block-shared-memory">Using Per-Block Shared Memory</h4>
+
+<ul>
+  <li>Each SM has 64 KB of private memory, divided 16KB/48KB (or 48KB/16KB) into so hardware‐managed scratchpad and hardware‐managed, non‐coherent cache
+– Pre‐Fermi, the SM memory is only 16 KB, and is usable only as so hardware‐managed scratchpad</li>
+  <li>Unless data will be shared between Threads in a block, it should reside in registers   - On Fermi, the 128 KB Register file is twice as large, and accessible at higher bandwidth and lower latency
+    <ul>
+      <li>Pre‐Fermi, register file is 64 KB and equally fast as scratchpad</li>
+    </ul>
+  </li>
+  <li>每个SM都有64 KB的私有内存，将16KB/48KB(或48KB/16KB)分为由硬件管理的暂存板和由硬件管理的非一致性缓存。
+    <ul>
+      <li>在费米之前，SM内存只有16KB，只能作为硬件管理的暂存盘使用。</li>
+    </ul>
+  </li>
+  <li>除非数据将在块中的线程之间共享，否则它应该驻留在寄存器中
+    <ul>
+      <li>在Fermi上，128KB的寄存器文件是原来的两倍，并且可以在更高的带宽和更低的延迟下访问。</li>
+      <li>preFermi，注册文件为64KB，速度与便签簿一样快</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="atomic-memory-operations">Atomic Memory Operations</h4>
+
+<p>cuda提供了原生的原子操作，例如</p>
+
+<ul>
+  <li>CUDA  provides a set of instructions which execute atomically with respect to each other
+    <ul>
+      <li>Allow non‐read‐only access to variables shared between threads in shared or global memory</li>
+      <li>Substantially more expensive than standard load/stores</li>
+      <li>With voluntary consistency, can implement e.g., spin locks!</li>
+    </ul>
+  </li>
+  <li>CUDA提供了一组相互独立执行的指令。</li>
+  <li>允许对共享内存或全局内存中的线程之间共享的变量进行非只读访问。</li>
+  <li>比标准货物/商店贵得多。</li>
+  <li>具有自愿性一致性，可实现例如旋转锁定！</li>
+</ul>
+
+<h4 id="voluntary-memory-consistency">Voluntary Memory Consistency</h4>
+
+<ul>
+  <li>By default, you cannot assume memory accesses are occur in the same order specified by the program
+    <ul>
+      <li>Although a thread’s own accesses appear to that thread to occur in program order</li>
+    </ul>
+  </li>
+  <li>To enforce ordering, use memory fence instructions
+    <ul>
+      <li>__threadfence_block(): make all previous memory accesses visible to all other threads within the thread block</li>
+      <li>__threadfence(): make previous global memory accesses visible to all other threads on the device</li>
+    </ul>
+  </li>
+  <li>Frequently must also use the volatile type qualifier
+    <ul>
+      <li>Has same behavior as CPU C/C++: the compiler is forbidden from register‐promoting values in volatile memory</li>
+      <li>Ensures that pointer dereferences produce load/store instructions</li>
+      <li>Declared as volatile float *p; *p must produce a memory ref.</li>
+    </ul>
+  </li>
+  <li>默认情况下，不能假定内存访问的顺序与程序指定的顺序相同。</li>
+  <li>虽然线程自己的访问似乎是按程序顺序进行的。</li>
+  <li>要执行排序，请使用内存围栏说明。</li>
+  <li>_throfence_block()：使所有先前的内存访问对该线程块中的所有其他线程都可见。</li>
+  <li>_throfence()：使以前的全局内存访问对设备上的所有其他线程可见。</li>
+  <li>还必须经常使用易失性类型限定符。</li>
+  <li>具有与CPU C/C+相同的行为：禁止编译器在易失性内存中执行寄存器提升值。</li>
+  <li>确保指针取消引用生成加载/存储指令。</li>
+  <li>声明为易失性浮点<em>p；</em>p必须生成内存引用。</li>
+</ul>
+
+<h3 id="opencl运行时编译过程"><a href="http://www.photoneray.com/opencl_01/">OpenCL运行时编译过程</a></h3>
+
+<h4 id="platform">Platform</h4>
+
+<ul>
+  <li>查询并选择一个 platform</li>
+  <li>在 platform 上创建 context</li>
+  <li>在 context 上查询并选择一个或多个 device</li>
+</ul>
+
+<h4 id="running-time">Running time</h4>
+
+<ul>
+  <li>加载 OpenCL 内核程序并创建一个 program 对象</li>
+  <li>为指定的 device 编译 program 中的 kernel</li>
+  <li>创建指定名字的 kernel 对象</li>
+  <li>为 kernel 创建内存对象</li>
+  <li>为 kernel 设置参数</li>
+  <li>在指定的 device 上创建 command queue</li>
+  <li>将要执行的 kernel 放入 command queue</li>
+  <li>将结果读回 host</li>
+</ul>
+
+<h4 id="资源回收">资源回收</h4>
+
+<h2 id="第十一讲mapreduce并行编程模型内容要点">第十一讲：MapReduce并行编程模型，内容要点</h2>
+
+<ul>
+  <li>MapReduce Programming Model</li>
+  <li>Typical Problems Solved by MapReduce</li>
+  <li>MapReduce Examples</li>
+  <li>A Brief History</li>
+  <li>MapReduce Execution Overview</li>
+  <li>Hadoop</li>
+</ul>
+
+<p>MapReduce</p>
+
+<ul>
+  <li>A simple and powerful interface that enables automatic parallelization and distribution of large-scale computations, combined with an implementation of this interface that achieves high performance on large clusters of commodity PCs.”</li>
+  <li>
+    <p>More simply, MapReduce is A parallel programming model and associated implementation</p>
+  </li>
+  <li>一种简单而强大的接口，可实现大规模计算的自动并行化和分布，并可在大型商品PC集群上实现高性能。</li>
+  <li>更简单地说，MapReduce是一种并行编程模型及其相关实现</li>
+</ul>
+
+<p>Some MapReduceTerminology</p>
+
+<ul>
+  <li>Job–A “full program” -an execution of a Mapper and Reducer across a data set</li>
+  <li>Task –An execution of a Mapper or a Reducer on a slice of data
+    <ul>
+      <li>a.k.a. Task-In-Progress (TIP)</li>
+    </ul>
+  </li>
+  <li>Task Attempt –A particular instance of an attempt to execute a task on a machine</li>
+</ul>
+
+<p>一些MapReduce终端（猜测翻译成专有名词更合适？）。</p>
+
+<ul>
+  <li>Job-“完整程序”-跨数据集执行映射器和还原器。</li>
+  <li>任务-在数据切片上执行映射器或还原器。</li>
+  <li>别名。正在进行的任务(TIP)。</li>
+  <li>任务尝试-尝试在计算机上执行任务的特定实例</li>
+</ul>
+
+<h3 id="为什么会产生mapreduce并行编程模型">为什么会产生MapReduce并行编程模型</h3>
+
+<ul>
+  <li>全社会数据产生的速度非常快</li>
+  <li>大数据的呈现出指数增长速度</li>
+</ul>
+
+<p>Motivation: Large Scale Data Processing</p>
+
+<ul>
+  <li>Want to process lots of data ( &gt;1TB)</li>
+  <li>Want to parallelize across hundreds/thousands of CPUs</li>
+  <li>… Want to make this easy</li>
+</ul>
+
+<p>动机：大规模数据处理。</p>
+
+<ul>
+  <li>要处理大量数据(&gt;1TB)。</li>
+  <li>希望跨数百/数千个CPU并行化。</li>
+  <li>…。想让这件事变得简单</li>
+</ul>
+
+<h3 id="mapreduce与其他并行编程模型如mpi等的主要区别是什么"><a href="https://blog.csdn.net/s_sunnyy/article/details/60956201">MapReduce与其他并行编程模型如MPI等的主要区别是什么</a></h3>
+
+<h3 id="mapreduce的主要流程是什么">MapReduce的主要流程是什么</h3>
+
+<ul>
+  <li>Process data using special map() and reduce() functions
+    <ul>
+      <li>The map() function is called on every item in the input and emits a series of intermediate key/value pairs
+        <ul>
+          <li>All values associated with a given key are grouped together</li>
+        </ul>
+      </li>
+      <li>The reduce() function is called on every unique key, and its value list, and emits a value that is added to the output</li>
+    </ul>
+  </li>
+  <li>使用特殊map()和reduce()函数处理数据。
+    <ul>
+      <li>对输入中的每个项调用map()函数，并发出一系列中间键/值对。
+        <ul>
+          <li>将与给定键关联的所有值组合在一起。</li>
+        </ul>
+      </li>
+      <li>对每个唯一的键及其值列表调用reduce()函数，并发出一个添加到输出中的值</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="map">Map</h4>
+
+<ul>
+  <li>Records from the data source (lines out of files, rows of a database, etc) are fed into the map function as key*value pairs: e.g., (filename, line)</li>
+  <li>
+    <p>map() produces one or more intermediate values along with an output key from the input</p>
+  </li>
+  <li>将来自数据源的记录(文件的行数、数据库的行数等)作为键*值对输入到map函数中：例如(文件名、行)。</li>
+  <li>map()从输入生成一个或多个中间值以及输出键</li>
+</ul>
+
+<h4 id="reduce">Reduce</h4>
+
+<ul>
+  <li>After the map phase is over, all the intermediate values for a given output key are combined together into a list</li>
+  <li>
+    <p>reduce() combines those intermediate values into one or more final values for that same output key</p>
+  </li>
+  <li>映射阶段结束后，给定输出键的所有中间值将合并到一个列表中。</li>
+  <li>Reduce()将这些中间值组合为同一输出键的一个或多个终值</li>
+</ul>
+
+<h3 id="mapreduce的简单实现如hello-world例子">MapReduce的简单实现。如Hello World例子</h3>
+
+<p>使用python实现的分词程序。</p>
+
+<h4 id="mappy">map.py</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="nb">compile</span><span class="p">(</span><span class="s">r'\w+'</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="p">:</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">' '</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ss</span><span class="p">:</span>
+        <span class="c1">#time.sleep(1)
+</span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">s</span><span class="p">))</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="c1">#print s
+</span>            <span class="k">continue</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">s</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s">""</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">"</span><span class="si">%</span><span class="s">s</span><span class="se">\t</span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h4 id="reducepy">reduce.py</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">current_word</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="p">:</span>
+    <span class="n">word</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">'</span><span class="se">\t</span><span class="s">'</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">current_word</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">current_word</span> <span class="o">=</span> <span class="n">word</span>
+
+    <span class="k">if</span> <span class="n">current_word</span> <span class="o">!=</span> <span class="n">word</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">"</span><span class="si">%</span><span class="s">s</span><span class="se">\t</span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="p">(</span><span class="n">current_word</span><span class="p">,</span> <span class="nb">sum</span><span class="p">)</span>
+        <span class="n">current_word</span> <span class="o">=</span> <span class="n">word</span>
+        <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="nb">sum</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">"</span><span class="si">%</span><span class="s">s</span><span class="se">\t</span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="p">(</span><span class="n">current_word</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">sum</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h3 id="mapreduce具有哪些容错措施">MapReduce具有哪些容错措施</h3>
+
+<ul>
+  <li>Master detects worker failures
+    <ul>
+      <li>Re-executes completed &amp; in-progress map() tasks</li>
+      <li>Re-executes in-progress reduce() tasks</li>
+    </ul>
+  </li>
+  <li>Master notices particular input key/values cause crashes in map(), and skips those values on re-execution
+    <ul>
+      <li>Effect: Can work around bugs in third-party libraries!</li>
+    </ul>
+  </li>
+  <li>Master检测工人故障。
+    <ul>
+      <li>重新执行已完成和正在进行的map()任务。</li>
+      <li>重新执行正在进行的reduce()任务。</li>
+    </ul>
+  </li>
+  <li>Master在map()中注意到特定的输入键/值导致崩溃，并在重新执行时跳过这些值。
+    <ul>
+      <li>效果：可以解决第三方库中的错误！</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="mapreduce存在哪些优化点">MapReduce存在哪些优化点</h3>
+
+<p>Optimizations</p>
+
+<ul>
+  <li>No reduce can start until map is complete
+    <ul>
+      <li>A single slow disk controller can rate-limit the whole process</li>
+    </ul>
+  </li>
+  <li>Master redundantly executes “slow-moving” map tasks; uses results of first copy to finish</li>
+  <li>“Combiner” functions can run on same machine as a mapper</li>
+  <li>
+    <p>Causes a mini-reduce phase to occur before the real reduce phase, to save bandwidth</p>
+  </li>
+  <li>在map完成之前，不能开始reduce。
+    <ul>
+      <li>单个慢速磁盘控制器可以对整个过程进行速率限制。</li>
+    </ul>
+  </li>
+  <li>Master冗余地执行“缓慢移动”的map任务；使用第一次复制的结果来完成。</li>
+  <li>“组合器”函数可以像映射器一样在同一台计算机上运行。</li>
+  <li>导致在实际减少阶段之前出现一个小减少阶段，以节省带宽</li>
+</ul>
+
+<h3 id="mapreduce可以解决的问题有哪些">MapReduce可以解决的问题有哪些</h3>
+
+<h4 id="greatly-reduces-parallel-programming-complexity">Greatly reduces parallel programming complexity</h4>
+
+<ul>
+  <li>Reduces synchronization complexity</li>
+  <li>Automatically partitions data</li>
+  <li>Provides failure transparency</li>
+  <li>
+    <p>Handles load balancing</p>
+  </li>
+  <li>降低同步复杂性。</li>
+  <li>自动划分数据。</li>
+  <li>提供故障透明度。</li>
+  <li>处理负载平衡</li>
+</ul>
+
+<h4 id="typical-problems-solved-by-mapreduce">Typical Problems Solved by MapReduce</h4>
+
+<ul>
+  <li>Read a lot of data</li>
+  <li>Map: extract something you care about from each record</li>
+  <li>Shuffle and Sort</li>
+  <li>Reduce: aggregate, summarize, filter, or transform</li>
+  <li>Write the results</li>
+  <li>
+    <p>Outline stays the same, but map and reduce change to fit the problem</p>
+  </li>
+  <li>阅读大量数据。</li>
+  <li>Map：从每条记录中提取您关心的内容。</li>
+  <li>洗牌和排序。</li>
+  <li>减少：聚合、汇总、筛选或转换。</li>
+  <li>写下结果。</li>
+  <li>大纲保持不变，但映射并减少更改以适应问题</li>
+</ul>
+
+<h2 id="第十二讲基于spark的分布式计算内容要点">第十二讲：基于Spark的分布式计算，内容要点</h2>
+
+<p><a href="https://www.cnblogs.com/qingyunzong/p/8886338.html">SPARK初识</a></p>
+
+<h3 id="spark与hadoop的区别和联系">Spark与Hadoop的区别和联系</h3>
+
+<p>它扩展了广泛使用的MapReduce计算模型。高效的支撑更多计算模式，包括交互式查询和流处理。spark的一个主要特点是能够在内存中进行计算，及时依赖磁盘进行复杂的运算，Spark依然比MapReduce更加高效。</p>
+
+<h3 id="传统mapreduce的主要缺点是什么">传统MapReduce的主要缺点是什么</h3>
+
+<p>MapReduce is great at one-pass computation, but inefficient for multi-pass algorithms. No efficient primitives for data sharing</p>
+
+<ul>
+  <li>State between steps goes to distributed file system</li>
+  <li>Slow due to replication &amp; disk storage</li>
+</ul>
+
+<p>MapReduce在单程计算方面很好，但对于多路算法效率较低。没有有效的数据共享原语。</p>
+
+<ul>
+  <li>步骤之间的状态转到分布式文件系统。</li>
+  <li>由于复制和磁盘存储而速度较慢</li>
+</ul>
+
+<h3 id="spark中的rdd如何理解">Spark中的RDD如何理解</h3>
+
+<ol>
+  <li>RDD是Spark的核心数据模型，但是个抽象类，全称为Resillient Distributed Dataset，即弹性分布式数据集。</li>
+  <li>RDD在抽象上来说是一种元素集合，包含了数据。它是被分区的，分为多个分区，每个分区分布在集群中的不同节点上，从而让RDD中的数据可以被并行操作。（分布式数据集）</li>
+  <li>RDD通常通过Hadoop上的文件，即HDFS文件或者Hive表，来进行创建；有时也可以通过应用程序中的集合来创建。</li>
+  <li>RDD最重要的特性就是，提供了容错性，可以自动从节点失败中恢复过来。即如果某个节点上的RDDpartition，因为节点故障，导致数据丢了，那么RDD会自动通过自己的数据来源重新计算该partition。这一切对使用者是透明的。</li>
+  <li>RDD的数据默认情况下存放在内存中的，但是在内存资源不足时，Spark会自动将RDD数据写入磁盘。（弹性）</li>
+</ol>
+
+<h3 id="spark样例程序"><a href="http://spark.apache.org/examples.html">Spark样例程序</a></h3>
+
+<p>In this example, we use a few transformations to build a dataset of (String, Int) pairs called counts and then save it to a file.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">text_file</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">textFile</span><span class="p">(</span><span class="s">"hdfs://..."</span><span class="p">)</span>
+<span class="n">counts</span> <span class="o">=</span> <span class="n">text_file</span><span class="o">.</span><span class="n">flatMap</span><span class="p">(</span><span class="k">lambda</span> <span class="n">line</span><span class="p">:</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">" "</span><span class="p">))</span> \
+             <span class="o">.</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">word</span><span class="p">:</span> <span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> \
+             <span class="o">.</span><span class="n">reduceByKey</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">counts</span><span class="o">.</span><span class="n">saveAsTextFile</span><span class="p">(</span><span class="s">"hdfs://..."</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="第十三讲离散搜索与负载均衡">第十三讲：离散搜索与负载均衡</h2>
+
+<h3 id="1-深度优先搜索的主要流程">1. 深度优先搜索的主要流程</h3>
+
+<blockquote>
+  <p>从图中某顶点v出发：
+（1）访问顶点v；
+（2）依次从v的未被访问的邻接点出发，对图进行深度优先遍历；直至图中和v有路径相通的顶点都被访问；
+（3）若此时图中尚有顶点未被访问，则从一个未被访问的顶点出发，重新进行深度优先遍历，直到图中所有顶点均被访问过为止。(百度)</p>
+</blockquote>
+
+<ul>
+  <li>开始遍历当前节点的子树</li>
+  <li>如果一个节点的所有子树都被遍历过, 则回溯</li>
+</ul>
+
+<p>时间复杂度$\theta(b^k)$, 空间复杂度$\theta(k)$, b为宽度, k为深度</p>
+
+<h3 id="2-深度优先搜索的复杂度">2. 深度优先搜索的复杂度</h3>
+
+<blockquote>
+  <p>假设状态空间树中的平均分支因子（每个节点的子节点数（平均值））为b，搜索一棵深度为k的树需要检索：<img src="./7.png" alt="7" />个结点。空间复杂度为Θ(k)</p>
+</blockquote>
+
+<h3 id="3-并行深度优先搜索的主要设计思想">3. 并行深度优先搜索的主要设计思想</h3>
+
+<h4 id="每个处理器处理一个子树">每个处理器处理一个子树</h4>
+
+<blockquote>
+  <ol>
+    <li>Send nodes near the bottom of the stack（发送堆栈底部附近的结点），适用于均匀搜索空间；分配成本低。</li>
+    <li>Send nodes near the cutoff depth（发送截止深度附近的结点），使用强启发式（尝试分配搜索空间中可能包含解决方案的部分）可以获得更好的性能。</li>
+    <li>Send half the nodes between the bottom and the cutoff depth（发送底部和截止深度之间的一半结点），适用于均匀不规则的搜索空间。</li>
+  </ol>
+</blockquote>
+
+<h3 id="4-动态负载均衡的三种方法以及每种方法的额外开销复杂度">4. 动态负载均衡的三种方法，以及每种方法的额外开销复杂度</h3>
+
+<h4 id="均衡负载">均衡负载</h4>
+
+<ol>
+  <li>Asynchronous round robin（ARR），异步循环，每个进程维护一个计数器并以循环方式发出请求。</li>
+  <li>Global round robin（GRR），全局循环，系统维护一个全局计数器，并以循环方式在全局发出请求。</li>
+  <li>Random polling（RP），随机轮询,请求随机选择的工作流程。</li>
+</ol>
+
+<h4 id="额外开销复杂度">额外开销复杂度</h4>
+
+<blockquote>
+  <p>我们将v（p）定义为每个处理器在收到至少一个工作请求之后的工作请求总数；假设任意点的最大工作量是W；则工作请求总数为O(V(p)logW)。</p>
+</blockquote>
+
+<blockquote>
+  <ol>
+    <li>ARR：V(p) = O(p²)在最坏情况下</li>
+    <li>GRR：V(p) = p</li>
+    <li>RP：
+      <blockquote>
+        <p>最坏情况下V(p)是无穷的。
+平均状况下V(p) = O(plogp)</p>
+      </blockquote>
+    </li>
+  </ol>
+</blockquote>
+
+<blockquote>
+  <ol>
+    <li>ARR：W = O(p²logp)</li>
+    <li>GRR：最坏情况下W = O(p²logp)</li>
+    <li>RP：W = O(plog²p)</li>
+  </ol>
+</blockquote>
+
+<blockquote>
+  <ol>
+    <li>ARR性能较差，因为它会发出大量的工作请求。</li>
+    <li>GRR调度由于计数器上的争用而性能较差，尽管它发出的请求数最少。</li>
+    <li>RP是一个理想的折衷办法。</li>
+  </ol>
+</blockquote>
+
+<h3 id="5-最优搜索的处理过程">5. 最优搜索的处理过程</h3>
+
+<h3 id="6-并行最优搜索的主要思想的实现方式">6. 并行最优搜索的主要思想的实现方式</h3>
+
+<h3 id="7-什么是加速比异常主要份哪几类">7. 什么是加速比异常，主要份哪几类</h3>
+
+<blockquote>
+  <ol>
+    <li>由于处理器探索的搜索空间是在运行时动态确定的，实际工作可能会有很大的差异。</li>
+    <li>使用P处理器产生大于P的加速的执行被称为加速异常。使用P处理器的小于P的加速被称为减速异常。</li>
+    <li>加速异常也表现在最佳优先搜索算法中。</li>
+    <li>如果启发式函数是好的，那么并行的best-first搜索中所做的工作通常比串行搜索中所做的工作要多。</li>
+  </ol>
+</blockquote>
+
+<h3 id="性能优化综合">性能优化综合</h3>
+
+<h3 id="负载均衡">负载均衡</h3>
+
+<blockquote>
+  <ol>
+    <li>负载均衡主要有哪些方式？分别有什么特点？</li>
+    <li>静态、动态负载均衡适用的场景是什么？</li>
+    <li>如何选择任务的粒度？</li>
+  </ol>
+</blockquote>
+
+<p>理想情况下, 所有处理器在程序运行时同时计算, 并同时结束他们被分派的任务.</p>
+
+<p>问题: 实现更好的负载均衡</p>
+
+<ul>
+  <li>需要所有处理器充分执行</li>
+  <li>需要低开销的负载均衡管理实现</li>
+  <li>减小调度开销</li>
+  <li>减小同步开销</li>
+</ul>
+
+<p>静态分派与动态分派</p>
+
+<ul>
+  <li>他们是共存的选择</li>
+  <li>使用前置的负载均衡知识取减少负载不均衡和任务管理同步开销</li>
+</ul>
+
+<h4 id="方式">方式</h4>
+
+<h5 id="静态分派static-assignment">静态分派(Static assignment)</h5>
+
+<h6 id="静态负载均衡">静态负载均衡</h6>
+
+<p>在每个线程运行前, 每个线程被分派的任务规模已经被确定. 即预先分派每个线程执行的任务. 这可以在编译期间分派, 也可以在运行期间依据运行参数分派(比如数据大小, 线程数量).</p>
+
+<h6 id="特点-1">特点</h6>
+
+<ul>
+  <li>优点
+    <ul>
+      <li>简单</li>
+      <li>零运行时开销</li>
+    </ul>
+  </li>
+  <li>缺点</li>
+</ul>
+
+<h6 id="适用场景">适用场景</h6>
+
+<p>任务的开销(执行时间)和任务的数量是可预测的</p>
+
+<h5 id="半静态分派semi-static-assignment">半静态分派(“Semi-static” assignment)</h5>
+
+<p>周期性地进行预测并再动态分派, 在相邻再分配的时间间隔内, 为静态分派</p>
+
+<h6 id="适用场景-1">适用场景</h6>
+
+<p>任务的开销在较近的未来是可预测的.</p>
+
+<h5 id="动态分派dynamic-assignment">动态分派(Dynamic assignment)</h5>
+
+<p>程序在运行时动态地分派任务.</p>
+
+<h6 id="适用场景-2">适用场景</h6>
+
+<p>任务的开销和数量是不可预测的</p>
+
+<h4 id="动态负载均衡的优化">动态负载均衡的优化</h4>
+
+<h5 id="任务的粒度">任务的粒度</h5>
+
+<p>考虑用工作队列的方式实现动态分派. 一个共享的工作队列, 里面有一些待完成的任务.</p>
+
+<p><img src="assets.并行编程之性能优化/1561644969249.png" alt="1561644969249" /></p>
+
+<p>worker thread可以执行两种操作</p>
+
+<ul>
+  <li>从队列中弹出一个任务</li>
+  <li>从队列中推入新的任务</li>
+</ul>
+
+<p>我们来分析一下任务的粒度对这种动态负载均衡方式的影响</p>
+
+<h6 id="粒度小">粒度小</h6>
+
+<ul>
+  <li>大量的小任务, 使得动态负载均衡效果好</li>
+  <li>高分派开销</li>
+</ul>
+
+<h6 id="粒度大">粒度大</h6>
+
+<ul>
+  <li>负载均衡效果差</li>
+  <li>分派次数少, 开销小</li>
+</ul>
+
+<h6 id="如何选择任务的粒度">如何选择任务的粒度</h6>
+
+<ul>
+  <li>大量的小粒度任务保证了良好的动态负载均衡效果</li>
+  <li>大粒度任务减少了分派管理的开销</li>
+</ul>
+
+<p>理想的粒度还取决于许多因素.</p>
+
+<h5 id="长尾现象long-pole">长尾现象(long pole)</h5>
+
+<p>考虑下列任务</p>
+
+<p><img src="assets.并行编程之性能优化/1561645738150.png" alt="1561645738150" /></p>
+
+<p>如果简单地进行分派, 可能造成负责不均衡</p>
+
+<p><img src="assets.并行编程之性能优化/1561645773909.png" alt="1561645773909" /></p>
+
+<p>解决的办法</p>
+
+<ol>
+  <li>将任务划分为大量的小人物
+    <ul>
+      <li>可能将大任务切分为小任务, 使得负载更均衡</li>
+      <li>增加同步开销</li>
+      <li>可能没效果(如果长任务是连续的)</li>
+    </ul>
+  </li>
+  <li>先分派大任务执行
+    <ul>
+      <li>执行大任务的线程相比其他线程可能执行的任务的数量更少.</li>
+      <li>需要能预测任务的开销</li>
+    </ul>
+  </li>
+</ol>
+
+<h5 id="使用分布式队列减少同步开销">使用分布式队列减少同步开销</h5>
+
+<p>这样可以避免所有workers需要进行同时同步.</p>
+
+<p><img src="assets.并行编程之性能优化/1561680402403.png" alt="1561680402403" /></p>
+
+<p>当worker线程队列为空时, 会从别的队列中偷(steal)任务</p>
+
+<h6 id="特点-2">特点</h6>
+
+<ul>
+  <li>仅当steal的时候有通信和同步的开销</li>
+  <li>增加了局部性, 每个线程基本只运行本地创建的任务</li>
+</ul>
+
+<h6 id="问题">问题</h6>
+
+<ul>
+  <li>Who to steal from?</li>
+  <li>How much to steal?</li>
+  <li>How to detect program termination?</li>
+  <li>Ensuring local queue access is fast</li>
+</ul>
+
+<h5 id="任务依赖">任务依赖</h5>
+
+<p><img src="assets.并行编程之性能优化/1561680741080.png" alt="1561680741080" /></p>
+
+<ul>
+  <li>队列中的任务仅当所有的依赖任务都完成时才能被弹出队列, 分派给worker</li>
+</ul>
+
+<h3 id="减少通信开销">减少通信开销</h3>
+
+<blockquote>
+  <ol>
+    <li>Latency 和 Throughput 的定义</li>
+    <li>通信时间的计算方法</li>
+    <li>并行程序中通信产生的原因</li>
+    <li>什么是天然通信？什么是人为通信？举例</li>
+    <li>什么是运算密度？</li>
+    <li>人为通信包括哪些？</li>
+    <li>减少通信代价的方式有哪些？</li>
+  </ol>
+</blockquote>
+
+<p>减少通信代价方法</p>
+
+<blockquote>
+  <ul>
+    <li>Reduce overhead of communication to sender/receiver
+      <ul>
+        <li>Send fewer messages, make messages larger (amortize overhead)</li>
+        <li>Coalesce (合并)many small messages into large ones</li>
+      </ul>
+    </li>
+    <li>Reduce delay
+      <ul>
+        <li>Application writer: restructure code to exploit locality</li>
+        <li>HW implementor: improve communication architecture</li>
+      </ul>
+    </li>
+    <li>Reduce contention
+      <ul>
+        <li>Replicate contended resources (e.g., local copies, fine-grained locks)</li>
+        <li>Stagger access to contended resources</li>
+      </ul>
+    </li>
+    <li>Increase communication/computation overlap
+      <ul>
+        <li>Application writer: use asynchronous communication (e.g., async messages)</li>
+        <li>HW implementor: pipelining, multi-threading, pre-fetching, out-of-order exec</li>
+        <li>Requires additional concurrency in application (more concurrency than number of execution units)</li>
+      </ul>
+    </li>
+  </ul>
+</blockquote>
+
+<p>优化通信</p>
+
+<blockquote>
+  <ul>
+    <li>Inherent vs. artifactual communication
+      <ul>
+        <li>Inherent communication is fundamental given how the problem is
+decomposed and how work is assigned</li>
+        <li>Artifactual communication depends on machine implementation details
+(often as important to performance as inherent communication)</li>
+      </ul>
+    </li>
+    <li>Improving program performance
+      <ul>
+        <li>Identify and exploit locality: communicate less (increase arithmetic intensity)</li>
+        <li>Reduce overhead (fewer, large messages)</li>
+        <li>Reduce contention</li>
+        <li>Maximize overlap of communication and processing
+(hide latency so as to not incur cost)</li>
+      </ul>
+    </li>
+  </ul>
+</blockquote>
+
+<h4 id="阻塞型sendrecieve">阻塞型send/recieve</h4>
+
+<p><img src="assets.并行编程之性能优化/1561681923093.png" alt="1561681923093" /></p>
+
+<ul>
+  <li>send: 在确保接收方接收到数据才返回</li>
+  <li>recv: 将数据拷贝到本地缓存才返回</li>
+</ul>
+
+<p>阻塞型send/recv如何避免死锁</p>
+
+<p><img src="assets.并行编程之性能优化/1561681996839.png" alt="1561681996839" /></p>
+
+<h4 id="非阻塞型sendrecv">非阻塞型send/recv</h4>
+
+<p><img src="assets.并行编程之性能优化/1561682240146.png" alt="1561682240146" /></p>
+
+<ul>
+  <li>send: 立马返回, 需要保证发送缓冲区之后一段时间不改变</li>
+  <li>recv: 立马返回, 需要使用checksend(), checkrecv()检查状态</li>
+</ul>
+
+<h4 id="latency与throughput">Latency与Throughput</h4>
+
+<p>传输延迟(Latency): 一个操作完成需要的时间.</p>
+
+<blockquote>
+  <p><img src="assets.并行编程之性能优化/1561682739048.png" alt="1561682739048" /></p>
+</blockquote>
+
+<p>吞吐量(Throughput/Bandwidth): 操作执行时的速度</p>
+
+<blockquote>
+  <p><img src="assets.并行编程之性能优化/1561682752366.png" alt="1561682752366" /></p>
+</blockquote>
+
+<p>增加吞吐量的方法</p>
+
+<ol>
+  <li>
+    <p>加快传输速度</p>
+
+    <blockquote>
+      <p><img src="assets.并行编程之性能优化/1561682810347.png" alt="1561682810347" /></p>
+    </blockquote>
+  </li>
+  <li>
+    <p>加大带宽</p>
+
+    <blockquote>
+      <p><img src="assets.并行编程之性能优化/1561682822715.png" alt="1561682822715" /></p>
+    </blockquote>
+  </li>
+</ol>
+
+<h4 id="通信与pipline">通信与pipline</h4>
+
+<p>上一节的讨论让我们知道, 虽然不可用减少latency, 但可以增加pipline程度来提高throughput.</p>
+
+<p>对于无pipline的通信而言, 开销如下
+<script type="math/tex">T(n)=T_0+\frac{n}{B}</script></p>
+
+<ul>
+  <li>$T_0$: latency</li>
+  <li>n: 传输字节数</li>
+  <li>$B$: bandwidth</li>
+</ul>
+
+<p>对于以下情景考虑pipline方式</p>
+
+<blockquote>
+  <p><img src="assets.并行编程之性能优化/1561683205266.png" alt="1561683205266" /></p>
+
+  <p><img src="assets.并行编程之性能优化/1561683218826.png" alt="1561683218826" /></p>
+</blockquote>
+
+<h4 id="通信开销">通信开销</h4>
+
+<p>通信时间=本地开销+传输开销+传播开销+异地开销</p>
+
+<p>通信开销=通信时间-overlap部分</p>
+
+<h4 id="运算密度arithmetic-intensity">运算密度(Arithmetic intensity)</h4>
+
+<p><strong>运算密度</strong>: 运算数量/通信数量</p>
+
+<h4 id="通信产生的原因">通信产生的原因</h4>
+
+<h5 id="天然通信inherent-communication">天然通信(Inherent communication)</h5>
+
+<p>并行算法中必须要的通信, 是算法的组成部分</p>
+
+<blockquote>
+  <p>information that fundamentally must be moved between processors to carry out the algorithm given the specified assignment (assumes unlimited capacity caches, minimum granularity transfers, etc.)</p>
+</blockquote>
+
+<p>如何减少? 通过改进算法</p>
+
+<blockquote>
+  <p><img src="assets.并行编程之性能优化/1561684086835.png" alt="1561684086835" /></p>
+
+  <p><img src="assets.并行编程之性能优化/1561684065267.png" alt="1561684065267" /></p>
+
+  <p><img src="assets.并行编程之性能优化/1561684100528.png" alt="1561684100528" /></p>
+</blockquote>
+
+<h5 id="人为通信artifactual-communication">人为通信(artifactual communication)</h5>
+
+<blockquote>
+  <p>all other communication (artifactual communication results from practical details of system implementation)</p>
+</blockquote>
+
+<ul>
+  <li>System might have a minimum granularity of transfer (result: system must communicate more data than what is needed)</li>
+  <li>
+    <p>System might have rules of operation that result in unnecessary communication</p>
+  </li>
+  <li>受通信粒度影响
+    <ul>
+      <li>Cache Size
+  <img src="assets.并行编程之性能优化/1561686179624.png" alt="1561686179624" /></li>
+      <li>任务划分
+  <img src="assets.并行编程之性能优化/1561686192011.png" alt="1561686192011" /></li>
+      <li>改变布局
+  <img src="assets.并行编程之性能优化/1561686242834.png" alt="1561686242834" /></li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="增强局部性">增强局部性</h3>
+
+<blockquote>
+  <ol>
+    <li>Cache 冲突包含哪些类型？</li>
+    <li>提高Cache局部性的方式有哪些？</li>
+  </ol>
+</blockquote>
+
+<h4 id="cache冲突类型">Cache冲突类型</h4>
+
+<ul>
+  <li><strong>Cold miss</strong>: First time data touched. Unavoidable in a sequential program</li>
+  <li><strong>Capacity miss</strong>: Working set is larger than cache. Can be avoided/reduced by increasing cache size.</li>
+  <li><strong>Conflict miss</strong>: Miss induced by cache management policy.Can be avoided/reduced by changing cache associativity, or data access pattern in application.</li>
+  <li><strong>Communication miss</strong> (new): Due to inherent or artifactual communication in parallel system</li>
+</ul>
+
+<p><img src="assets.并行编程之性能优化/1561685417531.png" alt="1561685417531" /></p>
+
+<h4 id="减少cache-miss">减少Cache Miss</h4>
+
+<h5 id="改变访问顺序">改变访问顺序</h5>
+
+<p>考虑row-major traversal的访问方法</p>
+
+<p><img src="assets.并行编程之性能优化/1561685513851.png" alt="1561685513851" /></p>
+
+<p>其中蓝色为在Cache中的部分, 所以我们需要change grid traversal order</p>
+
+<p><img src="assets.并行编程之性能优化/1561685557966.png" alt="1561685557966" /></p>
+
+<h5 id="融合循环">融合循环</h5>
+
+<p><img src="assets.并行编程之性能优化/1561685619379.png" alt="1561685619379" /></p>
+
+<h5 id="本地处理器共享数据">本地处理器共享数据</h5>
+
+<ul>
+  <li>Exploit sharing: co-locate tasks that operate on the same data
+    <ul>
+      <li>Schedule threads working on the same data structure at the same time on the same processor</li>
+      <li>Reduces inherent communication</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="减少数据竞争">减少数据竞争</h3>
+
+<blockquote>
+  <ol>
+    <li>减少数据竞争的方式有哪些？</li>
+  </ol>
+</blockquote>
+
+<p>Contention occurs when many requests to a resource are made within a small window of time</p>
+
+<h4 id="解决方法">解决方法</h4>
+
+<h5 id="parallelize-over-cells">parallelize over cells</h5>
+
+<p>One possible answer is to decompose work by cells: for each cell, independently compute particles within it (eliminates contention because no synchronization is required)</p>
+
+<p><img src="assets.并行编程之性能优化/1561686552619.png" alt="1561686552619" /></p>
+
+<h5 id="parallelize-over-particles">parallelize over particles</h5>
+
+<p>assign one particle to each CUDA thread. Thread computes cell containing particle, then atomically updates list.</p>
+
+<p><img src="assets.并行编程之性能优化/1561686580689.png" alt="1561686580689" /></p>
+
+<h5 id="use-finer-granularity-locks">use finer-granularity locks</h5>
+
+<p>Alleviate contention for single global lock by using per-cell locks</p>
+
+<p><img src="assets.并行编程之性能优化/1561686602014.png" alt="1561686602014" /></p>
+
+<h5 id="compute-partial-results--merge">compute partial results + merge</h5>
+
+<ul>
+  <li>Example: create M thread blocks (at least as many thread blocks as SMX cores)</li>
+  <li>Each block assigned N/M particles</li>
+  <li>All threads in thread block update same grid</li>
+  <li>Enables faster synchronization: contention reduced by factor of M and also cost
+of synchronization is lower because it is performed on block-local variables (in
+CUDA shared memory)</li>
+  <li>Requires extra work: merging the M grids at the end of the computation</li>
+  <li>Requires extra memory footprint: Store M grids of lists, rather than 1</li>
+</ul>
+
+<h2 id="第十四讲性能优化之一内容要点">第十四讲：性能优化之一，内容要点</h2>
+
+<h3 id="1-负载均衡主要有哪些方式分别有什么他特点">1. 负载均衡主要有哪些方式？分别有什么他特点？</h3>
+<ul>
+  <li>静态分配：
+    <blockquote>
+      <ol>
+        <li>预先决定分配的工作线程，不一定在编译时确定(分配算法可能取决于运行时参数，如输入数据大小、线程数等)。（分配包括按块和按行）<br />
+Assignment of work to threads is pre-determined,Not necessarily determined at compile-time (assignment algorithm may depend on runtime parameters such as input data size, number of threads, etc.)</li>
+        <li>简单，本质上是零运行时开销<br />
+ simple, essentially zero runtime overhead (in this example: extra work to implement assignment is a little bit of indexing math)</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>“半静态“分配：（注：“半静态”分配属于静态分配的一种）
+    <blockquote>
+      <ol>
+        <li>工作成本短时间可以预测<br />
+ Cost of work is predictable for near-term future</li>
+        <li>应用程序定期对自身进行配置并重新调整分配<br />
+Application periodically profiles itself and re-adjusts assignment</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>动态分配：
+    <blockquote>
+      <ol>
+        <li>程序在运行时动态的确定分配，以确保负载分布良好（任意的执行时间和执行点数是不可预测的）<br />
+Program determines assignment dynamically at runtime to ensure a well distributed load. (The execution time of tasks, or the total number of tasks, is unpredictable.)</li>
+        <li>使用工作队列动态分配<br />
+Dynamic assignment using a work queue</li>
+      </ol>
+    </blockquote>
+  </li>
+</ul>
+
+<h3 id="2-静态动态负载均衡适用的场景是什么">2. 静态、动态负载均衡适用的场景是什么？</h3>
+<ul>
+  <li>静态
+    <blockquote>
+      <ol>
+        <li>当工作的成本(执行时间)和工作量是可预测的(这样程序员就可以提前完成一项很好的任务)<br />
+When the cost (execution time) of work and the amount of work is predictable</li>
+        <li>当工作是可预测的，但不是所有的工作都有相同的成本<br />
+When work is predictable, but not all jobs have same cost (see example below)</li>
+        <li>当关于执行时间的统计数据是已知的(例如，平均成本相同)<br />
+When statistics about execution time are known (e.g., same cost on average)</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>动态
+    <blockquote>
+      <p>不知道工作的成本与资源</p>
+      <h3 id="3-如何选择任务的粒度">3. 如何选择任务的粒度？</h3>
+      <p>有用比处理器更多的任务(很多小任务可以通过动态分配好工作负载平衡)<br />
+Useful to have many more tasks* than processors (many small tasks enables good workload balance via dynamic assignment)</p>
+      <ol>
+        <li>激发小粒度的任务：<br />
+Motivates small granularity tasks <br />
+但希望尽可能少的任务的开销最小化管理任务<br />
+But want as few tasks as possible to minimize overhead of managing the assignment</li>
+        <li>激发大粒度任务<br />
+ Motivates large granularity tasks<br />
+理想的粒度取决于许多因素(在这门课中共同的主题:必须知道你的工作量,和你的机器)<br />
+ Ideal granularity depends on many factors (Common theme in this course: must know your workload, and your machine)</li>
+      </ol>
+    </blockquote>
+  </li>
+</ul>
+
+<h3 id="4-cilk_spawn的原理是什么">4. Cilk_spawn的原理是什么？</h3>
+<blockquote>
+  <ol>
+    <li>cilk_spawn foo (args);语义:调用foo，但与标准函数调用不同，调用者可以继续异步执行foo。</li>
+    <li>注意，cilk_spawn抽象没有指定如何或何时计划执行派生调用。只是它们可以与调用者并发运行(以及由调用者生成的所有其他调用)</li>
+  </ol>
+</blockquote>
+
+<blockquote>
+  <ol>
+    <li>cilk_spawn foo(args); Semantics: invoke foo, but unlike standard function call, caller may continue executing asynchronously with execution of foo.</li>
+    <li>notice that the cilk_spawn abstraction does not specify how or when spawned calls are scheduled to execute. only that they may be run concurrently with caller(and with all other calls spawned by caller)
+      <h3 id="5-cilk_sync的原理是什么">5. Cilk_sync的原理是什么？</h3>
+    </li>
+    <li>语义:当当前函数生成的所有调用都已完成时返回。(与派生调用“同步”)
+注意:在包含cilk_spawn的每个函数的末尾都有一个隐式cilk_sync(含义:当一个Cilk函数返回时，与该函数相关的所有工作都完成了)</li>
+    <li>cilk_sync确实是调度上的一个约束。所有派生调用必须在cilk_sync返回之前完成。</li>
+  </ol>
+</blockquote>
+
+<blockquote>
+  <ol>
+    <li>Semantics: returns when all calls spawned by current function have completed. (“sync up” with the spawned calls)
+Note: there is an implicit cilk_sync at the end of every function that contains a cilk_spawn (implication: when a Cilk function returns, all work associated with that function is complete)</li>
+    <li>cilk_sync does serve as a constraint on scheduling. All spawned calls must complete before cilk_sync returns.
+      <h3 id="6-cilk_spawn的调度方式有哪些各自有什么特点">6. Cilk_spawn的调度方式有哪些？各自有什么特点？</h3>
+      <ul>
+        <li>先运行延续</li>
+      </ul>
+    </li>
+    <li>在执行任何迭代之前，调用方线程派生都可以用于所有迭代</li>
+    <li>如果没有窃取，执行顺序与删除cilk_spawn的程序非常不同。</li>
+  </ol>
+</blockquote>
+
+<ul>
+  <li>run continuation first(“child stealing”)
+    <blockquote>
+      <ol>
+        <li>caller thread spawns work for all iterations before executing any of it</li>
+        <li>If no stealing,execution order is very different than that of program with cilk_spawn removed.</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>孩子优先
+    <blockquote>
+      <ol>
+        <li>调用方线程只创建一个要窃取的项(表示所有剩余迭代的延续)</li>
+        <li>如果没有发生串列，线程将从工作队列中不断弹出continuation，并为新的continuation(更新值为i)排队</li>
+        <li>执行顺序与删除派生的程序相同。</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>run child first(“continuation stealing”)
+    <blockquote>
+      <ol>
+        <li>caller thread only creates one item to steal(continuation that represents all remaining iterations)</li>
+        <li>If no straling occurs, thread continually pops continuation from work queue, enqueues new continuation(with updated value of i)</li>
+        <li>Order of execution is the same as for program with spawn removed.</li>
+      </ol>
+    </blockquote>
+  </li>
+</ul>
+
+<h3 id="7-cilk_spawn中任务在不同线程之间steal的过程">7. Cilk_spawn中任务在不同线程之间steal的过程。</h3>
+<ul>
+  <li>人均出列
+    <ul>
+      <li>工作队列实现为dequeue(双端队列)
+        <blockquote>
+          <ol>
+            <li>本地线程从“尾部”(底部)推送/弹出</li>
+            <li>远程线程从“头部”(顶部)窃取</li>
+            <li>存在高效的无锁dequeue实现</li>
+          </ol>
+        </blockquote>
+      </li>
+    </ul>
+  </li>
+  <li>dequeue per worker
+    <ul>
+      <li>Work queue implemented as a dequeue (double ended queue)
+        <blockquote>
+          <ol>
+            <li>Local thread pushes/pops from the “tail” (bottom)</li>
+            <li>Remote threads steal from “head” (top)</li>
+            <li>Efficient lock-free dequeue implementations exist</li>
+          </ol>
+        </blockquote>
+      </li>
+    </ul>
+  </li>
+  <li>随机选择受害人
+    <ul>
+      <li>空闲线程随机选择一个线程尝试从队列顶部窃取</li>
+      <li>从dequeue头中窃取……
+        <ul>
+          <li>减少与本地线程的争用:本地线程访问dequeue的部分与窃取线程不同!</li>
+          <li>偷工作开始调用树:这是一个“大”的作品,所以执行偷的成本摊销(分摊)再未来计算</li>
+          <li>最大化局部性:(结合run-child-first政策)本地线程作用于本地调用树的一部分</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>random choice of victim
+    <blockquote>
+      <ol>
+        <li>Idle threads randomly choose a thread to attempt to steal from</li>
+        <li>Stealing from top of dequeue…
+          <blockquote>
+            <ol>
+              <li>Reduces contention with local thread: local thread is not accessing same part of dequeue that stealing threads do! \</li>
+              <li>Steals work at beginning of call tree: this is a “larger” piece of work, so the cost of performing a steal is amortized (分摊) over longer future computation</li>
+              <li>Maximizes locality: (in conjunction with run-child-first policy) local thread works on local part of call tree
+                <h3 id="8-cilk_sync的几种实现方式">8. Cilk_sync的几种实现方式。</h3>
+              </li>
+            </ol>
+          </blockquote>
+        </li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>不偷
+    <blockquote>
+      <p>如果线程没有窃取任何工作，那么在同步点上就不做任何事</p>
+    </blockquote>
+  </li>
+  <li>no stealing
+    <blockquote>
+      <p>If no work has been stolen by threads, then there’s nothing to do at the sync point</p>
+    </blockquote>
+  </li>
+  <li>stalling join (具体请参考ppt14 50-56页，看图比较形象)
+    <blockquote>
+      <ul>
+        <li>启动fork的线程必须预先形成同步</li>
+        <li>因此，它等待所有生成的工作完成。在本例中，线程0是引发fork的线程。</li>
+      </ul>
+    </blockquote>
+  </li>
+  <li>stalling join
+    <blockquote>
+      <ul>
+        <li>Thread that initiates the fork must preform the sync</li>
+        <li>Therefore it waits for all spawned work to be complete. In the case, thread 0 is the thread initating the fork.</li>
+      </ul>
+    </blockquote>
+  </li>
+  <li>greedy policy(具体参考57-62页)</li>
+</ul>
+
+<h3 id="click框架简介">Click框架简介</h3>
+
+<h4 id="reference">Reference</h4>
+
+<blockquote>
+  <ol>
+    <li>Cilk_spawn的原理是什么？</li>
+    <li>Cilk_sync的原理是什么？</li>
+    <li>Cilk_spawn的调度方式有哪些？各自有什么特点？</li>
+    <li>Cilk_spawn的任务在不同线程之间steal的过程</li>
+    <li>Cilk_sync的几种实现方式</li>
+  </ol>
+</blockquote>
+
+<h4 id="scheduling-fork-join-parallelism">Scheduling fork-join parallelism</h4>
+
+<p>常见的并行编程范式有两种</p>
+
+<ul>
+  <li>数据并行(Data parallelism), 比如openmp的parallel for.</li>
+  <li>对每个执行单元创建新线程, 比如pthread</li>
+</ul>
+
+<p><strong>Fork-join pattern</strong>: Natural way to express independent work in divide-and-conquer algorithms</p>
+
+<p>Cilk框架的几个重要函数</p>
+
+<ul>
+  <li>
+    <p><code class="highlighter-rouge">cilk_spawn foo(args)</code>: “fork” (create new logical thread of control)</p>
+
+    <p>Semantics: invoke foo, but unlike standard function call, caller may continue
+  <strong>executing asynchronously</strong> with execution of foo.</p>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">cilk_sync</code>: “join”
+  Semantics: <strong>returns when all calls spawned by current function have completed.</strong>
+  Note: there is an <strong>implicit cilk_sync at the end of every function</strong> that contains</p>
+  </li>
+</ul>
+
+<p>注意</p>
+
+<ul>
+  <li>上述的函数只是一种抽象, <code class="highlighter-rouge">cilk_spawn</code>只保证callee可能与caller和其他callees一起执行</li>
+  <li><code class="highlighter-rouge">cilk_sync</code>起到调度上的约束作用</li>
+</ul>
+
+<p>例子</p>
+
+<p><img src="assets.并行之Cilk框架简介/1561876200052.png" alt="1561876200052" /></p>
+
+<p><img src="assets.并行之Cilk框架简介/1561876231140.png" alt="1561876231140" /></p>
+
+<p><img src="assets.并行之Cilk框架简介/1561876237049.png" alt="1561876237049" /></p>
+
+<p><img src="assets.并行之Cilk框架简介/1561876244416.png" alt="1561876244416" /></p>
+
+<p><img src="assets.并行之Cilk框架简介/1561876251458.png" alt="1561876251458" /></p>
+
+<p><img src="assets.并行之Cilk框架简介/1561876256252.png" alt="1561876256252" /></p>
+
+<p><img src="assets.并行之Cilk框架简介/1561877309802.png" alt="1561877309802" /></p>
+
+<p>并行化快速排序</p>
+
+<p><img src="assets.并行之Cilk框架简介/1561876444352.png" alt="1561876444352" /></p>
+
+<h4 id="如何编写fork-join程序">如何编写fork-join程序</h4>
+
+<ul>
+  <li>Main idea: expose independent work (potential parallelism) to the system using cilk_spawn</li>
+  <li>Recall parallel programming rules of thumb
+    <ul>
+      <li>Want at least as much work as parallel execution capability (e.g., program
+  should probably spawn at least as much work as there are cores)</li>
+      <li>Want more independent work than execution capability to allow for good
+  workload balance of all the work onto the cores</li>
+      <li>“parallel slack” = ratio of independent work to machine’s parallel execution
+  capability (in practice: ~8 is a good ratio)</li>
+      <li>But not too much independent work so that granularity of work is too small
+  (too much slack incurs overhead of managing fine-grained work)</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="cilk的fork-join的调度">Cilk的fork-join的调度</h4>
+
+<p>The Cilk Plus runtime maintains pool of worker threads</p>
+
+<ul>
+  <li>all threads created at application launch</li>
+  <li>as many worker threads as execution contexts in the machine</li>
+</ul>
+
+<p><code class="highlighter-rouge">cilk_spawn</code>将程序划分为两部分</p>
+
+<p><img src="assets.并行之Cilk框架简介/1561876644011.png" alt="1561876644011" /></p>
+
+<ul>
+  <li>spawned child</li>
+  <li>continuation(rest of calling function)</li>
+</ul>
+
+<p>以下是几个实现的细节</p>
+
+<ul>
+  <li>每个thread都有一个work queue, 实现为dequeue (double ended queue)
+    <ul>
+      <li>Local thread pushes/pops from the “tail” (bottom)</li>
+      <li>Remote threads steal from “head” (top)</li>
+      <li>Efficient lock-free dequeue implementations exist</li>
+    </ul>
+  </li>
+  <li>thread <code class="highlighter-rouge">cilk_spawn</code>后会将原work划分为<code class="highlighter-rouge">spawned child</code>和<code class="highlighter-rouge">continuation</code>, 选取一个执行, 另一个放到<code class="highlighter-rouge">work queue</code></li>
+  <li>闲置线程会从其他线程的work queue偷work(Idle threads “steal” work from busy threads)</li>
+</ul>
+
+<p>那么, 现在有个问题, 当一个线程<code class="highlighter-rouge">cilk_spawn</code>后, 它是先执行<code class="highlighter-rouge">spawned child</code>还是<code class="highlighter-rouge">continuation</code></p>
+
+<ul>
+  <li>continuation first: 先执行continuation</li>
+  <li>child first: 先执行spawned child</li>
+</ul>
+
+<p>以这个代码为例</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">cilk_spawn</span> <span class="n">foo</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="n">cilk_sync</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p><img src="assets.并行之Cilk框架简介/1561877004670.png" alt="1561877004670" /></p>
+
+<p>执行顺序为0, 1, 2 …</p>
+
+<p><img src="assets.并行之Cilk框架简介/1561877015674.png" alt="1561877015674" /></p>
+
+<p>执行顺序为N-1, N-2, N-3 …</p>
+
+<h4 id="work-stealing-的实现">work stealing 的实现</h4>
+
+<ul>
+  <li>Idle threads randomly choose a thread to attempt to steal from</li>
+  <li>Stealing from top of dequeue…
+    <ul>
+      <li><strong>Reduces contention with local thread</strong>: local thread is not accessing same part of dequeue that stealing threads do!</li>
+      <li><strong>Steals work at beginning of call tree</strong>: this is a “larger” piece of work, so the cost of performing a steal is amortized (分摊) over longer future computation</li>
+      <li><strong>Maximizes locality</strong>: (in conjunction with run-child-first policy) local thread works on local part of call tree</li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="sync的实现">sync的实现</h4>
+
+<h5 id="descriptor">descriptor</h5>
+
+<ul>
+  <li>
+    <p>如果没有stealing, 其他线程无事可做, sync的实现为<code class="highlighter-rouge">nop</code></p>
+  </li>
+  <li>
+    <p>stalling join: Thread that initialtes the fork must perform the sync</p>
+  </li>
+</ul>
+
+<p>对于每个由<code class="highlighter-rouge">cilk_spawn</code>和<code class="highlighter-rouge">cilk_sync</code>界定的代码块, 创建一个<code class="highlighter-rouge">descriptor</code>, 来描述这个代码块任务的完成情况</p>
+
+<ul>
+  <li>id: 标识代码块</li>
+  <li>spawn: work数量</li>
+  <li>done: 完成的work数量</li>
+</ul>
+
+<p><img src="assets.并行之Cilk框架简介/1561877608737.png" alt="1561877608737" /></p>
+
+<h5 id="greedy-policy">greedy policy</h5>
+
+<p>所有线程如果无事可做, 都会试图去偷任务. nitiated spawn thread 不一定是在sync后继续执行work的initiated spawn thread</p>
+
+<h2 id="第十五讲性能优化之二内容要点">第十五讲：性能优化之二，内容要点</h2>
+
+<h3 id="1-latency和throughput的定义">1. Latency和Throughput的定义。</h3>
+<ul>
+  <li>延迟：网络延迟是指各式各样的数据在网络介质中通过网络协议(如TCP/IP)进行传输，如果信息量过大不加以限制，超额的网络流量就会导致设备反应缓慢，造成网络延迟</li>
+  <li>吞吐量：单位时间内成功地传送数据的数量<br />
+(以上来自百度百科)</li>
+</ul>
+
+<h3 id="2-通信时间的计算方法">2. 通信时间的计算方法。</h3>
+<blockquote>
+  <p>通信时间 = 程序通信时间+占有时间+网络延迟\</p>
+  <ul>
+    <li>overhead：处理器用于通信的时间\</li>
+    <li>occupancy: 数据通过系统最慢组件的时间\</li>
+    <li>network delay: 其他的东西
+Total communication time = overhead + occupancy + network delay\</li>
+    <li>overhead: time spent on the communication by a processor\</li>
+    <li>occupancy: time for  data to pass through slowest component of system\</li>
+    <li>network delay: everything else</li>
+  </ul>
+</blockquote>
+
+<h3 id="3-并行程序中通信产生的原因">3. 并行程序中通信产生的原因。</h3>
+<blockquote>
+  <ol>
+    <li>处理器与其缓存之间的通信</li>
+    <li>处理器与存储器之间的通信。(内存在同一台机器上)</li>
+    <li>处理器和远程存储器之间的通信。(集群中另一个节点上的内存，通过发送网络消息访问)
+      <ul>
+        <li>communication between a processor and its cache</li>
+        <li>conmmunication between processor and memory(e.g., memory on same machine)</li>
+        <li>conmmunication between processor and a remote memory(e.g., memory on another node in the cluster, accessed by sending by sending a network message)
+          <h3 id="4-什么是天然通信什么是人为通信举例说明">4. 什么是天然通信？什么是人为通信？举例说明。</h3>
+          <p>天然通信：根据指定的分配(假设无限容量缓存、最小粒度传输等)，必须在处理器之间移动才能执行算法的信息<br />
+Inherent communication: information that fundamentally must be moved between processors to carry out the algorithm given the specified assignment (assumes unlimited capacity caches, minimum granularity transfers, etc.)</p>
+        </li>
+        <li>行与行之间的通信是天然通信</li>
+      </ul>
+    </li>
+  </ol>
+</blockquote>
+
+<blockquote>
+  <p>人为通信：所有其他通信(人为沟通源于系统实现的实际细节)<br />
+Artifactual communication: all other communication (artifactual communication results from practical details of system implementation)</p>
+  <ul>
+    <li>举例见6题</li>
+  </ul>
+</blockquote>
+
+<h3 id="5-什么是运算密度">5. 什么是运算密度？</h3>
+<p><img src="./运算密度中文.png" alt="图片描述" />
+<img src="./运算密度.png" alt="图片描述" /></p>
+<h3 id="6-人为通信包含哪些">6. 人为通信包含哪些？</h3>
+<ul>
+  <li>系统需要更小的粒度：所以系统需要更多的通信（程序加载一个4字节浮点值，但整个64字节高速缓存线必须是内存传输(比需要多16倍的通信)
+    <blockquote>
+      <p>System might have a minimum granularity of transfer (result: system must communicate more data than what is needed)</p>
+    </blockquote>
+  </li>
+</ul>
+
+<blockquote>
+  <p>Program loads one 4-byte float value but entire 64-byte cache line must be transferred from memory (16x more communication than necessary)</p>
+</blockquote>
+
+<ul>
+  <li>系统可能有操作规则造成不必要的通信：（程序存储16个连续的4字节浮点值，但整个64字节高速缓存行，首先从内存加载，然后存储到内存(2x开销)
+    <blockquote>
+      <p>System might have rules of operation that result in unnecessary communication:
+Program stores 16 consecutive 4-byte float values, but entire 64-byte cache line
+is first loaded from memory, and then subsequently stored to memory (2x overhead)</p>
+    </blockquote>
+  </li>
+  <li>数据在分布式内存中的位置不佳(数据不驻留在访问数据最多的处理器附近)
+    <blockquote>
+      <p>Poor placement of data in distributed memories (data doesn’t reside near processor that accesses it the most)</p>
+    </blockquote>
+  </li>
+  <li>有限的复制容量(由于本地存储(例如，缓存)太小，无法在访问之间保留相同的数据，因此多次与处理器通信)
+    <blockquote>
+      <p>Finite replication capacity (same data communicated to processor multiple times because local storage (e.g., cache) is too small to retain it between accesses)</p>
+    </blockquote>
+  </li>
+</ul>
+
+<h3 id="7-cache冲突包含哪些种类">7. Cache冲突包含哪些种类？</h3>
+<ul>
+  <li>cold miss: 有限的复制容量(由于本地存储(例如缓存)太小，无法在访问之间保留相同的数据，因此多次与处理器通信)。在顺序程序中不可避免<br />
+Cold miss： First time data touched. Unavoidable in a sequential program</li>
+  <li>capacity miss: 工作集大于缓存。可以通过增加缓存大小来避免/减少。<br />
+Capacity miss： Working set is larger than cache. Can be avoided/reduced by increasing cache size.</li>
+  <li>conflict miss: 缓存管理策略导致的遗漏。可以通过改变应用程序中的缓存关联或数据访问模式来避免/减少。<br />
+ Conflict miss： Miss induced by cache management policy. Can be avoided/reduced by changing cache     associativity, or data access pattern in application.</li>
+  <li>communication miss: 由于并行系统中固有的或人为的通信<br />
+ Communication miss ： Due to inherent or artifactual communication in parallel system</li>
+</ul>
+
+<h3 id="8-提高cache局部性的方式有哪些">8. 提高Cache局部性的方式有哪些？</h3>
+<blockquote>
+  <ol>
+    <li>通过改变网格遍历顺序来改进时间局部性</li>
+    <li>通过融合循环改进时间局部性</li>
+    <li>通过共享数据提高算法强度</li>
+  </ol>
+</blockquote>
+
+<blockquote>
+  <ol>
+    <li>Improving temporal locality by changing grid traversal order</li>
+    <li>Improving temporal locality by fusing loops</li>
+    <li>Improve arithmetic intensity by sharing data
+      <h3 id="9-减少数据竞争的方式有哪些">9. 减少数据竞争的方式有哪些？</h3>
+    </li>
+    <li>分布式工作队列可以减少争用</li>
+    <li>在大型并行机器上创建粒子数据结构网格</li>
+    <li>粒子层次并行化</li>
+    <li>使用细粒度锁</li>
+  </ol>
+</blockquote>
+
+<blockquote>
+  <ol>
+    <li>distributed work queues serve to reduce contention</li>
+    <li>create grid of particles data structure on large parallel machine</li>
+    <li>parallelize over particles</li>
+    <li>use finer-granularity locks</li>
+  </ol>
+</blockquote>
+
+<h3 id="10-减少通信代价的方式有哪些">10. 减少通信代价的方式有哪些？</h3>
+<ul>
+  <li>减少发送方/接收方的通信开销
+    <blockquote>
+      <ol>
+        <li>发送更少的消息，使消息更大(摊销开销)</li>
+        <li>合并(合)并成大的许多小消息</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>减少延迟
+    <blockquote>
+      <ol>
+        <li>应用程序编写器:重构代码以利用局部性</li>
+        <li>HW实现者:改进通信架构</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>减少争用
+    <blockquote>
+      <ol>
+        <li>复制竞争资源(例如，本地副本、细粒度锁)</li>
+        <li>错开对争用资源的访问</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>增加沟通/计算重叠
+    <blockquote>
+      <ol>
+        <li>应用程序编写器:使用异步通信(例如，异步消息)</li>
+        <li>HW实现者:流水线，多线程，预取，无序执行</li>
+        <li>应用程序中需要额外的并发性(并发性多于执行单元的数量)</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>Reduce overhead of communication to sender/receiver
+    <blockquote>
+      <ol>
+        <li>Send fewer messages, make messages larger (amortize overhead)</li>
+        <li>Coalesce （合并）many small messages into large ones</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>Reduce delay
+    <blockquote>
+      <ol>
+        <li>Application writer: restructure code to exploit locality</li>
+        <li>HW implementor: improve communication architecture</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>Reduce contention
+    <blockquote>
+      <ol>
+        <li>Replicate contended resources (e.g., local copies, fine-grained locks)</li>
+        <li>Stagger access to contended resources</li>
+      </ol>
+    </blockquote>
+  </li>
+  <li>Increase communication/computation overlap
+    <blockquote>
+      <ol>
+        <li>Application writer: use asynchronous communication (e.g., async messages)</li>
+        <li>HW implementor: pipelining, multi-threading, pre-fetching, out-of-order exec</li>
+        <li>Requires additional concurrency in application (more concurrency than number of execution units)</li>
+      </ol>
+    </blockquote>
+  </li>
+</ul>
+
+<h2 id="第十六讲并行图计算内容要点">第十六讲：并行图计算，内容要点</h2>
+
+<h3 id="1-prim算法的基本流程">1. Prim算法的基本流程。</h3>
+<blockquote>
+  <ol>
+    <li>求MST的Prim算法是一种贪婪算法。</li>
+    <li>首先选择一个任意的顶点，将它包含到当前的MST中。</li>
+    <li>通过插入最接近其中一个的顶点来增长当前MST顶点已经在当前MST中。</li>
+  </ol>
+</blockquote>
+
+<blockquote>
+  <ol>
+    <li>Prim’s algorithm for finding an MST is a greedy algorithm.</li>
+    <li>Start by selecting an arbitrary vertex, include it into the current MST.</li>
+    <li>Grow the current MST by inserting into it the vertex closest to one of the vertices already in current MST.
+      <h3 id="2-并行prim算法的基本流程及复杂度">2. 并行Prim算法的基本流程及复杂度。</h3>
+      <ul>
+        <li>该算法在n个外部迭代中工作，很难同时执行这些迭代。</li>
+        <li>内循环相对容易并行化</li>
+      </ul>
+      <ul>
+        <li>假设p为进程数，n为顶点数。
+     - 邻接矩阵采用一维分块的方式进行分块，距离向量d进行相应的分块。
+     - 在每个步骤中，处理器选择本地最近的节点，然后进行全局约简以选择全局最近的节点。
+     - 这个节点被插入到MST中，并选择广播给所有处理器。每个处理器本地更新其d向量的一部分。</li>
+      </ul>
+    </li>
+  </ol>
+</blockquote>
+
+<blockquote>
+  <ul>
+    <li>The algorithm works in n outer iterations - it is hard to execute these iterations concurrently.</li>
+    <li>The inner loop is relatively easy to parallelize
+      <ul>
+        <li>Let p be the number of processes, and let n be the number of vertices.</li>
+      </ul>
+    </li>
+    <li>The adjacency matrix is partitioned in a 1-D block fashion, with distance vector d partitioned accordingly.</li>
+    <li>In each step, a processor selects the locally closest node, followed by a global reduction to select globally closest node.</li>
+    <li>This node is inserted into MST, and the choice broadcast to all processors. Each processor updates its part of the d vector locally.</li>
+  </ul>
+</blockquote>
+
+<p><img src="./复杂度.png" alt="图片描述" /></p>
+<h3 id="3-单源最短路径dijkstra的并行版本及复杂度">3. 单源最短路径Dijkstra的并行版本及复杂度。</h3>
+<p><img src="./单源最短路径.png" alt="图片描述" /></p>
+<h3 id="4-并行连接图算法原理">4. 并行连接图算法原理。</h3>
+<blockquote>
+  <ol>
+    <li>跨进程划分图形，并在每个处理器上运行独立的连接组件算法。在这一点，我们有p个森林。</li>
+    <li>在第二步中，跨越森林两两合并，直到只剩下一个跨越森林。</li>
+  </ol>
+</blockquote>
+
+<blockquote>
+  <ol>
+    <li>partition the graph across processes and run independent connected component algorithms on each processor. At this point, we have p spanning forests.</li>
+    <li>In the second step, spanning forests are meged pairwise until only one spanning forest remains.</li>
+  </ol>
+</blockquote>
+
+<h3 id="最小生成树算法">最小生成树算法</h3>
+
+<h4 id="串行算法">串行算法</h4>
+
+<p><img src="assets.并行化的图算法/1561874811015.png" alt="1561874811015" /></p>
+
+<h5 id="最小生成树代价之和最小的生成树">最小生成树（代价之和最小的生成树）</h5>
+
+<p>构造准则</p>
+
+<ul>
+  <li>尽可能用网络中<u>权值最小的边</u></li>
+  <li>必须使用<u>且仅使用 n-1 条边</u>来联结网络中的 n 个顶点</li>
+  <li>不能使用产生回路的边。</li>
+</ul>
+
+<h5 id="普里姆prim算法">普里姆(Prim)算法</h5>
+
+<p><strong>算法流程</strong></p>
+
+<ul>
+  <li>在连通网的顶点集合V中，任选一个顶点， 构成最小生成树的初始顶点集合U；</li>
+  <li>在U和V-U中各选一个顶点，使得该边的权值最小，把该边加入到最小生成树的边集TE中， 同时将V-U中的该顶点并入到U中；
+  每次选择一个点未经过, 一个点经过, 避免了产生环.</li>
+  <li>反复执行第（2）步，直至V-U=Ø为止。</li>
+</ul>
+
+<p><strong>注意</strong></p>
+
+<ul>
+  <li>若候选轻权边集中的轻权边不止一条，可任选其中的一条扩充到T中。</li>
+  <li>连通图的最小生成树不一定是唯一的，但它们的权相等。</li>
+</ul>
+
+<p><strong>实现</strong></p>
+
+<p>设置辅组数组closedge[]</p>
+
+<ul>
+  <li>lowcost域:存放<u>生成树顶点集合内顶点</u>到<u>生成树外各顶点</u>的各边上的当前最小权值；
+  U集合 V-U集合 3</li>
+  <li>adjvex域:记录<u>生成树顶点集合外</u>各顶点<u>距离集合</u>内哪个顶点最近(即权值最小)。</li>
+</ul>
+
+<p>流程</p>
+
+<ol>
+  <li>初始化, 将lowcost初始化为$\infty$, adjvex初始化为0.</li>
+  <li>从lowcost[v]$\neq$0的点(选择一个属于V-U的点), 选择一个lowcost[v]最小的顶点(如果全为$\infty$, 任选一个点作为出发点, 如果有点不为$\infty$, 此时选取到的点是V-U到U权值最小的边的点)</li>
+  <li>将 adjvex[v] 改为-1, 表示它已加入生成树顶点集合。</li>
+  <li>将边 (adjvex[v], v, lowcost[v] ) 加入生成树的边集合。</li>
+  <li>取 <code class="highlighter-rouge">lowcost[i] = min{ lowcost[i], Edge[v][i] }</code>， 即用生成树顶点集合外各顶点 i 到刚加入该集 合的新顶点 v 的距离 <code class="highlighter-rouge">Edge[v][i]</code> 与原来它们到 生成树顶点集合中顶点的最短距离lowcost[i] 做比较, 取距离近的作为这些集合外顶点到生成树顶点集合内顶点的最短距离</li>
+  <li>如果生成树顶点集合外顶点 i 到刚加入 该集合的新顶点 v 的距离比原来它到生成树顶点集合中顶点的最短距离还要近， 则修改adjvex[i] : adjvex[i] = v。表示生成树外顶点i到生成树内顶点v当前距离最近。</li>
+</ol>
+
+<h4 id="并行算法">并行算法</h4>
+
+<ul>
+  <li>外层的选点循环难并行</li>
+  <li>内层的循环容易并行</li>
+  <li>并行的地方是选取最近的点这一步</li>
+</ul>
+
+<p>并行算法流程</p>
+
+<ul>
+  <li>The adjacency matrix is partitioned in a 1-D block fashion, with distance vector d partitioned accordingly.</li>
+  <li>In each step, a processor selects the locally closest node, followed by a global
+  reduction to select globally closest node.</li>
+  <li>This node is inserted into MST, and the choice broadcast to all processors. Each processor updates its part of the d vector locally.</li>
+</ul>
+
+<p><img src="assets.并行化的图算法/1561875015024.png" alt="1561875015024" /></p>
+
+<p>时间复杂度</p>
+
+<p>并行算法每次迭代的时间复杂度为$O(n/p+logp)$</p>
+
+<ul>
+  <li>选取最近点$O(n/p+logp)$</li>
+  <li>广播$O(logp)$</li>
+  <li>本地更新距离矩阵$O(n/p)$</li>
+</ul>
+
+<p>总时间复杂度为$O(n^2/p+nlogp)$</p>
+
+<h3 id="单源最短路径算法">单源最短路径算法</h3>
+
+<h4 id="最短路径shortest-path-algorithms">最短路径(Shortest Path algorithms)</h4>
+
+<p><strong>最短路径问题</strong>: 如果从图中某一顶点(称为源点)到达另一顶点(称为终点)的路径可能不止一条,如何找到一条路径使得沿此路径上各边上的权值总和达到最小。</p>
+
+<p><strong>问题解法</strong></p>
+
+<ul>
+  <li>边上权值非负情形的单源最短路径问题 =&gt; Dijkstra算法</li>
+  <li>所有顶点之间的最短路径 =&gt; Floyd算法</li>
+</ul>
+
+<h5 id="dijkstra算法">Dijkstra算法</h5>
+
+<p>本质上是贪心算法.</p>
+
+<p><strong>算法流程</strong></p>
+
+<ol>
+  <li>初始化: <code class="highlighter-rouge">S ← { v 0 }</code>;
+ <code class="highlighter-rouge">dist[j] ← Edge[0][j], j = 1, 2, ..., n-1</code>;</li>
+  <li>求出最短路径的长度:
+ <code class="highlighter-rouge">dist[k] ← min { dist[i] }, i in V- S </code>;
+ <code class="highlighter-rouge">S ← S U { k }</code>;</li>
+  <li>修改:
+ <code class="highlighter-rouge">dist[i] ← min{ dist[i], dist[k] +
+ Edge[k][i] }</code>,
+ 对于每一个 <code class="highlighter-rouge">i in V- S</code> ;</li>
+  <li>判断:若 <code class="highlighter-rouge">S = V</code>, 则算法结束,否则转 2。</li>
+</ol>
+
+<h4 id="并行版本">并行版本</h4>
+
+<p>和Prim的优化非常近似, 分析和完全考虑Prim的并行版本</p>
+
+<h3 id="all-pairs-最短路径算法">All-pairs 最短路径算法</h3>
+
+<h4 id="dijkstra">Dijkstra</h4>
+
+<p>使用的话, 复杂度为$O(n^3)$, 并行化有两种方法</p>
+
+<ul>
+  <li>(source partitioned) execute each of the n shortest path problems on a different processor
+  <img src="assets.并行化的图算法/1561875310800.png" alt="1561875310800" /></li>
+  <li>(source parallel) use a parallel formulation of the shortest path problem to increase concurrency
+  <img src="assets.并行化的图算法/1561875337796.png" alt="1561875337796" /></li>
+</ul>
+
+<h4 id="floyds-algorithm">Floyd’s Algorithm</h4>
+
+<p><img src="assets.并行化的图算法/1561875383130.png" alt="1561875383130" /></p>
+
+<p><img src="assets.并行化的图算法/1561875392849.png" alt="1561875392849" /></p>
+
+<h4 id="floyds-algorithm-1-d-block-mapping">Floyd’s Algorithm (1-D Block Mapping)</h4>
+
+<p><img src="assets.并行化的图算法/1561875458517.png" alt="1561875458517" /></p>
+
+<h4 id="floyds-algorithm-2-d-block-mapping">Floyd’s Algorithm (2-D Block Mapping)</h4>
+
+<p><img src="assets.并行化的图算法/1561875477302.png" alt="1561875477302" /></p>
+
+<p><img src="assets.并行化的图算法/1561875489573.png" alt="1561875489573" /></p>
+
+<p><img src="assets.并行化的图算法/1561875524495.png" alt="1561875524495" /></p>
+
+<h4 id="floyds-algorithm-communications">Floyd’s Algorithm: Communications</h4>
+
+<p><img src="assets.并行化的图算法/1561875513775.png" alt="1561875513775" /></p>
+
+<h3 id="connected-components">Connected Components</h3>
+
+<p>可以使用DFS寻找图的连通分量</p>
+
+<p>并行化可以使图在不同的处理器上运行不同生成树DFS, 最后再合并.</p>
+:ET

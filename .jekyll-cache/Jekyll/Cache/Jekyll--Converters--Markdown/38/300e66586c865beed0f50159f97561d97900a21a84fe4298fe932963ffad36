@@ -1,0 +1,76 @@
+I"�,<div class="language-haskell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">--import Test.QuickCheck</span>
+<span class="kr">module</span> <span class="nn">MyFraction</span> <span class="kr">where</span>
+<span class="kt">Fraction</span><span class="o">=</span><span class="p">(</span><span class="kt">Integer</span><span class="p">,</span><span class="kt">Integer</span><span class="p">)</span>
+
+<span class="c1">--分式化简</span>
+<span class="n">ratreduction</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span>
+<span class="n">ratreduction</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">=</span><span class="p">(</span><span class="n">div</span> <span class="n">x</span> <span class="n">g</span><span class="p">,</span><span class="n">div</span> <span class="n">y</span> <span class="n">g</span><span class="p">)</span><span class="kr">where</span> <span class="n">g</span><span class="o">=</span><span class="n">gcd</span> <span class="n">x</span> <span class="n">y</span>
+
+<span class="c1">--加法</span>
+<span class="n">ratplus</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span>
+<span class="n">ratplus</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span><span class="o">=</span><span class="n">ratreduction</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">d</span><span class="o">+</span><span class="n">b</span><span class="o">*</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="o">*</span><span class="n">d</span><span class="p">)</span>
+
+<span class="c1">--减法，调用加法实现</span>
+<span class="n">ratminus</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span>
+<span class="n">ratminus</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span><span class="o">=</span><span class="n">ratplus</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)(</span><span class="o">-</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+
+<span class="c1">--乘法</span>
+<span class="n">rattimes</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span>
+<span class="n">rattimes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span><span class="o">=</span><span class="n">ratreduction</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">c</span><span class="p">,</span><span class="n">b</span><span class="o">*</span><span class="n">d</span><span class="p">)</span>
+
+<span class="c1">--除法，调用乘法实现</span>
+<span class="n">ratdiv</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span>
+<span class="n">ratdiv</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span><span class="o">=</span><span class="n">rattimes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)(</span><span class="n">d</span><span class="p">,</span><span class="n">c</span><span class="p">)</span>
+
+<span class="c1">--取整</span>
+<span class="n">ratfloor</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Integer</span>
+<span class="n">ratfloor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span><span class="o">=</span><span class="n">div</span> <span class="n">a</span> <span class="n">b</span>
+
+<span class="c1">--转成浮点</span>
+<span class="n">ratfloat</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Float</span>
+<span class="n">ratfloat</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span><span class="o">=</span><span class="n">fromInteger</span> <span class="n">a</span><span class="o">/</span><span class="n">fromInteger</span> <span class="n">b</span>
+
+<span class="c1">--判断相等</span>
+<span class="n">rateq</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Bool</span>
+<span class="n">rateq</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span><span class="o">=</span><span class="n">a</span><span class="o">*</span><span class="n">d</span><span class="o">==</span><span class="n">b</span><span class="o">*</span><span class="n">c</span>
+
+<span class="c1">--重载运算符</span>
+<span class="p">(</span><span class="o">&lt;+&gt;</span><span class="p">)</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span>
+<span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span><span class="o">&lt;+&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span><span class="o">=</span><span class="n">ratplus</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span> 
+
+<span class="p">(</span><span class="o">&lt;-&gt;</span><span class="p">)</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span>
+<span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span><span class="o">&lt;-&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span><span class="o">=</span><span class="n">ratminus</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+
+<span class="p">(</span><span class="o">&lt;-*-&gt;</span><span class="p">)</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span>
+<span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span><span class="o">&lt;-*-&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span><span class="o">=</span><span class="n">rattimes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+
+<span class="p">(</span><span class="o">&lt;/&gt;</span><span class="p">)</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span>
+<span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span><span class="o">&lt;/&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span><span class="o">=</span><span class="n">ratdiv</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+
+<span class="p">(</span><span class="o">&lt;==&gt;</span><span class="p">)</span><span class="o">::</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Fraction</span><span class="o">-&gt;</span><span class="kt">Bool</span>
+<span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span><span class="o">&lt;==&gt;</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span><span class="o">=</span><span class="n">rateq</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+
+<span class="c1">--确定运算优先级</span>
+<span class="kr">infixl</span> <span class="mi">6</span> <span class="o">&lt;-*-&gt;</span><span class="p">,</span><span class="o">&lt;/&gt;</span>
+<span class="kr">infixl</span> <span class="mi">5</span> <span class="o">&lt;+&gt;</span><span class="p">,</span><span class="o">&lt;-&gt;</span>
+<span class="kr">infixl</span> <span class="mi">4</span> <span class="o">&lt;==&gt;</span>
+
+<span class="cm">{-
+--检查任意分数+(0,1)之后仍然等于其本身
+prop_ratplus_unit :: Fraction -&gt; Property
+prop_ratplus_unit (a,b) = b &gt; 0 ==&gt;(a, b) &lt;+&gt; (0,1) &lt;==&gt; (a, b)
+
+--检查任意分数加上相反数之后为0
+prop_ratplus_inv :: Fraction -&gt; Property
+prop_ratplus_inv (a,b) = b &gt; 0 ==&gt;(a, b) &lt;+&gt; (-a,b) &lt;==&gt; (0, 1)
+
+--检查任意非零分数乘上倒数之后为1
+prop_rattimes_inv :: Fraction -&gt; Property
+prop_rattimes_inv (a,b) = a/=0&amp;&amp;b &gt; 0 ==&gt;(a, b) &lt;-*-&gt; (b,a) &lt;==&gt; (1, 1)
+
+-- 检查乘法分配律
+prop_rattimes_plus_distr :: Fraction -&gt; Fraction -&gt; Fraction -&gt;Property
+prop_rattimes_plus_distr (a,b) (c,d) (e,f) = b &gt; 0 &amp;&amp; d &gt; 0 &amp;&amp; f &gt; 0 ==&gt; (a,b) &lt;-*-&gt; ((c,d) &lt;+&gt; (e,f)) &lt;==&gt; ((a,b) &lt;-*-&gt; (c,d)) &lt;+&gt; ((a,b) &lt;-*-&gt; (e,f))
+-}</span>
+</code></pre></div></div>
+:ET

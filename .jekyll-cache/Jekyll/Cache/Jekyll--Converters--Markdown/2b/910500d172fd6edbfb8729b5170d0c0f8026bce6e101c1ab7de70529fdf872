@@ -1,0 +1,81 @@
+I"%8<h2 id="gcc内置位运算">GCC内置位运算</h2>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">__builtin_clz</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">x</span><span class="p">);</span>      <span class="c1">//求前缀0的个数</span>
+<span class="kt">int</span> <span class="nf">__builtin_ctz</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">x</span><span class="p">);</span>      <span class="c1">//求后缀0的个数</span>
+<span class="kt">int</span> <span class="nf">__builtin_ffs</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">x</span><span class="p">);</span>      <span class="c1">//x的二进制末尾最后一个1的位置，从1开始</span>
+<span class="kt">int</span> <span class="nf">__builtin_popcount</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">x</span><span class="p">);</span> <span class="c1">//x二进制中1的个数，相当于bitset::count()</span>
+<span class="kt">int</span> <span class="nf">__builtin_parity</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">x</span><span class="p">);</span>   <span class="c1">//判断x的二进制中1的个数的奇（1）偶（0）性，这些函数都有相应的usigned long和usigned long long版本，只需要在函数名后面加上l或ll就可以了，比如__builtin_clzll</span>
+</code></pre></div></div>
+<h2 id="开栈">开栈</h2>
+<h3 id="for-c">For C++</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#pragma comment(linker, "/STACK:102400000,102400000") //For C++
+</span></code></pre></div></div>
+<h3 id="for-g">For G++</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="c1">//For G++</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">256</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span><span class="p">;</span> <span class="c1">//256MB</span>
+	<span class="kt">char</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="o">+</span> <span class="n">size</span><span class="p">;</span>
+	<span class="n">__asm__</span> <span class="n">__volatile__</span><span class="p">(</span><span class="s">"movq %0, %%rsp</span><span class="se">\n</span><span class="s">"</span> <span class="o">::</span><span class="s">"r"</span><span class="p">(</span><span class="n">p</span><span class="p">));</span> <span class="c1">//64bit，一定要最后写一句`exit(0);`退出程序，否则会得到非零退出的错误，可能RE。</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h2 id="读入优化">读入优化</h2>
+<h3 id="c文件指针版">C文件指针版</h3>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ll</span> <span class="nf">getll</span><span class="p">(</span><span class="kt">FILE</span> <span class="o">*</span><span class="n">in</span> <span class="o">=</span> <span class="n">stdin</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">ll</span> <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sgn</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ch</span> <span class="o">=</span> <span class="n">getc</span><span class="p">(</span><span class="n">in</span><span class="p">);</span>
+	<span class="k">for</span> <span class="p">(;</span> <span class="o">!</span><span class="n">isdigit</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">ch</span> <span class="o">!=</span> <span class="n">EOF</span><span class="p">;</span> <span class="n">ch</span> <span class="o">=</span> <span class="n">getc</span><span class="p">(</span><span class="n">in</span><span class="p">))</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">ch</span> <span class="o">==</span> <span class="sc">'-'</span><span class="p">)</span>
+			<span class="n">sgn</span> <span class="o">=</span> <span class="o">-</span><span class="n">sgn</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(;</span> <span class="n">isdigit</span><span class="p">(</span><span class="n">ch</span><span class="p">);</span> <span class="n">ch</span> <span class="o">=</span> <span class="n">getc</span><span class="p">(</span><span class="n">in</span><span class="p">))</span>
+		<span class="n">val</span> <span class="o">=</span> <span class="n">val</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="n">ch</span> <span class="o">-</span> <span class="sc">'0'</span><span class="p">;</span>
+	<span class="k">return</span> <span class="n">ungetc</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="n">in</span><span class="p">),</span> <span class="n">sgn</span> <span class="o">*</span> <span class="n">val</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">lf</span> <span class="nf">getlf</span><span class="p">(</span><span class="kt">FILE</span> <span class="o">*</span><span class="n">in</span> <span class="o">=</span> <span class="n">stdin</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">lf</span> <span class="n">val</span> <span class="o">=</span> <span class="n">getll</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="n">p</span> <span class="o">=</span> <span class="n">val</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="o">-</span><span class="mi">1</span> <span class="o">:</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="n">ll</span> <span class="n">ch</span> <span class="o">=</span> <span class="n">getc</span><span class="p">(</span><span class="n">in</span><span class="p">);</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">ch</span> <span class="o">==</span> <span class="sc">'.'</span><span class="p">)</span>
+		<span class="k">for</span> <span class="p">(</span><span class="n">ch</span> <span class="o">=</span> <span class="n">getc</span><span class="p">(</span><span class="n">in</span><span class="p">);</span> <span class="n">isdigit</span><span class="p">(</span><span class="n">ch</span><span class="p">);</span> <span class="n">ch</span> <span class="o">=</span> <span class="n">getc</span><span class="p">(</span><span class="n">in</span><span class="p">))</span>
+			<span class="n">val</span> <span class="o">+=</span> <span class="p">(</span><span class="n">p</span> <span class="o">/=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">ch</span> <span class="o">-</span> <span class="sc">'0'</span><span class="p">);</span>
+	<span class="k">return</span> <span class="n">ungetc</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="n">in</span><span class="p">),</span> <span class="n">val</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<h3 id="仿cio流沙雕版">仿C++IO流沙雕版</h3>
+<p><a href="https://vjudge.net/solution/14388745">使用前</a></p>
+
+<p><a href="https://vjudge.net/solution/14388713">使用后</a></p>
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define cin kin
+</span><span class="k">struct</span> <span class="n">Istream</span>
+<span class="p">{</span>
+	<span class="kt">char</span> <span class="n">b</span><span class="p">[</span><span class="mi">20</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span><span class="p">],</span> <span class="o">*</span><span class="n">i</span><span class="p">,</span> <span class="o">*</span><span class="n">e</span><span class="p">;</span> <span class="c1">//20MB</span>
+	<span class="n">Istream</span><span class="p">(</span><span class="kt">FILE</span> <span class="o">*</span><span class="n">in</span><span class="p">)</span> <span class="o">:</span> <span class="n">i</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="n">e</span><span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">fread</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="o">*</span><span class="n">b</span><span class="p">),</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="n">in</span><span class="p">))</span> <span class="p">{}</span>
+	<span class="kt">bool</span> <span class="n">eof</span><span class="p">()</span> <span class="k">const</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">i</span> <span class="o">==</span> <span class="n">e</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">Istream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="o">&amp;</span><span class="n">val</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">val</span> <span class="o">=</span> <span class="n">strtoll</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">i</span><span class="p">,</span> <span class="mi">10</span> <span class="cm">/*进制，取值2~36*/</span><span class="p">),</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">Istream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">ll</span> <span class="o">&amp;</span><span class="n">val</span><span class="p">)</span> <span class="c1">//极限快</span>
+	<span class="p">{</span>
+		<span class="k">while</span> <span class="p">(</span><span class="o">*</span><span class="n">i</span> <span class="o">&lt;</span> <span class="sc">'0'</span><span class="p">)</span>
+			<span class="o">++</span><span class="n">i</span><span class="p">;</span> <span class="c1">//无符号</span>
+		<span class="k">for</span> <span class="p">(</span><span class="n">val</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="o">*</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="sc">'0'</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="n">val</span> <span class="o">=</span> <span class="p">(</span><span class="n">val</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">val</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="o">*</span><span class="n">i</span> <span class="o">-</span> <span class="sc">'0'</span><span class="p">;</span>
+		<span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">Istream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="kt">double</span> <span class="o">&amp;</span><span class="n">val</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">return</span> <span class="n">val</span> <span class="o">=</span> <span class="n">strtod</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">i</span><span class="p">),</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">Istream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">eof</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="n">isspace</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">))</span>
+			<span class="o">++</span><span class="n">i</span><span class="p">;</span>
+		<span class="k">for</span> <span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">clear</span><span class="p">();</span> <span class="o">!</span><span class="n">eof</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">isspace</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">);</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+			<span class="n">s</span> <span class="o">+=</span> <span class="o">*</span><span class="n">i</span><span class="p">;</span>
+		<span class="k">return</span> <span class="o">*</span><span class="k">this</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">}</span> <span class="n">kin</span><span class="p">(</span><span class="n">stdin</span><span class="p">);</span>
+</code></pre></div></div>
+:ET

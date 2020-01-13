@@ -1,0 +1,40 @@
+I"—<p>Title of paper: <a href="http://folk.uio.no/yanzhang/IEEETIIBlockchain2018.pdf">Consortium Blockchain for Secure Energy Trading in Industrial Internet of Things</a></p>
+
+<p>Author list: Zhetao Li, Member, IEEE, Jiawen Kang, Rong Yu, Member, IEEE, Dongdong Ye, Qingyong Deng, Yan Zhang, Senior Member, IEEE, .</p>
+
+<p>Publication information: IEEE Transactions on Industrial Informatics, vol.14, no.8, pp. 3690-3700, Aug.2018</p>
+
+<h2 id="what-this-paper-is-doing">What this paper is doing</h2>
+
+<p>This paper studies how to address the security challenges caused by untrusted and nontransparent energymarkets in Peer-to-Peer(P2P) energy trading.</p>
+
+<h2 id="what-are-the-major-contributions-of-this-paper">What are the major contributions of this paper</h2>
+
+<p>The contributions include:</p>
+
+<ol>
+  <li>A consortium blockchain technology to propose asecure energy trading system named energy blockchain.</li>
+  <li>A credit-based payment scheme to support fast and frequent energy trading.</li>
+  <li>An optimal pricing strategy using Stackelberg game for credit-based loans.</li>
+</ol>
+
+<h2 id="to-describe-the-methodology-of-the-proposed-approach">To describe the methodology of the proposed approach</h2>
+
+<p>The rationale of the proposed approach is depicted as follows.</p>
+
+<h3 id="blockchain-enabled-enegry-trading-for-iiot">Blockchain Enabled Enegry Trading for IIoT</h3>
+
+<p>The energy blockchain performs the consensus process on pre-selected EAGs with moderate cost. These EAGs collect and managetheir local transaction records. The transaction records arestructured into blocks after finishing the consensus process among the EAGs, and thus stored in the memory pool.</p>
+
+<h3 id="creat-based-payment-for-fast-p2p-enegry-trading">Creat-based Payment For Fast P2P Enegry Trading</h3>
+
+<p>A credit bank in each authorized EAG works as atrusted bank node with enough energy coins. The credit banks provide energy coin loans for energy nodes according to their credit values, then the energy coins will be transferred from the credit banksâ€™ accounts to the wallet addresses shared between the credit banks and borrowers.</p>
+
+<h3 id="optimal-loan-pricing-in-credit-based-payment">Optimal Loan Pricing In Credit-based Payment</h3>
+
+<p>Present the problem definition about theamount of energy-coin loan and loan pricing (i.e., interest rateand penalty rate) for borrowers to maximize economic benefitsof credit banks. Energy buyers without enough energy coinsact as borrowers to apply for loans from the credit bank in alocal EAG. After that, the borrowers worked as energy buyerscan buy energy from energy sellers.</p>
+
+<h2 id="what-are-the-key-findings-of-their-study">What are the key findings of their study</h2>
+
+<p>Security analysis shows that this energy blockchain achieves secure energy trading, and numerical results illustrate that the energy blockchain and the credit-based payment scheme are effective and efficient for energy trading.</p>
+:ET

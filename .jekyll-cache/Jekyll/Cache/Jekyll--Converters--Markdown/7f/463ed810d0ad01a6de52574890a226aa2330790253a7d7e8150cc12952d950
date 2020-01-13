@@ -1,0 +1,144 @@
+I"T<h2 id="what-is-krr-knowledge-representation-and-reasoning">What is KRR (Knowledge representation and reasoning)</h2>
+
+<p>Symbolic encoding of propositions believed by some agent andtheir manipulation to produce representations of propositions thatare believed by the agent but not explicitly represented.</p>
+
+<h2 id="why-krr">Why KRR</h2>
+
+<ul>
+  <li>KR hypothesis: any artificial intelligent system isknowledge-based</li>
+  <li>Knowledge-based system: system with structures that
+    <ul>
+      <li>can be interpreted propositionally and</li>
+      <li>determine the system behavior
+such structures are called its knowledge base (KB)</li>
+    </ul>
+  </li>
+  <li>Knowledge-based system most suitable for open-ended tasks</li>
+  <li>
+    <p>Hallmark of knowledge-based system:  cognitive penetrability,i.e., actions depend on beliefs, including implicitly representedbeliefs</p>
+  </li>
+  <li>KR假设：任何人工智能系统都是基于知识的。</li>
+  <li>基于知识的系统：具有以下结构的系统。
+    <ul>
+      <li>可以通过命题和</li>
+      <li>确定系统行为
+这样的结构称为其知识库(KB)。</li>
+    </ul>
+  </li>
+  <li>基于知识的系统最适合开放式任务</li>
+  <li>基于知识的系统的Hallmark：认知渗透性，即行动依赖于信念，包括隐含表示的信念</li>
+</ul>
+
+<h2 id="krr-and-logic">KRR and logic</h2>
+
+<p>Logic is the main tool for KRR, because logic studies</p>
+
+<ul>
+  <li>How to formally represent agent’s beliefs</li>
+  <li>Given the explicitly represented beliefs, what are the implicitlyrepresented beliefs.</li>
+</ul>
+
+<p>There are many kinds of logics. In this course, we will usefirst-order logic (FOL) as the tool for KRR</p>
+
+<h2 id="an-example-contd">An example (cont’d)</h2>
+
+<ul>
+  <li>Intelligence is needed to answer the question</li>
+  <li>Can we make machines answer the question?</li>
+  <li>A possible approach
+    <ul>
+      <li>First, translate the sentences and question into FOL formulas
+        <ul>
+          <li>Of course, this is hard, and we do not have a good way toautomate this step</li>
+        </ul>
+      </li>
+      <li>Second, check if the formula of the question is logicallyentailed by the formulas of the sentences
+        <ul>
+          <li>We will show that there are ways to automate this step</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="alphabet">Alphabet</h2>
+
+<ul>
+  <li>Logical symbols (fixed meaning and use):
+    <ul>
+      <li>Punctuation:  (,),,,.</li>
+      <li>Connectives and quantifiers:=,¬,∧,∨,∀,∃</li>
+      <li>Variables:x,x1,x2,…,x′,x′′,…,y,…,z,…</li>
+    </ul>
+  </li>
+  <li>Non-logical symbols (domain-dependent meaning and use):
+    <ul>
+      <li>Predicate symbols
+        <ul>
+          <li>arity: number of arguments</li>
+          <li>arity 0 predicates:  propositional symbols
+-Function symbols</li>
+          <li>arity 0 functions: constant symbols</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="terms">Terms</h2>
+
+<ul>
+  <li>Every variable is a term</li>
+  <li>If t1,…,tn are terms andfis a function symbol of arityn,then f(t1,…,tn)is a term</li>
+</ul>
+
+<h2 id="formulas">Formulas</h2>
+
+<ul>
+  <li>If t1,…,tn are terms andPis a predicate symbol of arityn,thenP(t1,…,tn)is an atomic formula</li>
+  <li>Ift1andt2are terms, then(t1=t2)is an atomic formula</li>
+  <li>Ifαandβare formulas, andvis a variable, then¬α,(α∧β),(α∨β),∃v.α,∀v.αare formulas</li>
+</ul>
+
+<h2 id="notation">Notation</h2>
+
+<ul>
+  <li>Occasionally add or omit (,)</li>
+  <li>Use [,] and {,}</li>
+  <li>Abbreviation:(α→β)for(¬α∨β)</li>
+  <li>Abbreviation:(α↔β)for(α→β)∧(β→α)</li>
+  <li>Predicates:  mixed case capitalized,e.g., Person, OlderThan</li>
+  <li>Functions (and constants):  mixed case uncapitalized,e.g.,john, father,</li>
+</ul>
+
+<h2 id="variable-scope">Variable scope</h2>
+
+<ul>
+  <li>Free and bound occurrences of variables</li>
+  <li>e.g.,P(x)∧∃x[P(x)∨Q(x)]</li>
+  <li>A sentence:  formula with no free variables</li>
+  <li>Substitution:α[v/t]meansαwith all free occurrences of thevreplaced by termt</li>
+  <li>In general,α[v1/t1,…,vn/tn]</li>
+</ul>
+
+<h2 id="interpretations">Interpretations</h2>
+
+<p>An interpretation is a pair = <code class="highlighter-rouge">&lt;D,I&gt;</code></p>
+
+<ul>
+  <li>D,Ii D is the domain, can be any non-empty set</li>
+  <li>I is a mapping from the set of predicate and function symbols</li>
+  <li>If P is a predicate symbol of arity n, I(P) is an n-ary relation over D, i.e., I(P) ⊆ Dn
+    <ul>
+      <li>If p is a 0-ary predicate symbol, i.e., a propositional symbol, I(p) ∈{true,false}</li>
+    </ul>
+  </li>
+  <li>If f is a function symbol of arity n, I(f) is an n-ary function over D, i.e., I(f) : Dn → D
+    <ul>
+      <li>If c is a 0-ary function symbol, i.e., a constant symbol, I(c) ∈ D</li>
+    </ul>
+  </li>
+</ul>
+
+<p>wrt: with pespect to</p>
+:ET
