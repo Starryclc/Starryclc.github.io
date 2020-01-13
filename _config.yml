@@ -3,9 +3,9 @@ kramdown:
   input: GFM # Github Flavored Markdown
   math_engine: katex # 防止行间公式渲染错误
 permalink: /posts/:categories/:title # 博文目录
-baseurl: "C:\Users\DELL\Documents\GitHub\Starryclc.github.io" # 假如你的博客是建在某个目录下的，请在这里加上目录名，并且下面配置的所有链接里的`/public`前也要加，即`/your_baseurl/public`。这一项结尾不要有'/'
+baseurl: "" # 假如你的博客是建在某个目录下的，请在这里加上目录名，并且下面配置的所有链接里的`/public`前也要加，即`/your_baseurl/public`。这一项结尾不要有'/'
 
-title: 语の秘密花园
+title: "语の秘密花园"
 url: http://Starryclc.github.io
 author: Liuxy
 
@@ -97,7 +97,7 @@ head: # 删改前确定知道自己在做什么
   - key: rel
     value: stylesheet
   - key: href
-    value: C:\Users\DELL\Documents\GitHub\Starryclc.github.io\public\css\style.css
+    value: /public/css/style.css
 - tag: link
   var:
   - key: rel
@@ -162,7 +162,7 @@ script: # 需要在正文前调用的脚本或者插件的autoloader
 #    value: //cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
 - var:
   - key: src
-    value: C:\Users\DELL\Documents\GitHub\Starryclc.github.io/public/js/katex.js
+    value: /public/js/katex.js
   - key: js
     value: //cdn.jsdelivr.net/npm/katex/dist/katex.min.js
   - key: auto_render
