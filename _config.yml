@@ -236,8 +236,8 @@ sidebar:
 
 index:
   showtag:
-  - 学习笔记
   - 碎碎念
+  - 学习笔记
 
 post:
   meta:
@@ -254,7 +254,6 @@ post:
       enable: true
       unit: 次
     #copyright: '<i class="fab fa-creative-commons"></i> <a rel="license" href="//creativecommons.org/licenses/by-sa/4.0/deed.zh">BY-SA 4.0</a>（除特别声明或转载文章外）'
-
 
 page404:
   search_children: # 腾讯公益
