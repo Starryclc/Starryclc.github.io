@@ -235,9 +235,9 @@ sidebar:
     text: '<script async defer src="https://buttons.github.io/buttons.js"></script>'
 
 index:
-  showtag:
-  - 碎碎念
-  - 学习笔记
+  #showtag:
+  #- 碎碎念
+  #- 学习笔记
 
 post:
   meta:
