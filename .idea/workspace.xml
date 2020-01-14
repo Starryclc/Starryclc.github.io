@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9a83fcef-a6e5-45e4-bfe9-fa6c7e7408b4" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Cache/b7/9606fb3afea5bd1609ed40b622142f1c98125abcfe89a76a661b0e8e343910" beforeDir="false" afterPath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Cache/b7/9606fb3afea5bd1609ed40b622142f1c98125abcfe89a76a661b0e8e343910" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_layouts/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/_layouts/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_posts/2020-1-14-棋盘问题.md" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/2020-1-14-棋盘问题.md" afterDir="false" />
-    </list>
+    <list default="true" id="9a83fcef-a6e5-45e4-bfe9-fa6c7e7408b4" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +40,7 @@
       <updated>1578941326740</updated>
       <workItem from="1578941333866" duration="535000" />
       <workItem from="1578983062513" duration="13764000" />
-      <workItem from="1579010646623" duration="6072000" />
+      <workItem from="1579010646623" duration="6248000" />
     </task>
     <servers />
   </component>
