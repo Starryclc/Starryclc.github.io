@@ -1,6 +1,6 @@
 ---
 layout: comments
-title: 留言
+title: 友情链接
 ---
 交换友链可以在评论区留言~
 

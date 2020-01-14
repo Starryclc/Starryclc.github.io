@@ -7,7 +7,7 @@ baseurl: "" # 假如你的博客是建在某个目录下的，请在这里加上
 
 title: Starryclc
 url: http://Starryclc.github.io
-author: Liu-xy
+author: xyliu
 
 head: # 删改前确定知道自己在做什么
 - tag: meta # Enable responsiveness on mobile devices
@@ -190,8 +190,8 @@ sidebar:
     href: /
   - title: '<i class="fab fa-readme fa-fw"></i> 关于'
     href: /about
-  - title: '<i class="fas fa-comments fa-fw"></i> 留言'
-    href: /comments
+  #- title: '<i class="fas fa-comments fa-fw"></i> 留言'
+   # href: /comments
   - title: '<i class="fas fa-tags fa-fw"></i> 标签'
     href: /tags
   - title: '<i class="fas fa-archive fa-fw"></i> 归档'
@@ -224,7 +224,7 @@ sidebar:
   run_time:
     enable: true
     src: /public/js/run_time.js
-    start_time: '01/04/2020 00:00:01' # 这是我第一篇CSDN博客的时间
+    start_time: '01/14/2020 00:00:01'
     alert: <i class="fas fa-cog fa-spin fa-fw"></i>
     day: 天
     hour: 时
@@ -255,21 +255,6 @@ post:
       unit: 次
     #copyright: '<i class="fab fa-creative-commons"></i> <a rel="license" href="//creativecommons.org/licenses/by-sa/4.0/deed.zh">BY-SA 4.0</a>（除特别声明或转载文章外）'
 
-
-valine:
-  enable: true
-  autoloader: /public/js/valine.js
-  src: //cdn.jsdelivr.net/npm/valine
-  appId: 9hABRddSuEkTgqLrt1VSK5B1-gzGzoHsz
-  appKey: NJ7RwmgrxsF7KDzlqU7YewlL
-  notify: true # 评论回复邮件提醒
-  verify: true # 验证码服务
-  avatar: identicon
-  placeholder: 在这里评论吧！
-  visitor: true # 文章访问量统计
-  highlight: true # 代码高亮
-  avatarForce: false # 每次访问强制拉取最新的评论列表头像
-  recordIP: true # 记录评论者IP
 
 page404:
   search_children: # 腾讯公益
