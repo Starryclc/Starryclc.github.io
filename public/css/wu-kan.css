@@ -9,7 +9,7 @@
   }
 }
 body {
-  background-image: url(https://i0.hdslb.com/bfs/article/48da202712ab6ecafee518dbaab7dd05f7de92eb.jpg);
+  background-image: url(/public/image/background.jpg);
   background-size: 100%;
   background-repeat: no-repeat;
   background-attachment: fixed;
