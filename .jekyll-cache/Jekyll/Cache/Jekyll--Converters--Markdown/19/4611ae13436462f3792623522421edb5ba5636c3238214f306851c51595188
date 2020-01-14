@@ -1,4 +1,0 @@
-I"P<p>```haskell
-{-
-Have you ever wondered how websites validate your credit card number when you shop online? They don’t check a massive database of numbers, and they don’t use magic. In fact, most credit providers rely on a checksum formula for distinguishing valid numbers from random collection of digits (or typing mistakes).</p>
-:ET

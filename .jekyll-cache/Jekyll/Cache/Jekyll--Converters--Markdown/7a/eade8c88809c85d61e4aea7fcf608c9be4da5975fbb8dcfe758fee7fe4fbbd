@@ -1,17 +1,0 @@
-I"�<p><a href="https://github.com/wu-kan/ACM_Template/tree/master/计算几何/三维">三维几何模板</a>
-<a href="https://vjudge.net/problem/UVALive-4589">题目链接</a></p>
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
-<span class="p">{</span>
-	<span class="n">lf</span> <span class="n">ans</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">;</span>
-	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">,</span><span class="n">flag</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="o">~</span><span class="n">scanf</span><span class="p">(</span><span class="s">"%d"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">n</span><span class="p">);)</span>
-	<span class="p">{</span>
-		<span class="n">vector</span><span class="o">&lt;</span><span class="n">Coord3</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">;</span>
-		<span class="k">for</span><span class="p">(;</span> <span class="n">n</span><span class="o">--</span><span class="p">;</span> <span class="n">p</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">Coord3</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">)))</span>
-			<span class="n">scanf</span><span class="p">(</span><span class="s">"%lf%lf%lf"</span><span class="p">,</span><span class="o">&amp;</span><span class="n">x</span><span class="p">,</span><span class="o">&amp;</span><span class="n">y</span><span class="p">,</span><span class="o">&amp;</span><span class="n">z</span><span class="p">);</span>
-		<span class="n">ConvexPolyhedron</span> <span class="n">c</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
-		<span class="n">ans</span><span class="o">+=</span><span class="n">c</span><span class="p">.</span><span class="n">dist</span><span class="p">(</span><span class="n">c</span><span class="p">.</span><span class="n">centroid</span><span class="p">());</span>
-		<span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="o">^=</span><span class="mi">1</span><span class="p">)</span><span class="n">printf</span><span class="p">(</span><span class="s">"%.5f</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="n">ans</span><span class="p">),</span><span class="n">ans</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
-	<span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-:ET
