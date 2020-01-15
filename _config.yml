@@ -177,8 +177,8 @@ sidebar:
   - title: rss
     href: /atom.xml
     class: 'fas fa-rss fa-fw'
-  - title: <!-->@.-->@<!-->@.-->liuxinyu.im<!-->@<>!-->gmail.com # email
-    href: mai<!-->lto:<!-->liuxinyu.im<!-->@<!-->gmail.com
+  - title: liuxinyu.im[<at>]gmail.com # email
+    #href: mailto:liuxinyu.im[at]gmail.com
     class: 'fas fa-envelope fa-fw'
   - title: github
     href: //github.com/Starryclc
