@@ -1,182 +1,137 @@
 ---
 layout: post
-title: 美赛向：Latex入门
+title: geth & Solidity合约的部署和调用
 categories: [学习笔记]
 ---
 
 
 
-## 1.碎碎念
+## 1. 碎碎念
 
-今年因为疫情的原因，美赛分成了两个时间，离2.14号的比赛没几天啦。抓紧突击一下Latex，排两篇论文上上手~~
+最近区块链课上布置了个实验，大概就是用Solidity编写一个投票智能合约然后部署到geth私有链。之前没怎么学以太坊，借这次实验记录一下学到的知识和实验过程，以及尚未解决的问题。
 
-记录一下美赛中排论文的常用操作。
+## 2. 以太坊客户端geth常用命令
 
-## 2. 基本操作
+这次实验做下来发现有那么几个命令是十分常用的：
 
-* 使用`/mcmsetup{key-value}`来控制基本的摘要页和题目页。
+* **启动私有链**
 
-* 控制段落
+```
+> geth --rpc --nodiscover --datadir data0  --port 30303 --rpc --rpcport 8545 --rpcapi "db,eth,net,web3" --rpccorsdomain "*" --networkid 1108 --ipcdisable console --allow-insecure-unlock
+```
 
-  * 首行缩进两个中文字符，在开始的控制位置加入`\setlength{\parindent}{2em} `
-  * 另起新的段落:`/par`
-  * 或者使用/`indent`实现缩进(需要使用 `\usepackage{indentfirst}` )
 
-* 文本格式控制
 
-  * 加粗: `\textbf{}`
-  * 数学公式加粗：`\bm`
-  * 意大利斜体: `\textit{}`
-  * slanted斜体: `\textsl{}`
-  * 细体: `\textlf{}`
+| 命令                    | 作用                                                         |
+| ----------------------- | ------------------------------------------------------------ |
+| rpc                     | 启用rpc服务，默认端口号8545                                  |
+| nodiscover              | 关闭p2p网络的自动发现，需要手动添加节点，有利于隐藏私有网络  |
+| datadir                 | 设置当前区块链网络数据存放的位置                             |
+| port                    | 设置网络监听端口                                             |
+| rpcapi                  | 可以通过rpc调用的对象                                        |
+| rpccorsdomain           | 指定可以访问APi的域名地址，设置为“*”则任何地址都可以访问，这样做不安全 |
+| networkid               | 网络标识，私有链取一个大于4的任意值                          |
+| --ipcdisable            | 禁用IPC-RPC服务器（默认是打开的）                            |
+| --allow-insecure-unlock | 允许不安全解锁                                               |
 
-* 生成新页面 `/newpage`
+* 创建新账户
 
-* 生成目录`\tableofcontents`
+```
+> personal.newAccount() //接下来设置密码
+> personal.newAccount("passwd")//双引号中设置密码
+```
 
-* 层次结构
+* 解锁账户
 
-  * `/section`，`/subsection`,`/subsubsection`
+```
+> personal.unlockAccount(eth.accounts[0])
+```
 
-  * 实心点
+* 查看账户
 
-    ```latex
-    \begin{itemize}
-        \item she
-        \item he
-        \ttem they
-    \end{itemize}
-    ```
+```
+> eth.accounts //查看所有账户
+> eth.accounts[0] //查看某一个账户
+```
 
-  * —
+* 查看账户余额
 
-    ```latex
-    上面换成\item[-] 
-    ```
+```
+eth.getBalance("address")
+eth.getBalance(eth.accounts[0])
+```
 
-  * 默认数字编号
+* 转账三个比特币
 
-    ```latex
-    \begin{enumerate}
-        \item she
-        \item he
-        \item they
-    \end{enumerat}
-    ```
+```
+eth.sendTransaction({from:"addressfrom",to:"addressto",value:web3.toWei(3,"ether")})
+```
 
-  * (1)(2)(3)的样式
+* 挖矿&停止
 
-    ```latex
-    \begin{enumerate}[(1)]
-        \item she
-        \item he
-        \item they
-    \end{enumerate}
-    ```
+```
+miner.start()
+miner.stop()
+```
 
-* 插入图片
+## 3. Solidity智能合约编写
 
-  * 在导言区引入宏包 `\usepackage{graphicx}`
+这里主要是看的《精通以太坊智能合约开发》以及*study by example*。其实solidity和javascript还是很像的，比较好上手。
 
-  * 使用 `\includegraphics[scale=0.6]{pic.png}` 引入图片（图片必须与.tex文件放在同一个路径下）
+## 4. 合约部署
 
-  * 一般为了排版方便，会使用相对位置**float**，图片的浮动环境使用*figure*,使用figure把其看作一个没有任何缩进的段落：
+我使用Remix在线IDE编写的合约，在IDE里编译后可以拿到这个程序的ABI接口和比特码。用这两样就可以把合约部署在以太坊私有链上啦~
 
-    ```latex
-    \begin{figure}[可选项]
-        \centering
-        \includegraphics[scale=0.6]{pic.png}
-        \caption{this is a figure demo}
-        \label{fig:label}
-    \end{figure}
-    ```
+首先拿到ABI接口：
 
-    > [可选项]是可选项:
-    >
-    > ​	h(here)插入在这里;
-    >
-    > ​	t(top)表示插入在页面顶部
-    >
-    > ​	b(bottom)表示插入在页底;
-    >
-    > ​	p(page)表示单独一页	
-    >
-    > \centering:紧跟的内容都居中显示
-    >
-    > \caption:设置图片的编号和为图片添加标题
+```
+> abi=[{},{},......,{}]
+```
 
-* 插入表格（参考 https://blog.csdn.net/JueChenYi/article/details/77116011 ）
+拿到ABI接口后就可以定义一个合约类：
 
-  * 无横竖线的表格
+```
+> mycontract=eth.contract(abi)
+```
 
-    ```latex
-    \begin{tabular}{cc} %一个c表示一列，c表示剧中，l表示居左，r表示居右
-    (1,1)&(1,2)\\ %每列中间用&连接
-    (2,1)&(2,2)\\
-    \end{tabular}
-    ```
+部署合约还需要使用合约的十六进制码，但是它太长了，直接用太太太不方便了，就先定义一个变量myhex来存储它：
 
-    
+```
+> myhex="0x........."
+```
 
-    ![](C:\Users\DELL\Documents\GitHub\Starryclc.github.io\public\image\meisai1.png)
+准备工作完成以后就可以开始部署合约啦。用账户0来部署合约，首先要解锁一下账户0，然后部署：
 
-  * 添加横竖线
+```
+> votecontract=mycontract.new({from:eth.accounts[0],data:Myhex,gas:3000000})
+```
 
-    ```latex
-    \begin{tabular}{|c|c|} %添加|来控制竖线
-    \hline %绘制一条横线
-    (1,1)&(1,2)\\ 
-    \hline
-    (2,1)&(2,2)\\
-    \hline
-    \end{tabular}
-    ```
+这一步之后会得到这个交易的hash, *TransactionHash*
 
-    ![](C:\Users\DELL\Documents\GitHub\Starryclc.github.io\public\image\1581423767432.png)
+合约部署其实是一个交易，所以要挖矿确认一下。可以用`txpool.status`查看交易池里是否有待确认的交易。
 
-  * 使用booktabs宏包控制横线的粗细，表格头和表格底粗横线，中间细横线。
+然后通过交易哈希获得合约的地址*ContractAddress*，用地址给合约命名：
 
-    ```latex
-    \usepackage{booktabs}
-    \begin{document}
-    
-    \begin{tabular}{ccc}
-    \toprule
-    姓名&学号&性别
-    \midrule
-    Steve Jobs&001&Male
-    Bill Gates&002&Female
-    \bottomrule
-    \end{tabular}
-    ```
+```
+> recpt=eth.getTransactionReceipt("TransactionHash")
+> myvote=mycontract.at("ContractAddress")
+```
 
-    ![](C:\Users\DELL\Documents\GitHub\Starryclc.github.io\public\image\1581424044889.png)
+到此合约的部署就结束了，后面可以通过合约名称调用合约。
 
-  * 控制行间距:\linespread{1.25}
+## 5. 调用合约
 
-  * 表格也可以使用网上的表格生成工具生成，也很方便
+### 以太坊中主要有三种合约调用方法
 
-* 插入数学公式
+* myvote.function.sendTransaction(parameter1,parameter2,...,{from:" "});
 
-  * 利用MathType软件编辑数学公式,再复制成latex代码.
+  > 这种调用方法会创建一个交易，返回一个交易哈希，会广播到网络等待矿工打包。创建交易会消耗gas。
 
-    需要修改MathType设置: 选项-剪切和复制选项
+* myvote.function.call(parameter1,parameter2,...,{from:" "});
 
-  ![](C:\Users\DELL\Documents\GitHub\Starryclc.github.io\public\image\1581489545049.png)
-  * 直接使用latex编辑
+  > 这种调用是一个本地调用，不向区块链广播，返回值取决于方法的代码逻辑，不消耗gas。
 
-     http://mohu.org/info/symbols/symbols.htm 
+* myvote.function(parameter1,parameter2,...,{from:" "});
 
-  * 行内公式
+  > 这个调用根据方法的constant标识来执行，有constant标识说明不会修改状态变量，web3.js会执行call()操作；反之，没有constant表示说明会修改状态变量，就会执行sendTransacton()操作
 
-    \$公式$
-
-    \\(公式)\
-
-  * 给公式编号
-
-    ```latex
-    $$公式\eqno(1)$$ %单独成行
-    ```
-
-    
