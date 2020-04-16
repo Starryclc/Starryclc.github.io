@@ -1,0 +1,182 @@
+---
+layout: post
+title: 美赛向：Latex入门
+categories: [学习笔记]
+---
+
+
+
+## 1.碎碎念
+
+今年因为疫情的原因，美赛分成了两个时间，离2.14号的比赛没几天啦。抓紧突击一下Latex，排两篇论文上上手~~
+
+记录一下美赛中排论文的常用操作。
+
+## 2. 基本操作
+
+* 使用`/mcmsetup{key-value}`来控制基本的摘要页和题目页。
+
+* 控制段落
+
+  * 首行缩进两个中文字符，在开始的控制位置加入`\setlength{\parindent}{2em} `
+  * 另起新的段落:`/par`
+  * 或者使用/`indent`实现缩进(需要使用 `\usepackage{indentfirst}` )
+
+* 文本格式控制
+
+  * 加粗: `\textbf{}`
+  * 数学公式加粗：`\bm`
+  * 意大利斜体: `\textit{}`
+  * slanted斜体: `\textsl{}`
+  * 细体: `\textlf{}`
+
+* 生成新页面 `/newpage`
+
+* 生成目录`\tableofcontents`
+
+* 层次结构
+
+  * `/section`，`/subsection`,`/subsubsection`
+
+  * 实心点
+
+    ```latex
+    \begin{itemize}
+        \item she
+        \item he
+        \ttem they
+    \end{itemize}
+    ```
+
+  * —
+
+    ```latex
+    上面换成\item[-] 
+    ```
+
+  * 默认数字编号
+
+    ```latex
+    \begin{enumerate}
+        \item she
+        \item he
+        \item they
+    \end{enumerat}
+    ```
+
+  * (1)(2)(3)的样式
+
+    ```latex
+    \begin{enumerate}[(1)]
+        \item she
+        \item he
+        \item they
+    \end{enumerate}
+    ```
+
+* 插入图片
+
+  * 在导言区引入宏包 `\usepackage{graphicx}`
+
+  * 使用 `\includegraphics[scale=0.6]{pic.png}` 引入图片（图片必须与.tex文件放在同一个路径下）
+
+  * 一般为了排版方便，会使用相对位置**float**，图片的浮动环境使用*figure*,使用figure把其看作一个没有任何缩进的段落：
+
+    ```latex
+    \begin{figure}[可选项]
+        \centering
+        \includegraphics[scale=0.6]{pic.png}
+        \caption{this is a figure demo}
+        \label{fig:label}
+    \end{figure}
+    ```
+
+    > [可选项]是可选项:
+    >
+    > ​	h(here)插入在这里;
+    >
+    > ​	t(top)表示插入在页面顶部
+    >
+    > ​	b(bottom)表示插入在页底;
+    >
+    > ​	p(page)表示单独一页	
+    >
+    > \centering:紧跟的内容都居中显示
+    >
+    > \caption:设置图片的编号和为图片添加标题
+
+* 插入表格（参考 https://blog.csdn.net/JueChenYi/article/details/77116011 ）
+
+  * 无横竖线的表格
+
+    ```latex
+    \begin{tabular}{cc} %一个c表示一列，c表示剧中，l表示居左，r表示居右
+    (1,1)&(1,2)\\ %每列中间用&连接
+    (2,1)&(2,2)\\
+    \end{tabular}
+    ```
+
+    
+
+    ![](C:\Users\DELL\Documents\GitHub\Starryclc.github.io\public\image\meisai1.png)
+
+  * 添加横竖线
+
+    ```latex
+    \begin{tabular}{|c|c|} %添加|来控制竖线
+    \hline %绘制一条横线
+    (1,1)&(1,2)\\ 
+    \hline
+    (2,1)&(2,2)\\
+    \hline
+    \end{tabular}
+    ```
+
+    ![](C:\Users\DELL\Documents\GitHub\Starryclc.github.io\public\image\1581423767432.png)
+
+  * 使用booktabs宏包控制横线的粗细，表格头和表格底粗横线，中间细横线。
+
+    ```latex
+    \usepackage{booktabs}
+    \begin{document}
+    
+    \begin{tabular}{ccc}
+    \toprule
+    姓名&学号&性别
+    \midrule
+    Steve Jobs&001&Male
+    Bill Gates&002&Female
+    \bottomrule
+    \end{tabular}
+    ```
+
+    ![](C:\Users\DELL\Documents\GitHub\Starryclc.github.io\public\image\1581424044889.png)
+
+  * 控制行间距:\linespread{1.25}
+
+  * 表格也可以使用网上的表格生成工具生成，也很方便
+
+* 插入数学公式
+
+  * 利用MathType软件编辑数学公式,再复制成latex代码.
+
+    需要修改MathType设置: 选项-剪切和复制选项
+
+  ![](C:\Users\DELL\Documents\GitHub\Starryclc.github.io\public\image\1581489545049.png)
+  * 直接使用latex编辑
+
+     http://mohu.org/info/symbols/symbols.htm 
+
+  * 行内公式
+
+    \$公式$
+
+    \\(公式)\
+
+  * 给公式编号
+
+    ```latex
+    $$公式\eqno(1)$$ %单独成行
+    ```
+
+    
