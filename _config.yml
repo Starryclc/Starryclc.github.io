@@ -2,6 +2,8 @@ markdown: kramdown
 kramdown:
   input: GFM # Github Flavored Markdown
   math_engine: katex # 防止行间公式渲染错误
+  syntax_highlighter_opts: # 可见<https://kramdown.gettalong.org/syntax_highlighter/rouge.html>
+    disable: true # 关掉默认的高亮，换用prismjs
 permalink: /posts/:categories/:title # 博文目录
 baseurl: "" # 假如你的博客是建在某个目录下的，请在这里加上目录名，并且下面配置的所有链接里的`/public`前也要加，即`/your_baseurl/public`。这一项结尾不要有'/'
 
@@ -345,19 +347,21 @@ index:
   #- 学习笔记
 
 post:
-  meta:
+  date: # 显示博文时间
     enable: true
-    date: true
-    wordcount:
-      enable: true
-      unit: 字
-    readtime:
-      enable: true
-      unit: 分
-      divided_by: 300
-    tags: # 显示博文标签
-      enable: true
-      alert: <i class="fas fa-tag fa-fw"></i>
+    alert: <i class="fas fa-calendar-day fa-fw"></i>
+  wordcount: # 统计全文字数
+    enable: true
+    alert: <i class="fas fa-file-word fa-fw"></i>
+    unit: 字
+  readtime: # 计算文章阅读时间
+    enable: true
+    alert: <i class="fas fa-clock fa-fw"></i>
+    unit: 分
+    divided_by: 300 # 正常人的阅读速度大概每分钟三百个字
+  tags: # 显示博文标签
+    enable: true
+    alert: <i class="fas fa-tag fa-fw"></i>
 
 
 page404:
