@@ -2,6 +2,8 @@ markdown: kramdown
 kramdown:
   input: GFM # Github Flavored Markdown
   math_engine: katex # 防止行间公式渲染错误
+  syntax_highlighter_opts: # 可见<https://kramdown.gettalong.org/syntax_highlighter/rouge.html>
+    disable: true # 关掉默认的高亮，换用prismjs
 permalink: /posts/:categories/:title # 博文目录
 baseurl: "" # 假如你的博客是建在某个目录下的，请在这里加上目录名，并且下面配置的所有链接里的`/public`前也要加，即`/your_baseurl/public`。这一项结尾不要有'/'
 
@@ -254,6 +256,78 @@ post:
       unit: 分
       divided_by: 300
 
+page:
+  masthead:
+    enable:true
+  append_before:
+    - | # 代码块超过半屏的时候自动折叠
+      <style>
+        pre {
+          max-height: 50vh;
+          overflow: auto;
+        }
+      </style>
+      - | # 增加宽屏下的显示内容
+      <style>
+        @media (min-width: 56em) {
+          .container {
+            max-width: 66.6%;
+          }
+        }
+      </style>
+      - | # 给文章加上白色背景，防止被背景影响阅读；同时加上加载动画
+      <style>
+        .masthead,
+        .container.content {
+          padding-top: 1rem;
+          padding-bottom: 1rem;
+          box-shadow: 0 0 .75rem rgba(0, 0, 0, 0.1);
+          background-color: rgba(255, 255, 255, 0.95);
+          animation-duration: 2s;
+          animation-name: fadeIn;
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+      </style>
+      - | # prism代码高亮
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/combine/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.css,npm/prismjs/plugins/toolbar/prism-toolbar.min.css,gh/PrismJS/prism-themes@1955cfef6953b3a59e66016e8a1e016b45d6cc79/themes/prism-nord.min.css"
+      />
+      <script
+        src="https://cdn.jsdelivr.net/combine/npm/prismjs/components/prism-core.min.js,npm/prismjs/plugins/autoloader/prism-autoloader.min.js,npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js,npm/prismjs/plugins/toolbar/prism-toolbar.min.js"
+        defer="defer"
+        onload='
+          Prism.plugins.autoloader.languages_path = "https:\/\/cdn.jsdelivr.net/npm/prismjs/components/";
+          for(let x=document.getElementsByTagName("pre"), i=0;i<x.length;i++)
+          {
+            x[i].classList.add("line-numbers");
+          }
+          Prism.plugins.toolbar.registerButton("select-code", function (env) {
+            let button = document.createElement("button");
+            button.innerHTML = "select this " + env.language;
+            button.addEventListener("click", function () {
+              if (document.body.createTextRange) {
+                let range = document.body.createTextRange();
+                range.moveToElementText(env.element);
+                range.select();
+              } else if (window.getSelection) {
+                let selection = window.getSelection();
+                let range = document.createRange();
+                range.selectNodeContents(env.element);
+                selection.removeAllRanges();
+                  selection.addRange(range);
+              }
+            });
+            return button;
+          })'
+      ></script>
 
 
 page404:
