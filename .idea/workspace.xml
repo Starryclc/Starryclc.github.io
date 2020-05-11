@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="9a83fcef-a6e5-45e4-bfe9-fa6c7e7408b4" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Cache/b7/9606fb3afea5bd1609ed40b622142f1c98125abcfe89a76a661b0e8e343910" beforeDir="false" afterPath="$PROJECT_DIR$/.jekyll-cache/Jekyll/Cache/Jekyll--Cache/b7/9606fb3afea5bd1609ed40b622142f1c98125abcfe89a76a661b0e8e343910" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/_config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/_config.yml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -47,6 +46,7 @@
       <workItem from="1579010646623" duration="7169000" />
       <workItem from="1579078919533" duration="1563000" />
       <workItem from="1579080521980" duration="1026000" />
+      <workItem from="1589190088993" duration="1674000" />
     </task>
     <servers />
   </component>
