@@ -111,6 +111,7 @@ body:
   layout-reverse: true # 开启后sidebar在右边，反之左边
   sidebar-overlay: true # 开启后正文不随sidebar移动而移动
 
+
 script: # 需要在正文前调用的脚本或者插件的autoloader
 - var:
   - key: src
@@ -171,7 +172,7 @@ sidebar:
   avatar: # 侧边栏显示的头像
     enable: true
     img: /public/image/网站图标.jpg # 头像的地址
-    info: <br/><br/><br/>懒狗<br/><br/> # 头像背后的信息
+    info: <br/><br/><br/>Hi~<br/><br/> # 头像背后的信息
   description: '<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=100% height=52 src="//music.163.com/outchain/player?type=2&id=28912659&auto=0&height=32"></iframe>'
   social:
   - title: rss
@@ -234,25 +235,126 @@ sidebar:
     enable: true
     text: '<script async defer src="https://buttons.github.io/buttons.js"></script>'
 
+page:
+  page:
+    masthead: # 显示顶栏
+      enable: true
+    append_before:
+      - | # 代码块超过半屏的时候自动折叠
+        <style>
+          pre {
+            max-height: 50vh;
+            overflow: auto;
+          }
+        </style>
+      - | # 增加宽屏下的显示内容
+        <style>
+          @media (min-width: 56em) {
+            .container {
+              max-width: 66.6%;
+            }
+          }
+        </style>
+      - | # 给文章加上白色背景，防止被背景影响阅读；同时加上加载动画
+        <style>
+          .masthead,
+          .container.content {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            box-shadow: 0 0 .75rem rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.95);
+            animation-duration: 2s;
+            animation-name: fadeIn;
+          }
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+            }
+            to {
+              opacity: 1;
+            }
+          }
+        </style>
+      - | # prism代码高亮
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/combine/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.css,npm/prismjs/plugins/toolbar/prism-toolbar.min.css,gh/PrismJS/prism-themes@1955cfef6953b3a59e66016e8a1e016b45d6cc79/themes/prism-nord.min.css"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/combine/npm/prismjs/components/prism-core.min.js,npm/prismjs/plugins/autoloader/prism-autoloader.min.js,npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js,npm/prismjs/plugins/toolbar/prism-toolbar.min.js"
+          defer="defer"
+          onload='
+            Prism.plugins.autoloader.languages_path = "https:\/\/cdn.jsdelivr.net/npm/prismjs/components/";
+            for(let x=document.getElementsByTagName("pre"), i=0;i<x.length;i++)
+            {
+              x[i].classList.add("line-numbers");
+            }
+            Prism.plugins.toolbar.registerButton("select-code", function (env) {
+              let button = document.createElement("button");
+              button.innerHTML = "select this " + env.language;
+              button.addEventListener("click", function () {
+                if (document.body.createTextRange) {
+                  let range = document.body.createTextRange();
+                  range.moveToElementText(env.element);
+                  range.select();
+                } else if (window.getSelection) {
+                  let selection = window.getSelection();
+                  let range = document.createRange();
+                  range.selectNodeContents(env.element);
+                  selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+              });
+              return button;
+            })'
+        ></script>
+      - | # 使文章支持Katex数学公式渲染，行内公式用$...$括起来，行间公式用$$..$$括起来
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/mathtex-script-type.min.js,npm/katex/dist/contrib/auto-render.min.js"
+          defer="defer"
+          onload='renderMathInElement(document.body, { delimiters: [{ left: "$", right: "$", display: false }] })'
+        ></script>
+      - | # mermaid
+        <style>
+          pre.language-mermaid,
+          code.language-mermaid {
+            display: none;
+          }
+        </style>
+        <script
+          src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"
+          defer="defer"
+          onload='
+          for(let x=document.getElementsByClassName("language-mermaid"), i=0;i<x.length;i++)
+            if(x[i].nodeName=="CODE")
+            {
+              let m = document.createElement("div");
+              m.classList.add("mermaid");
+              m.textContent = x[i].textContent;
+              x[i].parentNode.insertAdjacentElement("beforebegin", m);
+            }'
+        ></script>
+
 index:
   #showtag:
   #- 碎碎念
   #- 学习笔记
 
 post:
-  post:
-    date: # 显示博文时间
+  meta:
+    enable: true
+    date: true
+    wordcount:
       enable: true
-      alert: <i class="fas fa-calendar-day fa-fw"></i>
-    wordcount: # 统计全文字数
-      enable: true
-      alert: <i class="fas fa-file-word fa-fw"></i>
       unit: 字
-    readtime: # 计算文章阅读时间
+    readtime:
       enable: true
-      alert: <i class="fas fa-clock fa-fw"></i>
       unit: 分
-      divided_by: 300 # 正常人的阅读速度大概每分钟三百个字
+      divided_by: 300
     tags: # 显示博文标签
       enable: true
       alert: <i class="fas fa-tag fa-fw"></i>
