@@ -1,7 +1,7 @@
 ---
 layout: post
 title: geth & Solidity合约的部署和调用
-categories: [学习笔记]
+categories: [学习笔记,以太坊]
 ---
 
 
@@ -100,7 +100,7 @@ miner.stop()
 > myhex="0x........."
 ```
 
-准备工作完成以后就可以开始部署合约啦。用账户0来部署合约，首先要解锁一下账户0，然后部署：
+准备工作完成以后就可以开始部署合约啦，创建一个合约实例。用账户0来部署合约，首先要解锁一下账户0，然后部署：
 
 ```cmd
 > votecontract=mycontract.new({from:eth.accounts[0],data:Myhex,gas:3000000})
