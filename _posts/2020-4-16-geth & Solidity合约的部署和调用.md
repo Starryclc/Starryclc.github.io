@@ -16,7 +16,7 @@ categories: [学习笔记]
 
 * **启动私有链**
 
-```go
+```cmd
 > geth --rpc --nodiscover --datadir data0  --port 30303 --rpc --rpcport 8545 --rpcapi "db,eth,net,web3" --rpccorsdomain "*" --networkid 1108 --ipcdisable console --allow-insecure-unlock
 ```
 
@@ -36,40 +36,40 @@ categories: [学习笔记]
 
 * 创建新账户
 
-```go
+```cmd
 > personal.newAccount() //接下来设置密码
 > personal.newAccount("passwd")//双引号中设置密码
 ```
 
 * 解锁账户
 
-```go
+```cmd
 > personal.unlockAccount(eth.accounts[0])
 ```
 
 * 查看账户
 
-```go
+```cmd
 > eth.accounts //查看所有账户
 > eth.accounts[0] //查看某一个账户
 ```
 
 * 查看账户余额
 
-```go
+```cmd
 eth.getBalance("address")
 eth.getBalance(eth.accounts[0])
 ```
 
 * 转账三个比特币
 
-```go
+```cmd
 eth.sendTransaction({from:"addressfrom",to:"addressto",value:web3.toWei(3,"ether")})
 ```
 
 * 挖矿&停止
 
-```go
+```cmd
 miner.start()
 miner.stop()
 ```
@@ -84,25 +84,25 @@ miner.stop()
 
 首先拿到ABI接口：
 
-```go
+```cmd
 > abi=[{},{},......,{}]
 ```
 
 拿到ABI接口后就可以定义一个合约类：
 
-```go
+```cmd
 > mycontract=eth.contract(abi)
 ```
 
 部署合约还需要使用合约的十六进制码，但是它太长了，直接用太太太不方便了，就先定义一个变量myhex来存储它：
 
-```go
+```cmd
 > myhex="0x........."
 ```
 
 准备工作完成以后就可以开始部署合约啦。用账户0来部署合约，首先要解锁一下账户0，然后部署：
 
-```go
+```cmd
 > votecontract=mycontract.new({from:eth.accounts[0],data:Myhex,gas:3000000})
 ```
 
@@ -112,7 +112,7 @@ miner.stop()
 
 然后通过交易哈希获得合约的地址*ContractAddress*，用地址给合约命名：
 
-```go
+```cmd
 > recpt=eth.getTransactionReceipt("TransactionHash")
 > myvote=mycontract.at("ContractAddress")
 ```
