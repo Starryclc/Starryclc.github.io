@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 读写数据与dataframe切片
+title: 读写数据与dataframe
 categories: [学习笔记,数据处理]
 ---
 
@@ -89,30 +89,55 @@ data.to_csv('./out.csv')
 
 `cols:` 设置列,可仅设置一部分
 
-## 3 DataFrame切片
+## 3 获取DataFrame
+
+```python
+data = pd.DataFrame=([[1,2,3,1],[2,1,4,1],[1,1,1,0]],columns = ['x1','x2','x3','y'])
+>>
+   x1  x2 x3 y
+0  1  2  3  1
+1  2  1  4  1
+2  1  1  1  0
+```
+
+### loc() && iloc()
 
 `df.loc:` 通过索引标签名获取数据
 
 `df.iloc:` 通过位置获取数据
 
 ```python
-DataFrame:
-  x1  x2 x3 y
-0  1  2  3  1
-1  2  1  4  1
-2  1  1  1  0
+# 取一行 (返回Series)
+data.loc[0]
+# 取多行 (返回DataFrame)
+data.loc[[0,1]]
+# 连续取多行 (返回DataFrame)
+data.loc[0:2]
 
-# 取一行
-data.loc['0']
-# 取多行
-data.loc['0','1']
-# 连续取多行
-data.loc['0':'2']
-
-# 取单行单列
-data.loc['0','x1']
-# 取单行多列
-data.loc['0',['x1','y']]
+# 取单行单列 (返回Str)
+data.loc[0,'x1']
+# 取单行多列  (返回Series)
+data.loc[0,['x1','y']]
 ...类推
+```
+
+### at() && iat()
+
+* at: 根据行索引和列名获取元素值
+
+```python
+#  (返回Str)
+data.at[0,'x1']
+or
+data.iloc[0].at['x1']
+```
+
+* iat : 根据行索引和列索引获取元素值
+
+```python
+#  (返回Str)
+data.iat[0,0]
+or
+data.iloc[0].iat[0]
 ```
 
