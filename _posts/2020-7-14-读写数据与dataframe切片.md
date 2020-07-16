@@ -89,7 +89,7 @@ data.to_csv('./out.csv')
 
 `cols:` 设置列,可仅设置一部分
 
-## 3 获取DataFrame
+## 3 获取DataFrame元素
 
 ```python
 data = pd.DataFrame=([[1,2,3,1],[2,1,4,1],[1,1,1,0]],columns = ['x1','x2','x3','y'])
@@ -141,3 +141,22 @@ or
 data.iloc[0].iat[0]
 ```
 
+## 4 缺失值处理
+
+`DataFrame.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)` 
+
+| 参数    | 含义                                                       |
+| ------- | ---------------------------------------------------------- |
+| axis    | axis = 0 删除行 ；axis = 1 删除列                          |
+| how     | how = 'all' 全部为NAN时才删除 ； how = ‘any' 含有NAN即删除 |
+| thresh  | axis中至少有thresh个非缺失值，否则删除                     |
+| subset  | 在哪些列中查看是否有缺失值                                 |
+| inplace | 是否在原数据上操作.True则返回None，否则返回新的copy        |
+
+> 关于`Inplace`的提示：
+>
+> 有一次直接使用df.dropna()后再查看数据集，发现NAN行还存在，数据维度没有发生任何改变，排查后发现原来是忽略了inplace。
+>
+> **inplace默认为None，此时dropna()默认返回没有NA的数据集，需要分配一个新的变量去接收它。**
+>
+> **如果希望dropna()修改原数据，需要明确指定inplace=True.**
