@@ -1,7 +1,7 @@
 ---
 layout: post
 title: geth & Solidity合约的部署和调用
-categories: [学习笔记,以太坊]
+categories: [以太坊]
 ---
 
 

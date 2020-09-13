@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 读写数据与dataframe
-categories: [学习笔记,数据处理]
+categories: [数据处理]
 ---
 
 ---
