@@ -3,11 +3,18 @@ layout: page
 title: 关于
 permalink: /about
 ---
+##关于我
+我也不知道该用什么样的标签来概括自己...总之，目前我还是比较幸福、比较幸运的人。
+- 希望能更多的了解这个世界，通过脚步、通过书籍。
+- 希望做一个浪漫的理性者。
+- 希望能做些真正帮助到某人、某群体的有意义的事。
+- 努力向善
+
 ## 致谢
 
-**本博客主题基于http://jekyllthemes.org/themes/wu-kan/**
+**本博客主题基于[http://jekyllthemes.org/themes/wu-kan/](http://jekyllthemes.org/themes/wu-kan/)修改**
 
-**-------------------------------------------------------------------------------------------------------------**
+---
 
 托管于[Github Pages](https://pages.github.com/)，感谢。
 
