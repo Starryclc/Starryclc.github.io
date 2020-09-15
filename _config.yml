@@ -188,6 +188,7 @@ sidebar:
     class: 'fab fa-qq fa-fw'
   - title: douban
     href: https://www.douban.com/people/114001560
+    class: 'fab fa-douban fa-fw'
   nav:
   - title: '<i class="fas fa-home fa-fw"></i> 首页'
     href: /
