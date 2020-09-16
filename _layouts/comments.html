@@ -3,19 +3,24 @@ layout: page
 ---
 {{ content }}
 
+{% if site.valine_comment.enable %}
 <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
 <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
-<div id="comment"></div>
-<!--<script>-->
-<!--    var valine = new Valine();-->
-<!--    valine.init({-->
-<!--        el:'#comment',-->
-<!--        appId: '{{site.valine_comment.leancloud_appid}}',-->
-<!--        appKey:'{{site.valine_comment.leancloud_appkey}}',-->
-<!--        notify:true,-->
-<!--        placeholder:'{{site.valine_comment.placeholder}}'-->
-<!--    })-->
-<!--</script>-->
-{% if site.valine.enable %}
-<script src="{{ site.valine.autoloader }}"></script>
+<script src='https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js'></script>
+<div class="v">
+  <i class="fas fa-spinner fa-pulse"></i>
+</div>
+
+<script>
+    var valine = new Valine();
+    valine.init({
+        el:'#comment',
+        appId: '{{site.valine_comment.leancloud_appid}}',
+        appKey:'{{site.valine_comment.leancloud_appkey}}',
+        notify:true,
+        placeholder:'{{site.valine_comment.placeholder}}'
+    })
+</script>
+<!--{% if site.valine.enable %}-->
+<!--<script src="{{ site.valine.autoloader }}"></script>-->
 {% endif %}
