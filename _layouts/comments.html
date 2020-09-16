@@ -6,16 +6,16 @@ layout: page
 
 <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
 <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
-<!--<script src='https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js'></script>-->
 <div id="vcomments"></div>
+
 <script>
+    var valine = new Valine();
     new Valine({
         el: '#vcomments',
         appId: 'XjaxD4LRm8fr6lYsmUth22yO-gzGzoHsz',
         appKey: '8pUfi5Av7RAOOKPjFV6wrl3x'
     })
 </script>
-<!--{% if site.comment.enable %}-->
-<!--&lt;!&ndash;{% if site.valine.enable %}&ndash;&gt;-->
-<!--&lt;!&ndash;<script src="{{ site.valine.autoloader }}"></script>&ndash;&gt;-->
-<!--{% endif %}-->
+{% if site.comments.enable %}
+<script src="{{ site.valine.autoloader }}"></script>
+{% endif %}
