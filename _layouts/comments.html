@@ -5,15 +5,15 @@ layout: page
 
 <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
 <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
-<div id="comment"></div>
+
 <!--<script>-->
 <!--    var valine = new Valine();-->
 <!--    valine.init({-->
 <!--        el:'#comment',-->
-<!--        appId:'XjaxD4LRm8fr6lYsmUth22yO-gzGzoHsz,-->
-<!--        appKey:'8pUfi5Av7RAOOKPjFV6wrl3x',-->
+<!--        appId: '{{site.valine_comment.leancloud_appid}}',-->
+<!--        appKey:'{{site.valine_comment.leancloud_appkey}}',-->
 <!--        notify:true,-->
-<!--        placeholder:'在这里评论吧！'-->
+<!--        placeholder:'{{site.valine_comment.placeholder}}'-->
 <!--    })-->
 <!--</script>-->
 {% if site.valine.enable %}
