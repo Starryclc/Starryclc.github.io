@@ -270,14 +270,14 @@ index:
 #        })'
 #    ></script>
 
-valine_comment:
-  enable: true
-  # app_id
-  leancloud_appid: XjaxD4LRm8fr6lYsmUth22yO-gzGzoHsz
-  # app_key
-  leancloud_appkey: 8pUfi5Av7RAOOKPjFV6wrl3x
-  # placeholde
-  placeholder: “在这里评论吧！"
+#valine_comment:
+#  enable: true
+#  # app_id
+#  leancloud_appid: XjaxD4LRm8fr6lYsmUth22yO-gzGzoHsz
+#  # app_key
+#  leancloud_appkey: 8pUfi5Av7RAOOKPjFV6wrl3x
+#  # placeholde
+#  placeholder: “在这里评论吧！"
 
 post:
   meta:
