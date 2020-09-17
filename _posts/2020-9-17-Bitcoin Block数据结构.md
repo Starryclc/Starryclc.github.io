@@ -18,7 +18,7 @@ categories: [区块链]
 
 首先粗略地把一个区块划分为两大部分：block header和余下的block body。
 
-![2020-9-17-1](\assets\2020-9-17-1.png)
+![2020-9-17-1](/assets/2020-9-17-01.png)
 
 六个字段均为小端存储
 #### *1.Version*  (4 bytes) 
@@ -39,7 +39,7 @@ categories: [区块链]
 
 看图就十分直观啦~可以看到Merkel Tree只有叶子节点是Tx ID，中间的节点都是计算Merkel Root的桥梁。
 
-![2020-9-17-2](\assets\2020-9-17-2.png)
+![2020-9-17-2](/assets/2020-9-17-02.png)
 
 知其然容易，更要知其所以然，那么，**为什么要构造一个树来计算所有Tx ID的Hash，而不是直接Hash呢？**
 
@@ -82,7 +82,7 @@ block header大概记录完了，再来说说剩下的部分，首先是transact
 
 一条transaction包含六个字段，示意图如下：
 
-![2020-9-17-3](\assets\2020-9-17-3.png)
+![2020-9-17-3](/assets/2020-9-17-03.png)
 
 #### *1.Version* (4 bytes)
 
@@ -96,7 +96,7 @@ block header大概记录完了，再来说说剩下的部分，首先是transact
 
 一个input包含5个字段，如图：
 
-![2020-9-17-4](\assets\2020-9-17-4.png)
+![2020-9-17-4](/assets/2020-9-17-04.png)
 
 * TXID(32 bytes)：指明input来自哪条交易 。
 * Vout (4 bytes)：指明input的序号（是第几个input）。
@@ -111,7 +111,7 @@ block header大概记录完了，再来说说剩下的部分，首先是transact
 
 一共有三个字段：
 
-![2020-9-17-5](\assets\2020-9-17-5.png)
+![2020-9-17-5](/assets/2020-9-17-05.png)
 
 * Value(8 bytes)：satoshis的数量。
 * ScriptPubKey Size：加密脚本的长度。
