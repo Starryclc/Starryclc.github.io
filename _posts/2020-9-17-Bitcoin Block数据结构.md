@@ -45,9 +45,7 @@ categories: [区块链]
 如果是所有Tx ID直接一起Hash，那么当需要验证某一个Tx ID是不是属于这个Merkel Root的时候，就需要获取所有的Tx ID再一起Hash，和原Hash对比；但采用Merkel Tree的方法，我们只需要沿着这个Tx ID的分支，获取他的相邻节点（Merkel Proof），就可以计算得到Merkel Root。
 
 由此也可以引出**轻节点**和**全节点**概念：
-
 简单来说，只存储块头的节点就是轻节点，所有区块都存储的节点就是全节点。
-
 当轻节点需要查看一个交易是否成功存入区块，就可以通过块头中的Merkel Root字段来验证（其余计算需要的Merkel Prof来自于全节点）
 
 ####  *4.Time* (4 bytes)
@@ -125,7 +123,8 @@ block header大概记录完了，再来说说剩下的部分，首先是transact
 
 block header和transaction的数据结构都在上面记录了，下面就能补全整个block的数据结构啦~p.s.他俩之间还有一个transaction count（也是长度可变的）。
 
-也就是一个Block = Block Header || Tx Count || Transaction1 || Transaction2 ||...
+也就是一个Block =
+ Block Header || Tx Count || Transaction1 || Transaction2 ||...
 
 具体结构图参照[这里](https://www.arcblock.io/zh/post/2018/08/16/index-bitcoin)
 
