@@ -100,9 +100,7 @@ block header大概记录完了，再来说说剩下的部分，首先是transact
 
 * TXID(32 bytes)：指明input来自哪条交易 。
 * Vout (4 bytes)：指明input的序号（是第几个input）。
-
 * ScriptSig Size (长度不固定)：指明ScriptSig代码的长度。
-
 * ScriptSig：解锁脚本。
 
 #### *4. Output Count* （长度不固定)
