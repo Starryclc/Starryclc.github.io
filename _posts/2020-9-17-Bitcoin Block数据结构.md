@@ -18,7 +18,7 @@ categories: [区块链]
 
 首先粗略地把一个区块划分为两大部分：block header和余下的block body。
 
-![2020-9-17-01](\assets\2020-9-17-1.png)
+![2020-9-17-1](\assets\2020-9-17-1.png)
 
 六个字段均为小端存储
 #### *1.Version*  (4 bytes) 
