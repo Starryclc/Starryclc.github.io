@@ -20,7 +20,7 @@ categories: [区块链]
 
 
 
-<img src="\assets\2020-9-17-blockerHeader.png" style="zoom: 75%" title="图1. block header"/>
+<img src="/assets/2020-9-17-blockerHeader.png" style="zoom: 75%" title="图1. block header"/>
 
 六个字段均为小端存储
 #### *1.Version*  (4 bytes) 
